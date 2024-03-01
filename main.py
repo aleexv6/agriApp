@@ -16,6 +16,7 @@ dfPhysiqueEBM = dfPhysiqueEBM[dfPhysiqueEBM['Date'].dt.year > 2023]
 
 productPhysique = dfPhysique['Produit'].unique()
 
+
 cursorFutures = db.get_database_euronext().find({})
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
 productFutures = dfFutures['Ticker'].unique()
@@ -26,14 +27,24 @@ def index():
 
 @app.route("/physique")
 def physique():
-    my_chart = highcharts.Chart.from_pandas(dfPhysiqueEBM,
-                                            property_map = {'x': 'Date', 'y': 'Prix'},
-                                            chart_kwargs = {'container':'myChartBase', 'variable_name': 'myChart'},
-                                            options_kwargs={'title': {'text': 'Abrakadabra'}, 'x_axis': {'type': 'datetime'}})
-    my_chart.to_js_literal('static/js/my-js-literal.js')
     return render_template('physique.html', data=dfPhysique, listProduct=productPhysique, datafutures=dfFutures, listProductFutures=listProductFutures, expi=expi)
 
 @app.route("/futures")
 def futures():
     return render_template('futures.html', listProduct=productFutures, data=dfFutures, listProductFutures=listProductFutures)
+
+
+@app.route("/basis")
+def base():
+    prod = dict()
+    for produit in productPhysique:
+        if produit != 'Ble dur':
+            data = {produit : list(dfPhysique[dfPhysique['Produit'] == produit]['Place'].unique())}
+            prod.update(data)
+    my_chart = highcharts.Chart.from_pandas(dfPhysiqueEBM,
+                                                property_map = {'x': 'Date', 'y': 'Prix'},
+                                                chart_kwargs = {'container':'myChartBase', 'variable_name': 'myChart'},
+                                                options_kwargs={'title': {'text': 'Abrakadabra'}, 'x_axis': {'type': 'datetime'}})
+    my_chart.to_js_literal('static/js/my-js-literal.js')
+    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod)
     

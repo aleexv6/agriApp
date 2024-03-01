@@ -160,77 +160,47 @@
 
                 </nav>
                 <!-- End of Topbar -->
-                <div class="container-fluid">
-
+                <div class="container-fluid">     
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Physique</h1>
-                    </div>      
-
-                    <!-- DataTales Example -->
-                    {% for item in listProduct %}
-                        {% set df = data[data['Produit'] == item] %}
-
-                        {% set date = (df[df['Date'] < df.iloc[-1]['Date']])['Date'].max() %}
-                        {% set previousDf = df[df['Date'] == date] %}
-
-                        {% set df = df[df['Date'] == df.iloc[-1]['Date']] %}    
-
-                        {% if item != 'Ble dur' %}
-                            {% if item in listProductFutures %}                                       
-                                {% set ticker = listProductFutures[item] %}
-                            {% endif %}
-                            {% if item in expi %}                                       
-                                {% set expiration = expi[item] %}
-                            {% endif %}
-
-                            {% set dfFutures = datafutures[datafutures['Ticker'] == ticker] %}
-                            {% set dfFutures = dfFutures[dfFutures['Date'] == dfFutures.iloc[-1]['Date']] %}
-                        {% endif %}
-                        <div class="card shadow mb-4">
-                            <div class="card-header d-flex justify-content-between py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">{{ item.upper() }}</h6>
-                                <h6 class="m-0 font-italic text-primary" style="font-size: 0.7rem;">Mis à jour le : {{ df['Date'].iloc[-1] }}</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                        <thead>
-                                            <tr>
-                                                <th>Place</th>
-                                                <th>Prix</th>
-                                                <th>Base</th>
-                                                <th>1d change %</th>
-                                                <th>Mois Future</th>
-                                                <th>Graphique</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for index, row in df.iterrows() %}
-                                                {% if row['Place'] != 'Sud-Est Depart' and row['Place'] != 'Sud-Ouest Depart' %}
-                                                    <tr>
-                                                        <td>{{ row['Place'] }}</td>
-                                                        <td>{{ row['Prix'] }}</td>
-                                                        {% if item != 'Ble dur' %}
-                                                            <td>{{ (row['Prix'] - dfFutures.iloc[-1]['Prix']).round(2) }}</td>
-                                                            <td>{{ (((row['Prix'] - previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]) / (previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]|abs)) * 100).round(2) }}%</td>
-                                                            <td>{{ expiration }}</td>
-                                                        {% else %}
-                                                            <td>N/C</td>
-                                                            <td>{{ (((row['Prix'] - previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]) / (previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]|abs)) * 100).round(2) }}%</td>
-                                                            <td>N/C</td>
-                                                        {% endif %}
-                                                        <td>i</td>
-                                                    </tr>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                        <h1 class="h3 mb-0 text-gray-800">Base</h1>
+                    </div>   
+                    
+                    {% for produit in productPhysique if produit != 'Ble dur' %}
+                        {% set placeListProducts = dfPhysique[dfPhysique['Produit'] == produit]['Place'].unique() %}
+                        <input type="hidden"  id="{{ produit }}_place" value="{{ placeListProducts }}">
                     {% endfor %}
 
+                    {% for produit in productPhysique if produit != 'Ble dur' %}
+                        {% set ticktick = listProductFutures[produit] %}
+                        {% set expiListProducts = dfFutures[dfFutures['Ticker'] == ticktick]['Expiration'].unique() %}
+                        <input type="hidden"  id="{{ produit }}_expi" value="{{ expiListProducts }}">
+                    {% endfor %}
+
+                    <form class="form-inline mb-4">
+                        <label class="mr-2">Produit : </label>
+                        <select class="custom-select mr-4" id="basisProductSelector">
+                            {% for produit in productPhysique if produit != 'Ble dur' %}
+                                <option value='{{ produit }}'>{{ produit }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="mr-2">Place : </label>
+                        <select class="custom-select mr-4" id ="basisPlaceSelector">
+                            {% for place in dfPhysique[dfPhysique['Produit'] == productPhysique[0]]['Place'].unique() %}
+                            <option value="{{ place }}">{{ place }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="mr-2">Contrat : </label>
+                        {% set tick = listProductFutures[productPhysique[0]] %}
+                        <select class="custom-select mr-4" id="basisContractSelector">
+                            {% for expi in dfFutures[dfFutures['Ticker'] == tick]['Expiration'].unique() %}
+                            <option value="{{ expi }}">{{ expi }}</option>
+                            {% endfor %}
+                        </select>
+                    
+                    </form>             
+
+                    <div id="myChartBase"></div>
                 </div>
             </div>
             <!-- End of Main Content -->
@@ -277,7 +247,7 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    
+    <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
@@ -293,7 +263,44 @@
     <!-- Page level custom scripts -->
     <script src="../static/js/demo/chart-area-demo.js"></script>
     <script src="../static/js/demo/chart-pie-demo.js"></script>
-    
+    <script src="../static/js/my-js-literal.js"></script>
+
+    <script>
+        // Get the select element
+        var selectElement = document.getElementById("basisProductSelector");
+        var outputPlace = document.getElementById("basisPlaceSelector");
+        var outputExpi = document.getElementById("basisContractSelector");
+        selectElement.addEventListener("change", function() {
+            var selectedValue = selectElement.value;
+            outputPlace.innerHTML = "";
+            outputExpi.innerHTML = "";
+            switch(selectedValue) {
+                case "Mais":
+                    addOptions(eval((document.getElementById('Mais_place').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputPlace);
+                    addOptions(eval((document.getElementById('Mais_expi').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputExpi);
+                    break;
+                case "Ble tendre":
+                    addOptions(eval((document.getElementById('Ble tendre_place').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputPlace);
+                    addOptions(eval((document.getElementById('Ble tendre_expi').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputExpi);
+                    break;
+                case "Colza":
+                    addOptions(eval((document.getElementById('Colza_place').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputPlace);
+                    addOptions(eval((document.getElementById('Colza_expi').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputExpi);
+                    break;
+                default:
+                    outputPlace.innerHTML = "Default content";
+                    outputExpi.innerHTML = "Default content";
+            }
+        });
+        function addOptions(options, outputDoc) {
+            options.forEach(function(optionText) {
+                var option = document.createElement("option");
+                option.value = optionText;//.toLowerCase().replace(/\s/g, '');
+                option.text = optionText;
+                outputDoc.add(option);
+            });
+        }
+    </script>
 
 </body>
 
