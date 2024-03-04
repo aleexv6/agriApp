@@ -164,18 +164,7 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Base</h1>
-                    </div>   
-                    
-                    {% for produit in productPhysique if produit != 'Ble dur' %}
-                        {% set placeListProducts = dfPhysique[dfPhysique['Produit'] == produit]['Place'].unique() %}
-                        <input type="hidden"  id="{{ produit }}_place" value="{{ placeListProducts }}">
-                    {% endfor %}
-
-                    {% for produit in productPhysique if produit != 'Ble dur' %}
-                        {% set ticktick = listProductFutures[produit] %}
-                        {% set expiListProducts = dfFutures[dfFutures['Ticker'] == ticktick]['Expiration'].unique() %}
-                        <input type="hidden"  id="{{ produit }}_expi" value="{{ expiListProducts }}">
-                    {% endfor %}
+                    </div>
 
                     <form class="form-inline mb-4">
                         <label class="mr-2">Produit : </label>
@@ -263,10 +252,12 @@
     <!-- Page level custom scripts -->
     <script src="../static/js/demo/chart-area-demo.js"></script>
     <script src="../static/js/demo/chart-pie-demo.js"></script>
-    <script src="../static/js/my-js-literal.js"></script>
+    <!--<script src="../static/js/my-js-literal.js"></script>-->
 
     <script>
         // Get the select element
+        let dataPlace = JSON.parse('{{ prod | tojson }}');
+        let dataExpi = JSON.parse('{{ expi | tojson }}');
         var selectElement = document.getElementById("basisProductSelector");
         var outputPlace = document.getElementById("basisPlaceSelector");
         var outputExpi = document.getElementById("basisContractSelector");
@@ -276,16 +267,16 @@
             outputExpi.innerHTML = "";
             switch(selectedValue) {
                 case "Mais":
-                    addOptions(eval((document.getElementById('Mais_place').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputPlace);
-                    addOptions(eval((document.getElementById('Mais_expi').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputExpi);
+                    addOptions(dataPlace['Mais'], outputPlace);
+                    addOptions(dataExpi['Mais'], outputExpi);
                     break;
                 case "Ble tendre":
-                    addOptions(eval((document.getElementById('Ble tendre_place').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputPlace);
-                    addOptions(eval((document.getElementById('Ble tendre_expi').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputExpi);
+                    addOptions(dataPlace['Ble tendre'], outputPlace);
+                    addOptions(dataExpi['Ble tendre'], outputExpi);
                     break;
                 case "Colza":
-                    addOptions(eval((document.getElementById('Colza_place').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputPlace);
-                    addOptions(eval((document.getElementById('Colza_expi').value).replace(/' '/g, "', '").replace(/\n/g, ",")), outputExpi);
+                    addOptions(dataPlace['Colza'], outputPlace);
+                    addOptions(dataExpi['Colza'], outputExpi);
                     break;
                 default:
                     outputPlace.innerHTML = "Default content";
@@ -295,11 +286,55 @@
         function addOptions(options, outputDoc) {
             options.forEach(function(optionText) {
                 var option = document.createElement("option");
-                option.value = optionText;//.toLowerCase().replace(/\s/g, '');
+                option.value = optionText;
                 option.text = optionText;
                 outputDoc.add(option);
             });
         }
+    </script>
+
+    <script>
+        var produit = document.getElementById("basisProductSelector");
+        var place = document.getElementById("basisPlaceSelector");
+        var expiration = document.getElementById("basisContractSelector");
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log(produit.value);
+            console.log(place.value);
+            console.log(expiration.value);
+
+            produit.addEventListener("change", handleSelectChange);
+            place.addEventListener("change", handleSelectChange);
+            expiration.addEventListener("change", handleSelectChange);
+        });
+        function handleSelectChange() {
+            console.log(produit.value);
+            console.log(place.value);
+            console.log(expiration.value);
+        }
+        let chartData = {{ PhysiqueJson | tojson }}
+        Highcharts.chart('myChartBase', {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Highcharts with JSON Data'
+            },
+            xAxis: {
+                title: {
+                    text: 'Day'
+                },
+                type: 'datetime'
+            },
+            yAxis: {
+                title: {
+                    text: 'Prix'
+                }
+            },
+            series: [{
+                name: 'Prix',
+                data: JSON.parse(chartData)
+            }]
+        });
     </script>
 
 </body>
