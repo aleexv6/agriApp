@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for, request
 import database as db
 import pandas as pd
 from highcharts_core import highcharts
@@ -30,7 +30,7 @@ def futures():
     return render_template('futures.html', listProduct=productFutures, data=dfFutures, listProductFutures=listProductFutures)
 
 
-@app.route("/basis")
+@app.route("/basis", methods=['GET', 'POST'])
 def base():
     prod = dict()
     expi = dict()
@@ -44,10 +44,25 @@ def base():
             data = {produit : list(dfFutures[dfFutures['Ticker'] == ticktick]['Expiration'].unique())}
             expi.update(data)       
 
-    dfPhysiqueEBM = dfPhysique[(dfPhysique['Produit'] == 'Ble tendre') & (dfPhysique['Place'] == 'La Pallice Rendu')]
-    dfPhysiqueEBM = dfPhysiqueEBM[['Date', 'Prix']]
-    dfPhysiqueEBM = dfPhysiqueEBM[dfPhysiqueEBM['Date'].dt.year > 2023]
-    json_data = [[row['Date'], row['Prix']] for _, row in dfPhysiqueEBM.iterrows()]
+    
+
+    if request.method == 'POST':
+        basis = basisChart(request.form['produit'], request.form['place'], request.form['expiration'])
+
+    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod, expi=expi, basisData=basis)
+
+def basisChart(produit, place, expiration):
+    df = dfPhysique[(dfPhysique['Produit'] == produit) & (dfPhysique['Place'] == place)]
+    dfFut = dfFutures[(dfFutures['Ticker'] == listProductFutures[produit]) & (dfFutures['Expiration'] == expiration)]
+
+    df = df[['Date', 'Prix']]
+    df['Date'] = df['Date'].dt.date
+    dfFut = dfFut[['Date', 'Prix']]
+    dfFut['Date'] = dfFut['Date'].dt.date
+    merged_df = pd.merge(df, dfFut, on='Date', how='inner')
+    merged_df['Basis'] = merged_df['Prix_x'] - merged_df['Prix_y']
+
+    json_data = [[row['Date'], row['Basis']] for _, row in merged_df.iterrows()]
     json_string = pd.Series(json_data).to_json(orient='values')
 
-    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod, expi=expi, PhysiqueJson=json_string)
+    return json_string

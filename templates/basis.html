@@ -166,27 +166,27 @@
                         <h1 class="h3 mb-0 text-gray-800">Base</h1>
                     </div>
 
-                    <form class="form-inline mb-4">
+                    <form class="form-inline mb-4" action="{{ url_for('base') }}" method="POST">
                         <label class="mr-2">Produit : </label>
-                        <select class="custom-select mr-4" id="basisProductSelector">
+                        <select name="produit" class="custom-select mr-4" id="basisProductSelector">
                             {% for produit in productPhysique if produit != 'Ble dur' %}
-                                <option value='{{ produit }}'>{{ produit }}</option>
+                                <option value='{{ produit }}' >{{ produit }}</option>
                             {% endfor %}
                         </select>
                         <label class="mr-2">Place : </label>
-                        <select class="custom-select mr-4" id ="basisPlaceSelector">
+                        <select name="place" class="custom-select mr-4" id ="basisPlaceSelector">
                             {% for place in dfPhysique[dfPhysique['Produit'] == productPhysique[0]]['Place'].unique() %}
                             <option value="{{ place }}">{{ place }}</option>
                             {% endfor %}
                         </select>
                         <label class="mr-2">Contrat : </label>
                         {% set tick = listProductFutures[productPhysique[0]] %}
-                        <select class="custom-select mr-4" id="basisContractSelector">
+                        <select name="expiration" class="custom-select mr-4" id="basisContractSelector">
                             {% for expi in dfFutures[dfFutures['Ticker'] == tick]['Expiration'].unique() %}
                             <option value="{{ expi }}">{{ expi }}</option>
                             {% endfor %}
                         </select>
-                    
+                        <input type="submit" name="next" value="Next">
                     </form>             
 
                     <div id="myChartBase"></div>
@@ -311,13 +311,13 @@
             console.log(place.value);
             console.log(expiration.value);
         }
-        let chartData = {{ PhysiqueJson | tojson }}
+        let chartData = {{ basisData | tojson }}
         Highcharts.chart('myChartBase', {
             chart: {
                 type: 'line'
             },
             title: {
-                text: 'Highcharts with JSON Data'
+                text: 'Basis'
             },
             xAxis: {
                 title: {
@@ -327,11 +327,11 @@
             },
             yAxis: {
                 title: {
-                    text: 'Prix'
+                    text: 'Basis'
                 }
             },
             series: [{
-                name: 'Prix',
+                name: 'Basis',
                 data: JSON.parse(chartData)
             }]
         });
