@@ -60,6 +60,26 @@
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
+            <div class="sidebar-heading">
+                Analyse
+            </div>
+
+            <li class="nav-item">
+                <a class="nav-link" href="basis">
+                    <i class="fas fa-fw fa-money-bill-wave"></i>
+                    <span>Base</span></a>
+            </li>
+
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="spread">
+                    <i class="far fa-chart-bar"></i>
+                    <span>Spread</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
@@ -166,7 +186,7 @@
                         <h1 class="h3 mb-0 text-gray-800">Base</h1>
                     </div>
 
-                    <form class="form-inline mb-4" action="{{ url_for('base') }}" method="POST">
+                    <form class="form-inline mb-4">
                         <label class="mr-2">Produit : </label>
                         <select name="produit" class="custom-select mr-4" id="basisProductSelector">
                             {% for produit in productPhysique if produit != 'Ble dur' %}
@@ -186,7 +206,6 @@
                             <option value="{{ expi }}">{{ expi }}</option>
                             {% endfor %}
                         </select>
-                        <input type="submit" name="next" value="Next">
                     </form>             
 
                     <div id="myChartBase"></div>
@@ -236,6 +255,7 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -298,43 +318,78 @@
         var place = document.getElementById("basisPlaceSelector");
         var expiration = document.getElementById("basisContractSelector");
         document.addEventListener("DOMContentLoaded", function() {
-            console.log(produit.value);
-            console.log(place.value);
-            console.log(expiration.value);
+            $.ajax({
+                type: "POST",
+                url: "/process_basis",
+                data: JSON.stringify([{"Produit": produit.value}, {"Place": place.value}, {"Expiration": expiration.value}]),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function(result) {
+                    Highcharts.chart('myChartBase', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Basis ' + produit.value + ' ' + place.value + ' ' + expiration.value
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Day'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Basis'
+                        }
+                    },
+                    series: [{
+                        name: 'Basis',
+                        data: result
+                    }]
+                    });
+                }
+            });
 
             produit.addEventListener("change", handleSelectChange);
             place.addEventListener("change", handleSelectChange);
             expiration.addEventListener("change", handleSelectChange);
         });
         function handleSelectChange() {
-            console.log(produit.value);
-            console.log(place.value);
-            console.log(expiration.value);
-        }
-        let chartData = {{ basisData | tojson }}
-        Highcharts.chart('myChartBase', {
-            chart: {
-                type: 'line'
-            },
-            title: {
-                text: 'Basis'
-            },
-            xAxis: {
-                title: {
-                    text: 'Day'
-                },
-                type: 'datetime'
-            },
-            yAxis: {
-                title: {
-                    text: 'Basis'
+            $.ajax({
+                type: "POST",
+                url: "/process_basis",
+                data: JSON.stringify([{"Produit": produit.value}, {"Place": place.value}, {"Expiration": expiration.value}]),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function(result, data) {
+                    console.log(data)
+                    Highcharts.chart('myChartBase', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Basis ' + produit.value + ' ' + place.value + ' ' + expiration.value
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Day'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Basis'
+                        }
+                    },
+                    series: [{
+                        name: 'Basis',
+                        data: result
+                    }]
+                    });
                 }
-            },
-            series: [{
-                name: 'Basis',
-                data: JSON.parse(chartData)
-            }]
-        });
+            });
+        }        
     </script>
 
 </body>

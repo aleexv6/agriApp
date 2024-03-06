@@ -34,6 +34,7 @@ def futures():
 def base():
     prod = dict()
     expi = dict()
+    basis = dict()
     for produit in productPhysique:
         if produit != 'Ble dur':
             data = {produit : list(dfPhysique[dfPhysique['Produit'] == produit]['Place'].unique())}
@@ -44,16 +45,14 @@ def base():
             data = {produit : list(dfFutures[dfFutures['Ticker'] == ticktick]['Expiration'].unique())}
             expi.update(data)       
 
-    
+    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod, expi=expi)
 
-    if request.method == 'POST':
-        basis = basisChart(request.form['produit'], request.form['place'], request.form['expiration'])
-
-    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod, expi=expi, basisData=basis)
-
-def basisChart(produit, place, expiration):
-    df = dfPhysique[(dfPhysique['Produit'] == produit) & (dfPhysique['Place'] == place)]
-    dfFut = dfFutures[(dfFutures['Ticker'] == listProductFutures[produit]) & (dfFutures['Expiration'] == expiration)]
+@app.route('/process_basis', methods=['POST', 'GET'])
+def process_basis():
+  if request.method == "POST":
+    data = request.get_json()
+    df = dfPhysique[(dfPhysique['Produit'] == data[0]['Produit']) & (dfPhysique['Place'] == data[1]['Place'])]
+    dfFut = dfFutures[(dfFutures['Ticker'] == listProductFutures[data[0]['Produit']]) & (dfFutures['Expiration'] == data[2]['Expiration'])]
 
     df = df[['Date', 'Prix']]
     df['Date'] = df['Date'].dt.date
@@ -66,3 +65,4 @@ def basisChart(produit, place, expiration):
     json_string = pd.Series(json_data).to_json(orient='values')
 
     return json_string
+    
