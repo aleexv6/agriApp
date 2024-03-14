@@ -6,7 +6,7 @@ from bson import json_util
 
 app = Flask(__name__)
 
-expi = {'Ble tendre' : 'MAR24', 'Mais' : 'MAR24', 'Colza' : 'MAY24'}
+expi = {'Ble tendre' : 'MAY24', 'Mais' : 'JUN24', 'Colza' : 'MAY24'}
 listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO'}
 
 cursorPhysique = db.get_database_physical().find({})
@@ -34,7 +34,7 @@ def futures():
 def base():
     prod = dict()
     expi = dict()
-    basis = dict()
+    expiAll = dict()
     for produit in productPhysique:
         if produit != 'Ble dur':
             data = {produit : list(dfPhysique[dfPhysique['Produit'] == produit]['Place'].unique())}
@@ -42,10 +42,15 @@ def base():
     for produit in productPhysique:
         if produit != 'Ble dur':
             ticktick = listProductFutures[produit]
+            data = {produit : list(dfFutures[(dfFutures['Ticker'] == ticktick) & (dfFutures['Expired'] == False)]['Expiration'].unique())}
+            expi.update(data)    
+    for produit in productPhysique:
+        if produit != 'Ble dur':
+            ticktick = listProductFutures[produit]
             data = {produit : list(dfFutures[dfFutures['Ticker'] == ticktick]['Expiration'].unique())}
-            expi.update(data)       
+            expiAll.update(data)
 
-    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod, expi=expi)
+    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod, expi=expi, expiAll=expiAll)
 
 @app.route('/process_basis', methods=['POST', 'GET'])
 def process_basis():
