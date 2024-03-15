@@ -3,6 +3,7 @@ import database as db
 import pandas as pd
 from highcharts_core import highcharts
 from bson import json_util
+import re
 
 app = Flask(__name__)
 
@@ -70,4 +71,39 @@ def process_basis():
     json_string = pd.Series(json_data).to_json(orient='values')
 
     return json_string
+  
+@app.route("/spread", methods=['GET', 'POST'])
+def spread():
+    return render_template('spread.html')
     
+@app.route('/process_spread', methods=['POST', 'GET'])
+def process_spread():
+    if request.method == 'POST':
+        data = request.get_json()[0]['spreadString']
+        if data is not None:
+            data = data.upper()
+            data = data.replace(' ', '')
+            operators = re.findall(r'[-+*/]', data)
+            data = re.split(r'[-+*/]', data)
+            data = [item.split('_') for item in data]
+            for i in range(len(data)):
+                df = dfFutures[(dfFutures['Ticker'] == data[i][0]) & (dfFutures['Expiration'] == data[i][1])]
+                df = df.reset_index()
+                if i > 0:
+                    merged = pd.merge(df, tmp, on='Date', how='inner')
+                    if operators[i-1] == '+':
+                        merged['Spread'] = merged['Prix_y'] + merged['Prix_x']
+                    elif operators[i-1] == '-':
+                        merged['Spread'] = merged['Prix_y'] - merged['Prix_x']
+                    elif operators[i-1] == '*':
+                        merged['Spread'] = merged['Prix_y'] * merged['Prix_x']
+                    elif operators[i-1] == '/':
+                        merged['Spread'] = merged['Prix_y'] / merged['Prix_x']
+                    else:
+                        print("Invalid operand")
+                tmp = dfFutures[(dfFutures['Ticker'] == data[i][0]) & (dfFutures['Expiration'] == data[i][1])]
+                tmp = tmp.reset_index()
+            json_data = [[row['Date'], row['Spread']] for _, row in merged.iterrows()]
+            json_string = pd.Series(json_data).to_json(orient='values')
+
+            return json_string
