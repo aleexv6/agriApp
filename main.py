@@ -94,20 +94,31 @@ def spread():
     
 @app.route('/process_spread', methods=['POST', 'GET'])
 def process_spread():
+    json_string = dict()
     if request.method == 'POST':
-        print(request.get_json()[0])
+        string1 = request.get_json()[0]['Leg1'].split('_')
+        df1 = dfFutures[(dfFutures['Ticker'] == string1[0]) & (dfFutures['Expiration'] == string1[1])]
+        string2 = request.get_json()[0]['Leg2'].split('_')
+        df2 = dfFutures[(dfFutures['Ticker'] == string2[0]) & (dfFutures['Expiration'] == string2[1])]
+        string3 = request.get_json()[0]['Leg3'].split('_')
+        df3 = dfFutures[(dfFutures['Ticker'] == string3[0]) & (dfFutures['Expiration'] == string3[1])]
+        string4 = request.get_json()[0]['Leg4'].split('_')
+        df4 = dfFutures[(dfFutures['Ticker'] == string4[0]) & (dfFutures['Expiration'] == string4[1])]
+
         if request.get_json()[0]['Type'] == 'SP':
-            string1 = request.get_json()[0]['Leg1'].split('_')
-            df1 = dfFutures[(dfFutures['Ticker'] == string1[0]) & (dfFutures['Expiration'] == string1[1])]
-            string2 = request.get_json()[0]['Leg2'].split('_')
-            df2 = dfFutures[(dfFutures['Ticker'] == string2[0]) & (dfFutures['Expiration'] == string2[1])]
             merged = pd.merge(df1, df2, on='Date', how='inner')
             merged['Spread'] = merged['Prix_x'] - merged['Prix_y']
-
             json_data = [[row['Date'], row['Spread']] for _, row in merged.iterrows()]
             json_string = pd.Series(json_data).to_json(orient='values')
 
-            return json_string
+        elif request.get_json()[0]['Type'] == 'BF': 
+            merged = pd.merge(df1, df2, on='Date', how='inner')
+            fmerged = pd.merge(merged, df3)
+            fmerged['Spread'] = fmerged['Prix_x'] + (-2 * fmerged['Prix_y']) + fmerged['Prix']
+            json_data = [[row['Date'], row['Spread']] for _, row in fmerged.iterrows()]
+            json_string = pd.Series(json_data).to_json(orient='values')
+
+    return json_string
 
 # @app.route('/process_spread', methods=['POST', 'GET'])
 # def process_spread():
