@@ -185,15 +185,52 @@
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Spread</h1>
                     </div>
-                    <form class="form-inline mb-4">
+                    <!-- <form class="form-inline mb-4">
 
                         <label class="mr-2" for="name" >Spread string : </label>
                         <input class="mr-2" type="text" id="spreadString"/>
 
-                        <button type="button" class="btn btn-sm btn-primary shadow-sm" onclick="spread()">Show</button>
-
-                    </form>             
-
+                        <button type="button" class="btn btn-sm btn-primary shadow-sm" onclick="spread()">Show</button> 
+                    </form>-->          
+                    <form class="form-inline mb-4">
+                        <label class="mr-2">Type : </label>
+                        <select name="spread" class="custom-select mr-4" id="basisSpreadSelector">
+                            <option value='SP'>Calendar Spread</option>
+                            <option value='BF'>Butterfly Spread</option>
+                            <option value='CF'>Condor Spread</option>
+                        </select>
+                        <label class="mr-2">Produit : </label>
+                        <select name="produit" class="custom-select mr-4" id="basisProductSelector">
+                            {% for produit in fut %}
+                                <option value='{{ produit }}' >{{ produit }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="mr-2">Leg 1 : </label>
+                        <select name="expiration" class="custom-select mr-4" id="basisLeg1Selector">                            
+                            {% for ex in expi[listProductFutures[0]] %}
+                                <option value="{{ fut[0] }}_{{ ex }}">{{ fut[0] }} {{ ex }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="mr-2">Leg 2 : </label>
+                        <select name="expiration" class="custom-select mr-4" id="basisLeg2Selector">                            
+                            {% for ex in expi[listProductFutures[0]] %}
+                                <option value="{{ fut[0] }}_{{ ex }}">{{ fut[0] }} {{ ex }}</option>
+                            {% endfor %}
+                        </select>
+                        <label style="display: none;" class="mr-2" id="leg3Label">Leg 3 : </label>
+                        <select style="display: none;" name="expiration" class="custom-select mr-4 legDisplay" id="basisLeg3Selector">                            
+                            {% for ex in expi[listProductFutures[0]] %}
+                                <option value="{{ fut[0] }}_{{ ex }}">{{ fut[0] }} {{ ex }}</option>
+                            {% endfor %}
+                        </select>
+                        <label style="display: none;" class="mr-2" id="leg4Label">Leg 4 : </label>
+                        <select style="display: none;" name="expiration" class="legDisplay custom-select mr-4" id="basisLeg4Selector">                            
+                            {% for ex in expi[listProductFutures[0]] %}
+                                <option value="{{ fut[0] }}_{{ ex }}">{{ fut[0] }} {{ ex }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-sm btn-primary shadow-sm mr-4" type="button" onclick="Spread()">Show</button>
+                    </form> 
                     <div id="myChartBase"></div>
                 </div>
             </div>
@@ -258,14 +295,19 @@
     <!-- Page level custom scripts -->
     <script src="../static/js/demo/chart-area-demo.js"></script>
     <script src="../static/js/demo/chart-pie-demo.js"></script>
-    <!--<script src="../static/js/my-js-literal.js"></script>-->       
+    <!--<script src="../static/js/my-js-literal.js"></script>-->    
+    
     <script>
-        function spread(){
-            var spreadString = document.getElementById('spreadString')
+        function Spread() {
+            var spreadLeg1 = document.getElementById('basisLeg1Selector')
+            var spreadLeg2 = document.getElementById('basisLeg2Selector')
+            var spreadLeg3 = document.getElementById('basisLeg3Selector')
+            var spreadLeg4 = document.getElementById('basisLeg4Selector')
+            var spreadType = document.getElementById('basisSpreadSelector')
             $.ajax({
                 type: "POST",
                 url: "/process_spread",
-                data: JSON.stringify([{"spreadString": spreadString.value}]),
+                data: JSON.stringify([{"Type" : spreadType.value, "Leg1": spreadLeg1.value, "Leg2": spreadLeg2.value, "Leg3": spreadLeg3.value, "Leg4": spreadLeg4.value}]),
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(result) {
@@ -295,6 +337,94 @@
                 }
             });
         }
+    </script>
+
+    <script>
+        // Get the select element
+        var selectElement = document.getElementById("basisProductSelector");
+        var leg1 = document.getElementById("basisLeg1Selector");
+        var leg2 = document.getElementById("basisLeg2Selector");
+        var leg3 = document.getElementById("basisLeg3Selector");
+        var leg4 = document.getElementById("basisLeg4Selector");
+        let dataExpi = JSON.parse('{{ expi | tojson }}');
+        selectElement.addEventListener("change", function() {
+            var selectedValue = selectElement.value;
+            console.log(selectElement.value);
+            leg1.innerHTML = "";
+            leg2.innerHTML = "";
+            leg3.innerHTML = "";
+            leg4.innerHTML = "";
+            switch(selectedValue) {
+                case "EMA":
+                    var EMAList = dataExpi['Mais'].map(function(str) {
+                        console.log('EMA ' + str);
+                        return 'EMA ' + str;
+                    });
+                    addOptions(EMAList, leg1);
+                    addOptions(EMAList, leg2);
+                    addOptions(EMAList, leg3);
+                    addOptions(EMAList, leg4);
+                    break;
+                case "EBM":
+                    var EBMList = dataExpi['Ble tendre'].map(function(str) {
+                        return 'EBM ' + str;
+                    });
+                    addOptions(EBMList, leg1);
+                    addOptions(EBMList, leg2);
+                    addOptions(EBMList, leg3);
+                    addOptions(EBMList, leg4);
+                    break;
+                case "ECO":
+                    var ECOList = dataExpi['Colza'].map(function(str) {
+                        return 'ECO ' + str;
+                    });
+                    addOptions(ECOList, leg1);
+                    addOptions(ECOList, leg2);
+                    addOptions(ECOList, leg3);
+                    addOptions(ECOList, leg4);
+                    break;
+            }
+        });
+        function addOptions(options, outputDoc) {
+            options.forEach(function(optionText) {
+                var option = document.createElement("option");
+                option.value = optionText.replace(/\s/g, "_");
+                option.text = optionText;
+                outputDoc.add(option);
+            });
+        }
+    </script> 
+    <script>
+        // Get the select element
+        var spreadElement = document.getElementById("basisSpreadSelector");
+        var leg3 = document.getElementById("basisLeg3Selector");
+        var leg4 = document.getElementById("basisLeg4Selector");
+        spreadElement.addEventListener("change", function() {
+            var spreadValue = spreadElement.value;
+            switch(spreadValue) {
+                case "SP":
+                    document.getElementById("basisLeg3Selector").style.display = 'none';
+                    document.getElementById("leg3Label").style.display = 'none';
+                    document.getElementById("basisLeg4Selector").style.display = 'none';
+                    document.getElementById("leg4Label").style.display = 'none';
+                    break;
+
+                case "BF":
+                    document.getElementById("basisLeg3Selector").style.display = 'block';
+                    document.getElementById("leg3Label").style.display = 'block';
+                    document.getElementById("basisLeg4Selector").style.display = 'none';
+                    document.getElementById("leg4Label").style.display = 'none';
+                    break;
+                
+                case "CF":
+                    document.getElementById("basisLeg3Selector").style.display = 'block';
+                    document.getElementById("leg3Label").style.display = 'block';
+                    document.getElementById("basisLeg4Selector").style.display = 'block';
+                    document.getElementById("leg4Label").style.display = 'block';
+                    break;
+
+            }
+        });
     </script>
 
 </body>

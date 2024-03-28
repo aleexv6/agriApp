@@ -220,8 +220,8 @@
                                                 <th>Place</th>
                                                 <th>Prix</th>
                                                 <th>Base</th>
-                                                <th>1d change %</th>
                                                 <th>Mois Future</th>
+                                                <th>1d change %</th>                                                
                                                 <th>Graphique</th>
                                             </tr>
                                         </thead>
@@ -233,12 +233,12 @@
                                                         <td>{{ row['Prix'] }}</td>
                                                         {% if item != 'Ble dur' %}
                                                             <td>{{ (row['Prix'] - dfFutures.iloc[-1]['Prix']).round(2) }}</td>
+                                                            <td>{{ expiration }}</td>
                                                             {% if previousDf[previousDf['Place'] == row['Place']].empty %}
                                                                 <td>-</td>
                                                             {% else %}
                                                                 <td>{{ (((row['Prix'] - previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]) / (previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]|abs)) * 100).round(2) }}%</td>
                                                             {% endif %}
-                                                            <td>{{ expiration }}</td>
                                                         {% else %}
                                                             <td>N/C</td>
                                                             {% if previousDf[previousDf['Place'] == row['Place']].empty %}
