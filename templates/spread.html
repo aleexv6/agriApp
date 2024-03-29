@@ -198,20 +198,22 @@
                             <option value='SP'>Calendar Spread</option>
                             <option value='BF'>Butterfly Spread</option>
                             <option value='CF'>Condor Spread</option>
+                            <option value='OT'>Other</option>
                         </select>
-                        <label class="mr-2">Produit : </label>
+                        <input type="text" style="display: none;" class="form-control form-control-user mr-4" id="otherSpreadText" placeholder="Spread string">
+                        <label class="mr-2" id="productLabel">Produit : </label>
                         <select name="produit" class="custom-select mr-4" id="basisProductSelector">
                             {% for produit in fut %}
                                 <option value='{{ produit }}' >{{ produit }}</option>
                             {% endfor %}
                         </select>
-                        <label class="mr-2">Leg 1 : </label>
+                        <label class="mr-2" id="leg1Label">Leg 1 : </label>
                         <select name="expiration" class="custom-select mr-4" id="basisLeg1Selector">                            
                             {% for ex in expi[listProductFutures[0]] %}
                                 <option value="{{ fut[0] }}_{{ ex }}">{{ fut[0] }} {{ ex }}</option>
                             {% endfor %}
                         </select>
-                        <label class="mr-2">Leg 2 : </label>
+                        <label class="mr-2" id="leg2Label">Leg 2 : </label>
                         <select name="expiration" class="custom-select mr-4" id="basisLeg2Selector">                            
                             {% for ex in expi[listProductFutures[0]] %}
                                 <option value="{{ fut[0] }}_{{ ex }}">{{ fut[0] }} {{ ex }}</option>
@@ -304,10 +306,11 @@
             var spreadLeg3 = document.getElementById('basisLeg3Selector')
             var spreadLeg4 = document.getElementById('basisLeg4Selector')
             var spreadType = document.getElementById('basisSpreadSelector')
+            var otherString = document.getElementById("otherSpreadText")
             $.ajax({
                 type: "POST",
                 url: "/process_spread",
-                data: JSON.stringify([{"Type" : spreadType.value, "Leg1": spreadLeg1.value, "Leg2": spreadLeg2.value, "Leg3": spreadLeg3.value, "Leg4": spreadLeg4.value}]),
+                data: JSON.stringify([{"Type" : spreadType.value, "Leg1": spreadLeg1.value, "Leg2": spreadLeg2.value, "Leg3": spreadLeg3.value, "Leg4": spreadLeg4.value, 'OtherSpread': otherString.value}]),
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(result) {
@@ -407,20 +410,55 @@
                     document.getElementById("leg3Label").style.display = 'none';
                     document.getElementById("basisLeg4Selector").style.display = 'none';
                     document.getElementById("leg4Label").style.display = 'none';
+                    document.getElementById("otherSpreadText").style.display = 'none';
+                    document.getElementById("productLabel").style.display = 'block';
+                    document.getElementById("basisProductSelector").style.display = 'block';
+                    document.getElementById("basisLeg1Selector").style.display = 'block';
+                    document.getElementById("leg1Label").style.display = 'block';
+                    document.getElementById("basisLeg2Selector").style.display = 'block';
+                    document.getElementById("leg2Label").style.display = 'block';
                     break;
 
                 case "BF":
+                    document.getElementById("productLabel").style.display = 'block';
+                    document.getElementById("basisProductSelector").style.display = 'block';
+                    document.getElementById("basisLeg1Selector").style.display = 'block';
+                    document.getElementById("leg1Label").style.display = 'block';
+                    document.getElementById("basisLeg2Selector").style.display = 'block';
+                    document.getElementById("leg2Label").style.display = 'block';
                     document.getElementById("basisLeg3Selector").style.display = 'block';
                     document.getElementById("leg3Label").style.display = 'block';
                     document.getElementById("basisLeg4Selector").style.display = 'none';
                     document.getElementById("leg4Label").style.display = 'none';
+                    document.getElementById("otherSpreadText").style.display = 'none';
                     break;
                 
                 case "CF":
+                    document.getElementById("basisProductSelector").style.display = 'block';
+                    document.getElementById("basisLeg1Selector").style.display = 'block';
+                    document.getElementById("leg1Label").style.display = 'block';
+                    document.getElementById("basisLeg2Selector").style.display = 'block';
+                    document.getElementById("leg2Label").style.display = 'block';
                     document.getElementById("basisLeg3Selector").style.display = 'block';
                     document.getElementById("leg3Label").style.display = 'block';
                     document.getElementById("basisLeg4Selector").style.display = 'block';
                     document.getElementById("leg4Label").style.display = 'block';
+                    document.getElementById("otherSpreadText").style.display = 'none';
+                    document.getElementById("productLabel").style.display = 'block';
+                    break;
+                
+                case "OT":
+                    document.getElementById("basisLeg1Selector").style.display = 'none';
+                    document.getElementById("leg1Label").style.display = 'none';
+                    document.getElementById("basisLeg2Selector").style.display = 'none';
+                    document.getElementById("leg2Label").style.display = 'none';
+                    document.getElementById("basisLeg3Selector").style.display = 'none';
+                    document.getElementById("leg3Label").style.display = 'none';
+                    document.getElementById("basisLeg4Selector").style.display = 'none';
+                    document.getElementById("leg4Label").style.display = 'none';
+                    document.getElementById("basisProductSelector").style.display = 'none';
+                    document.getElementById("otherSpreadText").style.display = 'block';
+                    document.getElementById("productLabel").style.display = 'none';
                     break;
 
             }
