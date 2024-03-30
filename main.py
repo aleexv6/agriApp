@@ -138,26 +138,32 @@ def process_spread():
                     operators = re.findall(r'[-+*/]', data)
                     data = re.split(r'[-+*/]', data)
                     data = [item.split('_') for item in data]
-                    for i in range(len(data)):
-                        df = dfFutures[(dfFutures['Ticker'] == data[i][0]) & (dfFutures['Expiration'] == data[i][1])]
-                        df = df.reset_index()
-                        if i > 0:
-                            merged = pd.merge(df, tmp, on='Date', how='inner')
-                            print(merged)
-                            if operators[i-1] == '+':
-                                merged['Spread'] = merged['Prix_y'] + merged['Prix_x']
-                            elif operators[i-1] == '-':
-                                merged['Spread'] = merged['Prix_y'] - merged['Prix_x']
-                            elif operators[i-1] == '*':
-                                merged['Spread'] = merged['Prix_y'] * merged['Prix_x']
-                            elif operators[i-1] == '/':
-                                merged['Spread'] = merged['Prix_y'] / merged['Prix_x']
-                            else:
-                                print("Invalid operand")
-                            print(merged['Spread'])
-                        tmp = dfFutures[(dfFutures['Ticker'] == data[i][0]) & (dfFutures['Expiration'] == data[i][1])]
-                        tmp = tmp.reset_index()
-                    json_data = [[row['Date'], row['Spread']] for _, row in merged.iterrows()]
+                    result = pd.DataFrame()
+
+                    for i, (ticker, expiration) in enumerate(data):
+                        # Filter DataFrame based on current ticker and expiration
+                        df_temp = dfFutures[(dfFutures['Ticker'] == ticker) & (dfFutures['Expiration'] == expiration)]
+                        
+                        # Rename the 'Prix' column to avoid conflicts during merge
+                        df_temp = df_temp.rename(columns={'Prix': f'Prix_{i}'})
+                        
+                        if i == 0:
+                            result = df_temp
+                        else:
+                            # Merge the current DataFrame with the result DataFrame based on the date column
+                            result = pd.merge(result, df_temp, on='Date', how='inner')
+
+                    # Perform arithmetic operations based on operands
+                    for i in range(1, len(data)):
+                        if operators[i - 1] == '+':
+                            result[f'Prix_0'] += result[f'Prix_{i}']
+                        elif operators[i - 1] == '-':
+                            result[f'Prix_0'] -= result[f'Prix_{i}']
+
+                    results = result[['Date', 'Prix_0']]
+                    json_data = []
+                    for _, row in results.iterrows():
+                        json_data.append([row['Date'], row['Prix_0']])
                     json_string = pd.Series(json_data).to_json(orient='values')
 
     return json_string
