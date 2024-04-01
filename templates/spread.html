@@ -233,7 +233,7 @@
                         </select>
                         <button class="btn btn-sm btn-primary shadow-sm mr-4" type="button" onclick="Spread()">Show</button>
                     </form> 
-                    <div id="myChartBase"></div>
+                    <div id="myChartBase" style="height: 60vh;"></div>
                 </div>
             </div>
             <!-- End of Main Content -->
@@ -282,6 +282,7 @@
     <!-- Bootstrap core JavaScript-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
@@ -306,7 +307,13 @@
             var spreadLeg3 = document.getElementById('basisLeg3Selector')
             var spreadLeg4 = document.getElementById('basisLeg4Selector')
             var spreadType = document.getElementById('basisSpreadSelector')
-            var otherString = document.getElementById("otherSpreadText")
+            var otherString = document.getElementById("otherSpreadText");
+            if (spreadType.value == "OT"){
+                var title = 'Spread ' + otherString.value.replace(/_/g, ' ');
+            }
+            else{
+                var title = 'Spread '
+            }
             $.ajax({
                 type: "POST",
                 url: "/process_spread",
@@ -314,12 +321,12 @@
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(result) {
-                    Highcharts.chart('myChartBase', {
+                    Highcharts.stockChart('myChartBase', {
                     chart: {
                         type: 'line'
                     },
                     title: {
-                        text: 'Spread '
+                        text: title
                     },
                     xAxis: {
                         title: {
@@ -334,7 +341,8 @@
                     },
                     series: [{
                         name: 'Spread',
-                        data: result
+                        data: result,
+                        
                     }]
                     });
                 }
@@ -352,7 +360,6 @@
         let dataExpi = JSON.parse('{{ expi | tojson }}');
         selectElement.addEventListener("change", function() {
             var selectedValue = selectElement.value;
-            console.log(selectElement.value);
             leg1.innerHTML = "";
             leg2.innerHTML = "";
             leg3.innerHTML = "";

@@ -140,13 +140,14 @@ def process_spread():
                     data = [item.split('_') for item in data]
                     result = pd.DataFrame()
 
-                    for i, (ticker, expiration) in enumerate(data):
+                    for i, (nb_contracts, ticker, expiration) in enumerate(data):
+                        nb_contracts = int(nb_contracts)
                         # Filter DataFrame based on current ticker and expiration
                         df_temp = dfFutures[(dfFutures['Ticker'] == ticker) & (dfFutures['Expiration'] == expiration)]
                         
                         # Rename the 'Prix' column to avoid conflicts during merge
                         df_temp = df_temp.rename(columns={'Prix': f'Prix_{i}'})
-                        
+                        df_temp[f'Prix_{i}'] = df_temp[f'Prix_{i}'] * nb_contracts
                         if i == 0:
                             result = df_temp
                         else:
@@ -156,10 +157,9 @@ def process_spread():
                     # Perform arithmetic operations based on operands
                     for i in range(1, len(data)):
                         if operators[i - 1] == '+':
-                            result[f'Prix_0'] += result[f'Prix_{i}']
+                            result[f'Prix_0'] += result[f'Prix_{i}'] * nb_contracts
                         elif operators[i - 1] == '-':
-                            result[f'Prix_0'] -= result[f'Prix_{i}']
-
+                            result[f'Prix_0'] -= result[f'Prix_{i}'] * nb_contracts
                     results = result[['Date', 'Prix_0']]
                     json_data = []
                     for _, row in results.iterrows():
