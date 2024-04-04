@@ -167,3 +167,7 @@ def process_spread():
                     json_string = pd.Series(json_data).to_json(orient='values')
 
     return json_string
+
+@app.route("/analytics", methods=['GET', 'POST'])
+def analytics():
+    return render_template('analytics.html')
