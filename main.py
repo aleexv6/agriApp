@@ -4,6 +4,7 @@ import pandas as pd
 from highcharts_core import highcharts
 from bson import json_util
 import re
+from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext
 
 app = Flask(__name__)
 
@@ -168,6 +169,22 @@ def process_spread():
 
     return json_string
 
-@app.route("/analytics", methods=['GET', 'POST'])
-def analytics():
-    return render_template('analytics.html')
+@app.route("/cot", methods=['GET', 'POST'])
+def cot():
+    #for i in ['EBM', 'EMA', 'ECO']:
+    dfEBM = get_cot_from_db_euronext('EBM')
+    dfEMA = get_cot_from_db_euronext('EMA')
+    dfECO = get_cot_from_db_euronext('ECO')
+    dfEuronextEBM = format_data_euronext(dfEBM)
+    dfEuronextEMA = format_data_euronext(dfEMA)
+    dfEuronextECO = format_data_euronext(dfECO)
+    net_euronext_ebm = net_position_euronext(dfEuronextEBM)
+    net_euronext_ema = net_position_euronext(dfEuronextEMA)
+    net_euronext_eco = net_position_euronext(dfEuronextECO)
+    net_euronext_ebm = net_euronext_ebm.reset_index()
+    net_euronext_ema = net_euronext_ema.reset_index()
+    net_euronext_eco = net_euronext_eco.reset_index()
+    net_euronext_ebm = net_euronext_ebm[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
+    net_euronext_eco = net_euronext_eco[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
+    net_euronext_ema = net_euronext_ema[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
+    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'))

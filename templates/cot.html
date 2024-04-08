@@ -85,9 +85,9 @@
             </div>
 
             <li class="nav-item">
-                <a class="nav-link" href="spread">
+                <a class="nav-link" href="cot">
                     <i class="far fa-chart-bar"></i>
-                    <span>Analyse</span></a>
+                    <span>COT</span></a>
             </li>
 
             <!-- Sidebar Toggler (Sidebar) -->
@@ -191,7 +191,9 @@
                 </nav>
                 <!-- End of Topbar -->
                 <div class="container-fluid">                        
-
+                    <div id="net_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                    <div id="net_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                    <div id="net_euronext_eco" class="mb-4" style="height: 60vh;"></div>
                 </div>
                 <!-- /.container-fluid -->
             </div>
@@ -239,6 +241,9 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
@@ -254,6 +259,153 @@
     <!-- Page level custom scripts -->
     <script src="../static/js/demo/chart-area-demo.js"></script>
     <script src="../static/js/demo/chart-pie-demo.js"></script>
+    <script>
+        var net_euronext_ebm = JSON.parse('{{ net_euronext_ebm | tojson }}');
+        var net_euronext_ema = JSON.parse('{{ net_euronext_ema | tojson }}');
+        var net_euronext_eco = JSON.parse('{{ net_euronext_eco | tojson }}');
+
+        var fondsEBM = net_euronext_ebm.map(function(item) {
+            return [item['Date'], Math.round(item['FondNetPos'])];
+        });
+        var commEBM = net_euronext_ebm.map(function(item) {
+            return [item['Date'], Math.round(item['CommerceNetPos'])];
+        });
+        var creditEBM = net_euronext_ebm.map(function(item) {
+            return [item['Date'], Math.round(item['InvestAndCredit'])];
+        });
+        var otherEBM = net_euronext_ebm.map(function(item) {
+            return [item['Date'], Math.round(item['OtherFinancial'])];
+        });
+
+        var fondsEMA = net_euronext_ema.map(function(item) {
+            return [item['Date'], Math.round(item['FondNetPos'])];
+        });
+        var commEMA = net_euronext_ema.map(function(item) {
+            return [item['Date'], Math.round(item['CommerceNetPos'])];
+        });
+        var creditEMA = net_euronext_ema.map(function(item) {
+            return [item['Date'], Math.round(item['InvestAndCredit'])];
+        });
+        var otherEMA = net_euronext_ema.map(function(item) {
+            return [item['Date'], Math.round(item['OtherFinancial'])];
+        });
+
+        var fondsECO = net_euronext_eco.map(function(item) {
+            return [item['Date'], Math.round(item['FondNetPos'])];
+        });
+        var commECO = net_euronext_eco.map(function(item) {
+            return [item['Date'], Math.round(item['CommerceNetPos'])];
+        });
+        var creditECO = net_euronext_eco.map(function(item) {
+            return [item['Date'], Math.round(item['InvestAndCredit'])];
+        });
+        var otherECO = net_euronext_eco.map(function(item) {
+            return [item['Date'], Math.round(item['OtherFinancial'])];
+        });
+
+
+        Highcharts.chart('net_euronext_ebm', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Positions nettes ' + net_euronext_ebm[0]['Ticker'] +' '+ '(' + net_euronext_ebm[0]['Produit'] + ')'
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Spread'
+            }
+        },
+        series: [{
+            name: "Fonds d'investissement",
+            data: fondsEBM,
+        }, {
+            name: "Entreprises commerciales",
+            data: commEBM,
+        }, {
+            name: "Entreprises d'investissement et établissements de crédit",
+            data: creditEBM,
+        }, {
+            name: "Autres institutions financières",
+            data: otherEBM
+        }]
+        });
+
+
+        Highcharts.chart('net_euronext_ema', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Positions nettes ' + net_euronext_ema[0]['Ticker'] +' '+ '(' + net_euronext_ema[0]['Produit'] + ')'
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Spread'
+            }
+        },
+        series: [{
+            name: "Fonds d'investissement",
+            data: fondsEMA,
+        }, {
+            name: "Entreprises commerciales",
+            data: commEMA,
+        }, {
+            name: "Entreprises d'investissement et établissements de crédit",
+            data: creditEMA,
+        }, {
+            name: "Autres institutions financières",
+            data: otherEMA
+        }]
+        });
+
+
+        Highcharts.chart('net_euronext_eco', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Positions nettes ' + net_euronext_eco[0]['Ticker'] +' '+ '(' + net_euronext_eco[0]['Produit'] + ')'
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Spread'
+            }
+        },
+        series: [{
+            name: "Fonds d'investissement",
+            data: fondsECO,
+        }, {
+            name: "Entreprises commerciales",
+            data: commECO,
+        }, {
+            name: "Entreprises d'investissement et établissements de crédit",
+            data: creditECO,
+        }, {
+            name: "Autres institutions financières",
+            data: otherECO
+        }]
+        });
+
+    </script>
 
 </body>
 
