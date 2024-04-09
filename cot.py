@@ -274,23 +274,15 @@ def seasonality_cftc(df, start_year):
     # plt.close()
 
 def variation_euronext(df):
-    fig, axs = plt.subplots(2, 2, figsize=(13, 6.25))
-    for i, act in enumerate(["Fonds d'investissement", "Entreprises commerciales", "Autres institutions financières", "Entreprises d'investissement et établissements de crédit"]):
-        row, col = divmod(i, 2)
-        df['NetVar'] = df[f"{act} variation Long (Total)"] - df[f"{act} variation Short (Total)"]
-        df = df.sort_index()
-        axs[row, col].plot(df['NetVar'].index, df['NetVar'].values, label='Variation par rapport au rapport précendent', linewidth=0.8)
-        axs[row, col].set_ylabel('Contrats', style='italic')
-        axs[row, col].set_title(act, fontsize = 10, color="grey", style='italic')
-
-    plt.axhline(y = 0, color = 'grey', linestyle = '--', linewidth=0.5, alpha=0.5) 
-    plt.legend(bbox_to_anchor=(0.30, -0.1), frameon=False)
-    plt.suptitle(f"VARIATION NETTE DES POSITIONS", x=0.5125, y=.98, fontsize = 15, fontweight='bold')
-    fig.text(0.51, 0.93, df['Produit'][0], ha='center', va='center', fontsize=10, color="grey")
-    
-    plt.savefig(f"img/variation{df['Produit'][0].replace('/', '').replace(' ', '')}Euronext.png")
-    #plt.show()
-    plt.close()
+    data = []
+    df = df.reset_index()
+    for i in ["Fonds d'investissement", "Entreprises commerciales", "Autres institutions financières", "Entreprises d'investissement et établissements de crédit"]:
+        temp_df = df.copy()  # Make a copy of the original DataFrame
+        temp_df['NetVar'] = temp_df[f"{i} variation Long (Total)"] - temp_df[f"{i} variation Short (Total)"]
+        temp_df['Type'] = i
+        data.append(temp_df)
+    res = pd.concat(data, ignore_index=True)
+    return res[['Date', 'NetVar', 'Type']]
 
 def variation_cftc(df, start_year):
     df = df.sort_index()

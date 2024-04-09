@@ -4,7 +4,10 @@ import pandas as pd
 from highcharts_core import highcharts
 from bson import json_util
 import re
-from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext
+from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
+import warnings
+
+warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 
@@ -205,4 +208,16 @@ def cot():
         for list_of_dicts in list
     ]
     seasonality_euronext_ema = [lst for lst in fondsSeasonalityListEMA if lst]
-    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_euronext_ebm=seasonality_euronext_ebm, seasonality_euronext_ema=seasonality_euronext_ema)
+
+    data_seasonality_euronext_eco = seasonality_euronext(dfEuronextECO)
+    listEco = [dfEco.to_dict(orient='records') for dfEco in data_seasonality_euronext_eco]
+    fondsSeasonalityListECO = [
+        [record for record in list_of_dicts if record.get('Type') == "Fonds d'investissement"]
+        for list_of_dicts in listEco
+    ]
+    
+    seasonality_euronext_eco = [lst for lst in fondsSeasonalityListECO if lst]
+
+    df_variation_ebm = variation_euronext(dfEuronextEBM)
+    df_variation_fonds_ebm = df_variation_ebm[df_variation_ebm['Type'] == "Fonds d'investissement"]
+    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_euronext_ebm=seasonality_euronext_ebm, seasonality_euronext_ema=seasonality_euronext_ema, seasonality_euronext_eco=seasonality_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'))
