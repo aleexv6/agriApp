@@ -190,10 +190,35 @@
 
                 </nav>
                 <!-- End of Topbar -->
-                <div class="container-fluid">                        
-                    <div id="net_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
-                    <div id="net_euronext_ema" class="mb-4" style="height: 60vh;"></div>
-                    <div id="net_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                <div class="container-fluid">   
+                    <div class="card shadow mb-4">
+                        <div class="card-header d-flex justify-content-between py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">EBM</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="net_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                            <div id="seasonality_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header d-flex justify-content-between py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">EMA</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="net_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                            <div id="seasonality_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header d-flex justify-content-between py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">ECO</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="net_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>    
                 </div>
                 <!-- /.container-fluid -->
             </div>
@@ -263,6 +288,28 @@
         var net_euronext_ebm = JSON.parse('{{ net_euronext_ebm | tojson }}');
         var net_euronext_ema = JSON.parse('{{ net_euronext_ema | tojson }}');
         var net_euronext_eco = JSON.parse('{{ net_euronext_eco | tojson }}');
+        var seasonality_euronext_ebm = JSON.parse('{{ seasonality_euronext_ebm | tojson }}');
+        var seasonality_euronext_ema = JSON.parse('{{ seasonality_euronext_ema | tojson }}');
+
+        var seasonality_euronext_ebm_series = [];
+        var seasonality_euronext_ema_series = [];
+
+        for (var i = 0; i < seasonality_euronext_ebm.length; i++) {
+            seasonality_euronext_ebm_series.push({
+                name: (2018 + i) + '-' + (2019 + i),
+                data: seasonality_euronext_ebm[i].map(function(item) {
+                    return [item['Date'], Math.round(item['Net'])];
+                })
+            });
+        }
+        for (var i = 0; i < seasonality_euronext_ema.length; i++) {
+            seasonality_euronext_ema_series.push({
+                name: (2018 + i) + '-' + (2019 + i),
+                data: seasonality_euronext_ema[i].map(function(item) {
+                    return [item['Date'], Math.round(item['Net'])];
+                })
+            });
+        }
 
         var fondsEBM = net_euronext_ebm.map(function(item) {
             return [item['Date'], Math.round(item['FondNetPos'])];
@@ -403,6 +450,48 @@
             name: "Autres institutions financières",
             data: otherECO
         }]
+        });
+
+        Highcharts.chart('seasonality_euronext_ebm', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Saisonnalité ' + seasonality_euronext_ebm[0][0]['Type']
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Contrats'
+            }
+        },
+        series: seasonality_euronext_ebm_series
+        });
+
+        Highcharts.chart('seasonality_euronext_ema', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Saisonnalité ' + seasonality_euronext_ema[0][0]['Type']
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Contrats'
+            }
+        },
+        series: seasonality_euronext_ema_series
         });
 
     </script>

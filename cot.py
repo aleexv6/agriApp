@@ -200,46 +200,25 @@ def net_position_cftc(df, start_year):
     # plt.close()
 
 def seasonality_euronext(df):
+    data = []
     df = df.sort_index()
     years = list(set(df.index.year))
-    #years = years[:2]
-    fig, axs = plt.subplots(2, 2, figsize=(13, 6.25))
     for i, act in enumerate(["Fonds d'investissement", "Entreprises commerciales", "Autres institutions financières", "Entreprises d'investissement et établissements de crédit"]):
-        row, col = divmod(i, 2)
         for year in years[:-1]:
             if df['Produit'][0] == "Corn / Mais":
-                year_data = df[(df.index >= pd.to_datetime(f"{year}-09-01")) & (df.index < pd.to_datetime(f"{year+1}-09-01"))]
-                net = (year_data[act + " positions Long (Total)"] - year_data[act + " positions Short (Total)"]).sort_index()
-                net = net.reset_index()
-                net['Date'] = pd.to_datetime(net['Date'].map(lambda x: x.replace(year=2100)))
-                mask = (net['Date'].dt.month >= 1) & (net['Date'].dt.month < 9)
+                year_data = df[(df.index >= pd.to_datetime(f"{year}-07-01")) & (df.index < pd.to_datetime(f"{year+1}-07-01"))]
+                year_data['Net'] = (year_data[act + " positions Long (Total)"] - year_data[act + " positions Short (Total)"]).sort_index()
+                year_data['Type'] = act
+                year_data = year_data.reset_index()
             elif df['Produit'][0] == "Milling Wheat / Ble" or df['Produit'][0] == "Rapeseed / Colza":
                 year_data = df[(df.index >= pd.to_datetime(f"{year}-07-01")) & (df.index < pd.to_datetime(f"{year+1}-07-01"))]
-                net = (year_data[act + " positions Long (Total)"] - year_data[act + " positions Short (Total)"]).sort_index()
-                net = net.reset_index()
-                net['Date'] = pd.to_datetime(net['Date'].map(lambda x: x.replace(year=2100)))
-                mask = (net['Date'].dt.month >= 1) & (net['Date'].dt.month < 7)
+                year_data['Net'] = (year_data[act + " positions Long (Total)"] - year_data[act + " positions Short (Total)"]).sort_index()
+                year_data['Type'] = act
+                year_data = year_data.reset_index()
             else:
                 print("Erreur dans l'attribution des dates")
-
-            net.loc[mask, 'Date'] = net.loc[mask, 'Date'].apply(lambda x: x.replace(year=2101))
-            net = net.set_index('Date')
-    return net
-    #         axs[row, col].xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
-    #         axs[row, col].plot(net, label=f"{year} / {year+1}")
-    #         axs[row, col].grid(True, linestyle='--', linewidth=0.5, alpha=0.8)
-    #         axs[row, col].set_ylabel('Contrats', style='italic')
-    #         axs[row, col].set_title(act, fontsize = 10, color="grey", style='italic')
-
-
-    # plt.axhline(y = 0, color = 'grey', linestyle = '--', linewidth=0.5, alpha=0.5) 
-    # plt.legend(bbox_to_anchor=(0.88, -0.1), frameon=False, ncol=len(years))
-    # plt.suptitle(f"SAISONALITÉ DES POSITIONS", x=0.5125, y=.98, fontsize = 15, fontweight='bold')
-    # fig.text(0.51, 0.93, df['Produit'][0], ha='center', va='center', fontsize=10, color="grey")
-    
-    # plt.savefig(f"img/seasonalite{df['Produit'][0].replace('/', '').replace(' ', '')}Euronext.png")
-    # #plt.show()
-    # plt.close()
+            data.append(year_data[['Date', 'Net', 'Type']])
+    return data
 
 def seasonality_cftc(df, start_year):
     df = df.sort_index()

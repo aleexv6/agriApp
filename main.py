@@ -4,7 +4,7 @@ import pandas as pd
 from highcharts_core import highcharts
 from bson import json_util
 import re
-from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext
+from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext
 
 app = Flask(__name__)
 
@@ -175,9 +175,11 @@ def cot():
     dfEBM = get_cot_from_db_euronext('EBM')
     dfEMA = get_cot_from_db_euronext('EMA')
     dfECO = get_cot_from_db_euronext('ECO')
+
     dfEuronextEBM = format_data_euronext(dfEBM)
     dfEuronextEMA = format_data_euronext(dfEMA)
     dfEuronextECO = format_data_euronext(dfECO)
+
     net_euronext_ebm = net_position_euronext(dfEuronextEBM)
     net_euronext_ema = net_position_euronext(dfEuronextEMA)
     net_euronext_eco = net_position_euronext(dfEuronextECO)
@@ -187,4 +189,20 @@ def cot():
     net_euronext_ebm = net_euronext_ebm[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
     net_euronext_eco = net_euronext_eco[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
     net_euronext_ema = net_euronext_ema[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
-    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'))
+
+    data_seasonality_euronext_ebm = seasonality_euronext(dfEuronextEBM)
+    list = [df.to_dict(orient='records') for df in data_seasonality_euronext_ebm]
+    fondsSeasonalityListEBM = [
+        [record for record in list_of_dicts if record.get('Type') == "Fonds d'investissement"]
+        for list_of_dicts in list
+    ]
+    seasonality_euronext_ebm = [lst for lst in fondsSeasonalityListEBM if lst]
+
+    data_seasonality_euronext_ema = seasonality_euronext(dfEuronextEMA)
+    list = [df.to_dict(orient='records') for df in data_seasonality_euronext_ema]
+    fondsSeasonalityListEMA = [
+        [record for record in list_of_dicts if record.get('Type') == "Fonds d'investissement"]
+        for list_of_dicts in list
+    ]
+    seasonality_euronext_ema = [lst for lst in fondsSeasonalityListEMA if lst]
+    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_euronext_ebm=seasonality_euronext_ebm, seasonality_euronext_ema=seasonality_euronext_ema)
