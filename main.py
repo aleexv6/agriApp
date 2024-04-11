@@ -193,13 +193,19 @@ def cot():
     net_euronext_eco = net_euronext_eco[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
     net_euronext_ema = net_euronext_ema[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
 
+
     data_seasonality_euronext_ebm = seasonality_euronext(dfEuronextEBM)
     list = [df.to_dict(orient='records') for df in data_seasonality_euronext_ebm]
     fondsSeasonalityListEBM = [
         [record for record in list_of_dicts if record.get('Type') == "Fonds d'investissement"]
         for list_of_dicts in list
     ]
-    seasonality_euronext_ebm = [lst for lst in fondsSeasonalityListEBM if lst]
+    seasonality_fonds_euronext_ebm = [lst for lst in fondsSeasonalityListEBM if lst]
+    commSeasonalityListEBM = [
+        [record for record in list_of_dicts if record.get('Type') == "Entreprises commerciales"]
+        for list_of_dicts in list
+    ]
+    seasonality_comm_euronext_ebm = [lst for lst in commSeasonalityListEBM if lst]
 
     data_seasonality_euronext_ema = seasonality_euronext(dfEuronextEMA)
     list = [df.to_dict(orient='records') for df in data_seasonality_euronext_ema]
@@ -207,17 +213,34 @@ def cot():
         [record for record in list_of_dicts if record.get('Type') == "Fonds d'investissement"]
         for list_of_dicts in list
     ]
-    seasonality_euronext_ema = [lst for lst in fondsSeasonalityListEMA if lst]
+    seasonality_fonds_euronext_ema = [lst for lst in fondsSeasonalityListEMA if lst]
+    commSeasonalityListEMA = [
+        [record for record in list_of_dicts if record.get('Type') == "Entreprises commerciales"]
+        for list_of_dicts in list
+    ]
+    seasonality_comm_euronext_ema = [lst for lst in commSeasonalityListEMA if lst]
 
     data_seasonality_euronext_eco = seasonality_euronext(dfEuronextECO)
-    listEco = [dfEco.to_dict(orient='records') for dfEco in data_seasonality_euronext_eco]
+    list = [df.to_dict(orient='records') for df in data_seasonality_euronext_eco]
     fondsSeasonalityListECO = [
         [record for record in list_of_dicts if record.get('Type') == "Fonds d'investissement"]
-        for list_of_dicts in listEco
+        for list_of_dicts in list
     ]
-    
-    seasonality_euronext_eco = [lst for lst in fondsSeasonalityListECO if lst]
+    seasonality_fonds_euronext_eco = [lst for lst in fondsSeasonalityListECO if lst]
+    commSeasonalityListECO = [
+        [record for record in list_of_dicts if record.get('Type') == "Entreprises commerciales"]
+        for list_of_dicts in list
+    ]
+    seasonality_comm_euronext_eco = [lst for lst in commSeasonalityListECO if lst]
+
 
     df_variation_ebm = variation_euronext(dfEuronextEBM)
     df_variation_fonds_ebm = df_variation_ebm[df_variation_ebm['Type'] == "Fonds d'investissement"]
-    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_euronext_ebm=seasonality_euronext_ebm, seasonality_euronext_ema=seasonality_euronext_ema, seasonality_euronext_eco=seasonality_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'))
+
+    df_variation_ema = variation_euronext(dfEuronextEMA)
+    df_variation_fonds_ema = df_variation_ema[df_variation_ema['Type'] == "Fonds d'investissement"]
+
+    df_variation_eco = variation_euronext(dfEuronextECO)
+    df_variation_fonds_eco = df_variation_eco[df_variation_eco['Type'] == "Fonds d'investissement"]
+
+    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_fonds_euronext_ebm=seasonality_fonds_euronext_ebm, seasonality_comm_euronext_ebm=seasonality_comm_euronext_ebm, seasonality_fonds_euronext_ema=seasonality_fonds_euronext_ema, seasonality_comm_euronext_ema=seasonality_comm_euronext_ema, seasonality_fonds_euronext_eco=seasonality_fonds_euronext_eco, seasonality_comm_euronext_eco=seasonality_comm_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'), df_variation_fonds_eco=df_variation_fonds_eco.to_dict(orient='records'), df_variation_fonds_ema=df_variation_fonds_ema.to_dict(orient='records'))

@@ -197,7 +197,14 @@
                         </div>
                         <div class="card-body">
                             <div id="net_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
-                            <div id="seasonality_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div id="seasonality_fonds_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div id="seasonality_comm_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>                            
                             <div id="variation_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
                         </div>
                     </div>
@@ -208,7 +215,14 @@
                         </div>
                         <div class="card-body">
                             <div id="net_euronext_ema" class="mb-4" style="height: 60vh;"></div>
-                            <div id="seasonality_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div id="seasonality_fonds_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div id="seasonality_comm_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>
                             <div id="variation_euronext_ema" class="mb-4" style="height: 60vh;"></div>
                         </div>
                     </div>
@@ -219,7 +233,14 @@
                         </div>
                         <div class="card-body">
                             <div id="net_euronext_eco" class="mb-4" style="height: 60vh;"></div>
-                            <div id="seasonality_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div id="seasonality_fonds_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div id="seasonality_comm_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>
                             <div id="variation_euronext_eco" class="mb-4" style="height: 60vh;"></div>
                         </div>
                     </div>    
@@ -276,7 +297,8 @@
     <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
     <script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
-    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/vendor/jquery/jquery.min.js"></script>
+    <script src="../static/js/highcharts_theme.js"></script>
 
     <!-- Core plugin JavaScript-->
     <script src="../static/vendor/jquery-easing/jquery.easing.min.js"></script>
@@ -294,81 +316,123 @@
         var net_euronext_ebm = JSON.parse('{{ net_euronext_ebm | tojson }}');
         var net_euronext_ema = JSON.parse('{{ net_euronext_ema | tojson }}');
         var net_euronext_eco = JSON.parse('{{ net_euronext_eco | tojson }}');
-        var seasonality_euronext_ebm = JSON.parse('{{ seasonality_euronext_ebm | tojson }}');
-        var seasonality_euronext_ema = JSON.parse('{{ seasonality_euronext_ema | tojson }}');
-        var seasonality_euronext_eco = JSON.parse('{{ seasonality_euronext_eco | tojson }}');
+        var seasonality_fonds_euronext_ebm = JSON.parse('{{ seasonality_fonds_euronext_ebm | tojson }}');
+        var seasonality_comm_euronext_ebm = JSON.parse('{{ seasonality_comm_euronext_ebm | tojson }}');
+        var seasonality_fonds_euronext_ema = JSON.parse('{{ seasonality_fonds_euronext_ema | tojson }}');
+        var seasonality_comm_euronext_ema = JSON.parse('{{ seasonality_comm_euronext_ema | tojson }}');
+        var seasonality_fonds_euronext_eco = JSON.parse('{{ seasonality_fonds_euronext_eco | tojson }}');
+        var seasonality_comm_euronext_eco = JSON.parse('{{ seasonality_comm_euronext_eco | tojson }}');
         var variation_fonds_ebm = JSON.parse('{{ df_variation_fonds_ebm | tojson }}');
+        var variation_fonds_ema = JSON.parse('{{ df_variation_fonds_ema | tojson }}');
+        var variation_fonds_eco = JSON.parse('{{ df_variation_fonds_eco | tojson }}');
 
-        var seasonality_euronext_ebm_series = [];
-        var seasonality_euronext_ema_series = [];
-        var seasonality_euronext_eco_series = [];
+        var seasonality_fonds_euronext_ebm_series = [];
+        var seasonality_comm_euronext_ebm_series = [];
+        var seasonality_fonds_euronext_ema_series = [];
+        var seasonality_comm_euronext_ema_series = [];
+        var seasonality_fonds_euronext_eco_series = [];
+        var seasonality_comm_euronext_eco_series = [];
 
-        for (var i = 0; i < seasonality_euronext_ebm.length; i++) {
-            seasonality_euronext_ebm_series.push({
+        for (var i = 0; i < seasonality_fonds_euronext_ebm.length; i++) {
+            seasonality_fonds_euronext_ebm_series.push({
                 name: (2018 + i) + '-' + (2019 + i),
-                data: seasonality_euronext_ebm[i].map(function(item) {
+                data: seasonality_fonds_euronext_ebm[i].map(function(item) {
                     return [item['Date'], Math.round(item['Net'])];
                 })
             });
         }
-        for (var i = 0; i < seasonality_euronext_ema.length; i++) {
-            seasonality_euronext_ema_series.push({
+        for (var i = 0; i < seasonality_comm_euronext_ebm.length; i++) {
+            seasonality_comm_euronext_ebm_series.push({
                 name: (2018 + i) + '-' + (2019 + i),
-                data: seasonality_euronext_ema[i].map(function(item) {
+                data: seasonality_comm_euronext_ebm[i].map(function(item) {
                     return [item['Date'], Math.round(item['Net'])];
                 })
             });
         }
-        for (var i = 0; i < seasonality_euronext_eco.length; i++) {
-            seasonality_euronext_eco_series.push({
+        for (var i = 0; i < seasonality_fonds_euronext_ema.length; i++) {
+            seasonality_fonds_euronext_ema_series.push({
                 name: (2018 + i) + '-' + (2019 + i),
-                data: seasonality_euronext_eco[i].map(function(item) {
+                data: seasonality_fonds_euronext_ema[i].map(function(item) {
                     return [item['Date'], Math.round(item['Net'])];
                 })
             });
-        }        
+        }
+        for (var i = 0; i < seasonality_comm_euronext_ema.length; i++) {
+            seasonality_comm_euronext_ema_series.push({
+                name: (2018 + i) + '-' + (2019 + i),
+                data: seasonality_comm_euronext_ema[i].map(function(item) {
+                    return [item['Date'], Math.round(item['Net'])];
+                })
+            });
+        }
+        for (var i = 0; i < seasonality_fonds_euronext_eco.length; i++) {
+            seasonality_fonds_euronext_eco_series.push({
+                name: (2018 + i) + '-' + (2019 + i),
+                data: seasonality_fonds_euronext_eco[i].map(function(item) {
+                    return [item['Date'], Math.round(item['Net'])];
+                })
+            });
+        }
+        for (var i = 0; i < seasonality_comm_euronext_eco.length; i++) {
+            seasonality_comm_euronext_eco_series.push({
+                name: (2018 + i) + '-' + (2019 + i),
+                data: seasonality_comm_euronext_eco[i].map(function(item) {
+                    return [item['Date'], Math.round(item['Net'])];
+                })
+            });
+        }       
+
+        
 
         var fondsEBM = net_euronext_ebm.map(function(item) {
-            return [item['Date'], Math.round(item['FondNetPos'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['FondNetPos'])];
         });
         var commEBM = net_euronext_ebm.map(function(item) {
-            return [item['Date'], Math.round(item['CommerceNetPos'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['CommerceNetPos'])];
         });
         var creditEBM = net_euronext_ebm.map(function(item) {
-            return [item['Date'], Math.round(item['InvestAndCredit'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['InvestAndCredit'])];
         });
         var otherEBM = net_euronext_ebm.map(function(item) {
-            return [item['Date'], Math.round(item['OtherFinancial'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['OtherFinancial'])];
         });
 
         var fondsEMA = net_euronext_ema.map(function(item) {
-            return [item['Date'], Math.round(item['FondNetPos'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['FondNetPos'])];
         });
         var commEMA = net_euronext_ema.map(function(item) {
-            return [item['Date'], Math.round(item['CommerceNetPos'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['CommerceNetPos'])];
         });
         var creditEMA = net_euronext_ema.map(function(item) {
-            return [item['Date'], Math.round(item['InvestAndCredit'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['InvestAndCredit'])];
         });
         var otherEMA = net_euronext_ema.map(function(item) {
-            return [item['Date'], Math.round(item['OtherFinancial'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['OtherFinancial'])];
         });
 
         var fondsECO = net_euronext_eco.map(function(item) {
-            return [item['Date'], Math.round(item['FondNetPos'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['FondNetPos'])];
         });
         var commECO = net_euronext_eco.map(function(item) {
-            return [item['Date'], Math.round(item['CommerceNetPos'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['CommerceNetPos'])];
         });
         var creditECO = net_euronext_eco.map(function(item) {
-            return [item['Date'], Math.round(item['InvestAndCredit'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['InvestAndCredit'])];
         });
         var otherECO = net_euronext_eco.map(function(item) {
-            return [item['Date'], Math.round(item['OtherFinancial'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['OtherFinancial'])];
         });
 
         var variationFondsEBM = variation_fonds_ebm.map(function(item) {
-            return [item['Date'], Math.round(item['NetVar'])];
+            return [new Date(item['Date']).getTime(), Math.round(item['NetVar'])];
+        });
+
+        var variationFondsECO = variation_fonds_eco.map(function(item) {
+            return [new Date(item['Date']).getTime(), Math.round(item['NetVar'])];
+        });
+
+        var variationFondsEMA = variation_fonds_ema.map(function(item) {
+            return [new Date(item['Date']).getTime(), Math.round(item['NetVar'])];
         });
 
 
@@ -402,7 +466,11 @@
         }, {
             name: "Autres institutions financières",
             data: otherEBM
-        }]
+        }],
+
+        credits: {
+            enabled: false
+        }
         });
 
 
@@ -436,7 +504,11 @@
         }, {
             name: "Autres institutions financières",
             data: otherEMA
-        }]
+        }],
+
+        credits: {
+            enabled: false
+        }
         });
 
 
@@ -470,15 +542,19 @@
         }, {
             name: "Autres institutions financières",
             data: otherECO
-        }]
+        }],
+
+        credits: {
+            enabled: false
+        }
         });
 
-        Highcharts.chart('seasonality_euronext_ebm', {
+        Highcharts.chart('seasonality_fonds_euronext_ebm', {
         chart: {
             type: 'line'
         },
         title: {
-            text: 'Saisonnalité ' + seasonality_euronext_ebm[0][0]['Type']
+            text: 'Saisonnalité ' + seasonality_fonds_euronext_ebm[0][0]['Type']
         },
         xAxis: {
             title: {
@@ -491,15 +567,27 @@
                 text: 'Contrats'
             }
         },
-        series: seasonality_euronext_ebm_series
+        series: seasonality_fonds_euronext_ebm_series,
+
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
         });
 
-        Highcharts.chart('seasonality_euronext_ema', {
+        Highcharts.chart('seasonality_comm_euronext_ebm', {
         chart: {
             type: 'line'
         },
         title: {
-            text: 'Saisonnalité ' + seasonality_euronext_ema[0][0]['Type']
+            text: 'Saisonnalité ' + seasonality_comm_euronext_ebm[0][0]['Type']
         },
         xAxis: {
             title: {
@@ -512,15 +600,27 @@
                 text: 'Contrats'
             }
         },
-        series: seasonality_euronext_ema_series
+        series: seasonality_comm_euronext_ebm_series,
+
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
         });
 
-        Highcharts.chart('seasonality_euronext_eco', {
+        Highcharts.chart('seasonality_fonds_euronext_ema', {
         chart: {
             type: 'line'
         },
         title: {
-            text: 'Saisonnalité ' + seasonality_euronext_eco[0][0]['Type']
+            text: 'Saisonnalité ' + seasonality_fonds_euronext_ema[0][0]['Type']
         },
         xAxis: {
             title: {
@@ -533,21 +633,137 @@
                 text: 'Contrats'
             }
         },
-        series: seasonality_euronext_eco_series
+        series: seasonality_fonds_euronext_ema_series,
+
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('seasonality_comm_euronext_ema', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Saisonnalité ' + seasonality_comm_euronext_ema[0][0]['Type']
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Contrats'
+            }
+        },
+        series: seasonality_comm_euronext_ema_series,
+
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('seasonality_fonds_euronext_eco', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Saisonnalité ' + seasonality_fonds_euronext_eco[0][0]['Type']
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Contrats'
+            }
+        },
+        series: seasonality_fonds_euronext_eco_series,
+
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('seasonality_comm_euronext_eco', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Saisonnalité ' + seasonality_comm_euronext_eco[0][0]['Type']
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Contrats'
+            }
+        },
+        series: seasonality_comm_euronext_eco_series,
+
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
         });
 
         Highcharts.chart('variation_euronext_ebm', {
         chart: {
             type: 'histogram'
-        },
+        },        
         title: {
             text: 'Variation ' + variation_fonds_ebm[0]['Type']
         },
         xAxis: {
+            type: 'datetime',
             title: {
                 text: 'Day'
-            },
-            type: 'datetime'
+            }
+        },
+        tooltip: {
+            formatter: function (tooltip) {
+                return '<p style="font-size: 10px">' + new Intl.DateTimeFormat('fr-FR', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(this.x)) + '</p> <br>' + variation_fonds_ebm[0]['Type'] + ' : <b>' + this.y + '</b>'
+            }
         },
         yAxis: {
             title: {
@@ -557,7 +773,77 @@
         series: [{
             name: "Fonds d'investissement",
             data: variationFondsEBM,
-        }]
+        }],
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('variation_euronext_ema', {
+        chart: {
+            type: 'histogram'
+        },
+        title: {
+            text: 'Variation ' + variation_fonds_ema[0]['Type']
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        tooltip: {
+            formatter: function (tooltip) {
+                return '<p style="font-size: 10px">' + new Intl.DateTimeFormat('fr-FR', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(this.x)) + '</p> <br>' + variation_fonds_ebm[0]['Type'] + ' : <b>' + this.y + '</b>'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Contrats'
+            }
+        },
+        series: [{
+            name: "Fonds d'investissement",
+            data: variationFondsEMA,
+        }],
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('variation_euronext_eco', {
+        chart: {
+            type: 'histogram'
+        },
+        title: {
+            text: 'Variation ' + variation_fonds_eco[0]['Type']
+        },
+        xAxis: {
+            title: {
+                text: 'Day'
+            },
+            type: 'datetime'
+        },
+        tooltip: {
+            formatter: function (tooltip) {
+                return '<p style="font-size: 10px">' + new Intl.DateTimeFormat('fr-FR', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(this.x)) + '</p> <br>' + variation_fonds_ebm[0]['Type'] + ' : <b>' + this.y + '</b>'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Contrats'
+            }
+        },
+        series: [{
+            name: "Fonds d'investissement",
+            data: variationFondsECO,
+        }],
+
+        credits: {
+            enabled: false
+        }
         });
 
     </script>
