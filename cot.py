@@ -206,15 +206,19 @@ def seasonality_euronext(df):
     for i, act in enumerate(["Fonds d'investissement", "Entreprises commerciales", "Autres institutions financières", "Entreprises d'investissement et établissements de crédit"]):
         for year in years[:-1]:
             if df['Produit'][0] == "Corn / Mais":
-                year_data = df[(df.index >= pd.to_datetime(f"{year}-07-01")) & (df.index < pd.to_datetime(f"{year+1}-07-01"))]
+                year_data = df[(df.index >= pd.to_datetime(f"{year}-09-01")) & (df.index < pd.to_datetime(f"{year+1}-09-01"))]
                 year_data['Net'] = (year_data[act + " positions Long (Total)"] - year_data[act + " positions Short (Total)"]).sort_index()
                 year_data['Type'] = act
                 year_data = year_data.reset_index()
+                # year_data['Date'] = pd.to_datetime(year_data['Date'].map(lambda x: x.replace(year=2100)))
+                # mask = (year_data['Date'].dt.month >= 1) & (year_data['Date'].dt.month < 9)
             elif df['Produit'][0] == "Milling Wheat / Ble" or df['Produit'][0] == "Rapeseed / Colza":
                 year_data = df[(df.index >= pd.to_datetime(f"{year}-07-01")) & (df.index < pd.to_datetime(f"{year+1}-07-01"))]
                 year_data['Net'] = (year_data[act + " positions Long (Total)"] - year_data[act + " positions Short (Total)"]).sort_index()
                 year_data['Type'] = act
                 year_data = year_data.reset_index()
+                # year_data['Date'] = pd.to_datetime(year_data['Date'].map(lambda x: x.replace(year=2100)))
+                # mask = (year_data['Date'].dt.month >= 1) & (year_data['Date'].dt.month < 9)
             else:
                 print("Erreur dans l'attribution des dates")
             data.append(year_data[['Date', 'Net', 'Type']])

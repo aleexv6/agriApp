@@ -380,9 +380,7 @@
                     return [item['Date'], Math.round(item['Net'])];
                 })
             });
-        }       
-
-        
+        }        
 
         var fondsEBM = net_euronext_ebm.map(function(item) {
             return [new Date(item['Date']).getTime(), Math.round(item['FondNetPos'])];
@@ -557,10 +555,7 @@
             text: 'Saisonnalité ' + seasonality_fonds_euronext_ebm[0][0]['Type']
         },
         xAxis: {
-            title: {
-                text: 'Day'
-            },
-            type: 'datetime'
+            categories: seasonality_fonds_euronext_ebm_series[4].data.map(point => new Intl.DateTimeFormat("fr-FR", {day: "numeric",month: 'short'}).format(new Date(point[0])))
         },
         yAxis: {
             title: {
@@ -590,10 +585,7 @@
             text: 'Saisonnalité ' + seasonality_comm_euronext_ebm[0][0]['Type']
         },
         xAxis: {
-            title: {
-                text: 'Day'
-            },
-            type: 'datetime'
+            categories: seasonality_comm_euronext_ebm_series[4].data.map(point => new Intl.DateTimeFormat("fr-FR", {day: "numeric",month: 'short'}).format(new Date(point[0])))
         },
         yAxis: {
             title: {
@@ -623,10 +615,7 @@
             text: 'Saisonnalité ' + seasonality_fonds_euronext_ema[0][0]['Type']
         },
         xAxis: {
-            title: {
-                text: 'Day'
-            },
-            type: 'datetime'
+            categories: seasonality_fonds_euronext_ema_series[4].data.map(point => new Intl.DateTimeFormat("fr-FR", {day: "numeric",month: 'short'}).format(new Date(point[0])))
         },
         yAxis: {
             title: {
@@ -656,10 +645,7 @@
             text: 'Saisonnalité ' + seasonality_comm_euronext_ema[0][0]['Type']
         },
         xAxis: {
-            title: {
-                text: 'Day'
-            },
-            type: 'datetime'
+            categories: seasonality_comm_euronext_ema_series[4].data.map(point => new Intl.DateTimeFormat("fr-FR", {day: "numeric",month: 'short'}).format(new Date(point[0])))
         },
         yAxis: {
             title: {
@@ -689,10 +675,7 @@
             text: 'Saisonnalité ' + seasonality_fonds_euronext_eco[0][0]['Type']
         },
         xAxis: {
-            title: {
-                text: 'Day'
-            },
-            type: 'datetime'
+            categories: seasonality_fonds_euronext_eco_series[4].data.map(point => new Intl.DateTimeFormat("fr-FR", {day: "numeric",month: 'short'}).format(new Date(point[0])))
         },
         yAxis: {
             title: {
@@ -722,10 +705,7 @@
             text: 'Saisonnalité ' + seasonality_comm_euronext_eco[0][0]['Type']
         },
         xAxis: {
-            title: {
-                text: 'Day'
-            },
-            type: 'datetime'
+            categories: seasonality_comm_euronext_eco_series[4].data.map(point => new Intl.DateTimeFormat("fr-FR", {day: "numeric",month: 'short'}).format(new Date(point[0])))
         },
         yAxis: {
             title: {

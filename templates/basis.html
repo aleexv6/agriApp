@@ -80,6 +80,16 @@
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
+            <div class="sidebar-heading">
+                Data
+            </div>
+
+            <li class="nav-item">
+                <a class="nav-link" href="cot">
+                    <i class="far fa-chart-bar"></i>
+                    <span>COT</span></a>
+            </li>
+
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
@@ -259,6 +269,7 @@
     <!-- Bootstrap core JavaScript-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
@@ -368,7 +379,7 @@
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(result) {
-                    Highcharts.chart('myChartBase', {
+                    Highcharts.stockChart('myChartBase', {
                     chart: {
                         type: 'line'
                     },
@@ -389,7 +400,10 @@
                     series: [{
                         name: 'Basis',
                         data: result
-                    }]
+                    }],
+                    credits: {
+                        enabled: false
+                    }
                     });
                 }
             });
@@ -408,7 +422,7 @@
                 dataType: 'json',
                 success: function(result, data) {
                     console.log(data)
-                    Highcharts.chart('myChartBase', {
+                    Highcharts.stockChart('myChartBase', {
                     chart: {
                         type: 'line'
                     },
@@ -429,7 +443,10 @@
                     series: [{
                         name: 'Basis',
                         data: result
-                    }]
+                    }],
+                    credits: {
+                        enabled: false
+                    }
                     });
                 }
             });
