@@ -196,8 +196,33 @@
 
                 </nav>
                 <!-- End of Topbar -->
-                <div class="container-fluid">                        
+                <div class="container-fluid">   
+                    <div class="card shadow mb-4">
+                        <div class="card-header d-flex justify-content-between py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">EBM</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="curve_ebm" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
 
+                    <div class="card shadow mb-4">
+                        <div class="card-header d-flex justify-content-between py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">EMA</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="curve_ema" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header d-flex justify-content-between py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">ECO</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="curve_eco" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>    
                 </div>
                 <!-- /.container-fluid -->
             </div>
@@ -245,8 +270,14 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    
+    <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
+    <script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
-    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/vendor/jquery/jquery.min.js"></script>
+    <script src="../static/js/highcharts_theme.js"></script>
 
     <!-- Core plugin JavaScript-->
     <script src="../static/vendor/jquery-easing/jquery.easing.min.js"></script>
@@ -260,6 +291,136 @@
     <!-- Page level custom scripts -->
     <script src="../static/js/demo/chart-area-demo.js"></script>
     <script src="../static/js/demo/chart-pie-demo.js"></script>
+
+    <script>
+        var curve_ebm = JSON.parse('{{ curve_ebm | tojson }}');
+        var curve_ema = JSON.parse('{{ curve_ema | tojson }}');
+        var curve_eco = JSON.parse('{{ curve_eco | tojson }}');
+
+        var EBM = curve_ebm.map(function(item) {
+            return [item['Expiration'], item['Prix']];
+        });
+
+        var EMA = curve_ema.map(function(item) {
+            return [item['Expiration'], item['Prix']];
+        });
+
+        var ECO = curve_eco.map(function(item) {
+            return [item['Expiration'], item['Prix']];
+        });
+
+        Highcharts.chart('curve_ebm', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Curve ' + curve_ebm[0]['Ticker']
+        },
+        xAxis: {
+            title: {
+                text: 'Expiration'
+            },
+            categories : EBM.map(function(subArray) {
+                return subArray[0];
+            })
+        },
+        yAxis: {
+            title: {
+                text: 'Prix'
+            }
+        },
+        series: [{
+            name: "EBM",
+            data: EBM,
+        }],
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('curve_ema', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Curve ' + curve_ema[0]['Ticker']
+        },
+        xAxis: {
+            title: {
+                text: 'Expiration'
+            },
+            categories : EMA.map(function(subArray) {
+                return subArray[0];
+            })
+        },
+        yAxis: {
+            title: {
+                text: 'Prix'
+            }
+        },
+        series: [{
+            name: "EMA",
+            data: EMA,
+        }],
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('curve_eco', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Curve ' + curve_eco[0]['Ticker']
+        },
+        xAxis: {
+            title: {
+                text: 'Expiration'
+            },
+            categories : ECO.map(function(subArray) {
+                return subArray[0];
+            })
+        },
+        yAxis: {
+            title: {
+                text: 'Prix'
+            }
+        },
+        series: [{
+            name: "ECO",
+            data: ECO,
+        }],
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
+        });
+
+    </script>
 
 </body>
 

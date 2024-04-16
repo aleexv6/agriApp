@@ -22,6 +22,16 @@ cursorFutures = db.get_database_euronext().find({})
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
 productFutures = dfFutures['Ticker'].unique()
 
+def reformat_date(date):
+    month_to_number = {
+        "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
+        "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
+        "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12"
+    }
+    month = date[:3]
+    year = date[3:]
+    return f"20{year}-{month_to_number[month]}"
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -244,3 +254,23 @@ def cot():
     df_variation_fonds_eco = df_variation_eco[df_variation_eco['Type'] == "Fonds d'investissement"]
 
     return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_fonds_euronext_ebm=seasonality_fonds_euronext_ebm, seasonality_comm_euronext_ebm=seasonality_comm_euronext_ebm, seasonality_fonds_euronext_ema=seasonality_fonds_euronext_ema, seasonality_comm_euronext_ema=seasonality_comm_euronext_ema, seasonality_fonds_euronext_eco=seasonality_fonds_euronext_eco, seasonality_comm_euronext_eco=seasonality_comm_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'), df_variation_fonds_eco=df_variation_fonds_eco.to_dict(orient='records'), df_variation_fonds_ema=df_variation_fonds_ema.to_dict(orient='records'))
+
+@app.route("/futures_curve", methods=['GET', 'POST'])
+
+
+
+def curve():
+    df = dfFutures[dfFutures['Expired'] == False]
+    df = df[['Date', 'Ticker', 'Expiration', 'Prix']]
+    lastDfFuturesEBM = df[df['Ticker'] == 'EBM'].tail(5)
+    lastDfFuturesEBM['SortedExpi'] = lastDfFuturesEBM['Expiration'].apply(reformat_date)
+    lastDfFuturesEBM = lastDfFuturesEBM.sort_values(by='SortedExpi')
+    lastDfFuturesEMA = df[df['Ticker'] == 'EMA'].tail(5)
+    lastDfFuturesEMA['SortedExpi'] = lastDfFuturesEMA['Expiration'].apply(reformat_date)
+    lastDfFuturesEMA = lastDfFuturesEMA.sort_values(by='SortedExpi')
+    lastDfFuturesECO = df[df['Ticker'] == 'ECO'].tail(5)
+    lastDfFuturesECO['SortedExpi'] = lastDfFuturesECO['Expiration'].apply(reformat_date)
+    lastDfFuturesECO = lastDfFuturesECO.sort_values(by='SortedExpi')
+
+    
+    return render_template('curve.html', curve_ebm=lastDfFuturesEBM.to_dict(orient='records'), curve_ema=lastDfFuturesEMA.to_dict(orient='records'), curve_eco=lastDfFuturesECO.to_dict(orient='records'))
