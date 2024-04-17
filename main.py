@@ -30,7 +30,13 @@ def reformat_date(date):
     }
     month = date[:3]
     year = date[3:]
-    return f"20{year}-{month_to_number[month]}"
+    return f"20{year}-{month_to_number[month]}-10"
+
+def is_businnes_day(date):
+    while date.dayofweek >= 5 :
+         date = date + pd.Timedelta(days=1)
+    return date
+
 
 @app.route("/")
 def index():
@@ -182,7 +188,7 @@ def process_spread():
 
     return json_string
 
-@app.route("/cot", methods=['GET', 'POST'])
+@app.route("/cot")
 def cot():
     #for i in ['EBM', 'EMA', 'ECO']:
     dfEBM = get_cot_from_db_euronext('EBM')
@@ -255,10 +261,7 @@ def cot():
 
     return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_fonds_euronext_ebm=seasonality_fonds_euronext_ebm, seasonality_comm_euronext_ebm=seasonality_comm_euronext_ebm, seasonality_fonds_euronext_ema=seasonality_fonds_euronext_ema, seasonality_comm_euronext_ema=seasonality_comm_euronext_ema, seasonality_fonds_euronext_eco=seasonality_fonds_euronext_eco, seasonality_comm_euronext_eco=seasonality_comm_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'), df_variation_fonds_eco=df_variation_fonds_eco.to_dict(orient='records'), df_variation_fonds_ema=df_variation_fonds_ema.to_dict(orient='records'))
 
-@app.route("/futures_curve", methods=['GET', 'POST'])
-
-
-
+@app.route("/futures_curve")
 def curve():
     df = dfFutures[dfFutures['Expired'] == False]
     df = df[['Date', 'Ticker', 'Expiration', 'Prix']]
@@ -271,6 +274,29 @@ def curve():
     lastDfFuturesECO = df[df['Ticker'] == 'ECO'].tail(5)
     lastDfFuturesECO['SortedExpi'] = lastDfFuturesECO['Expiration'].apply(reformat_date)
     lastDfFuturesECO = lastDfFuturesECO.sort_values(by='SortedExpi')
-
     
     return render_template('curve.html', curve_ebm=lastDfFuturesEBM.to_dict(orient='records'), curve_ema=lastDfFuturesEMA.to_dict(orient='records'), curve_eco=lastDfFuturesECO.to_dict(orient='records'))
+
+@app.route("/saisonnalite")
+def saisonnalite():
+    data = []
+    df = dfFutures[dfFutures['Ticker'] == 'EBM']
+    df['FullExpi'] = pd.to_datetime(df['Expiration'].apply(reformat_date))
+    df['FullExpi'] = df['FullExpi'].apply(is_businnes_day)
+    df = df[['Date', 'Ticker', 'Expiration', 'Prix', 'Expired', 'FullExpi']]
+
+    for i, j in df.groupby(df['Date']):
+        j['Date_difference'] = abs(j['Date'] - j['FullExpi'])
+        closest_index = j['Date_difference'].idxmin()
+        closest_row = j.loc[closest_index]
+        data.append([closest_row['Date'], closest_row['Prix'], closest_row['FullExpi'], closest_row['Expiration']])
+    res = pd.DataFrame(data, columns=['Date', 'Prix', 'FullExpi', 'Expiration'])
+    res = res.set_index('Date')
+    res = res[res['Expiration'] == 'MAR24']
+    res["Percentage Change"] = res["Prix"].pct_change()
+    res["Year"] = res.index.year
+    yearly_cumulative_percentage_change = res.groupby("Year")["Percentage Change"].cumsum()
+
+    median_cumulative_percentage_change = yearly_cumulative_percentage_change.groupby(res.index.dayofyear).median()
+
+    return render_template('saisonnalite.html', data=median_cumulative_percentage_change.to_dict())
