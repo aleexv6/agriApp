@@ -300,3 +300,31 @@ def saisonnalite():
     median_cumulative_percentage_change = yearly_cumulative_percentage_change.groupby(res.index.dayofyear).median()
 
     return render_template('saisonnalite.html', data=median_cumulative_percentage_change.to_dict())
+
+@app.route("/production")
+def production():
+    dataEBM = []
+    dataEMA = []
+    dataECO = []
+    cursorProd = db.get_database_production().find({})
+    dfProd = pd.DataFrame(list(cursorProd)).sort_values(by='Date', ascending=True) 
+    dfEBM = dfProd[dfProd['ESPECES'] == 'Blé tendre']
+    for i, j in dfEBM.groupby('Date'):
+        max_collecte = j['TOTAL_COLLECTE'].max()
+        dataEBM.append(j[j['TOTAL_COLLECTE'] == max_collecte])
+    finalEBM = pd.concat(dataEBM).drop('_id', axis=1)
+
+    dfEMA = dfProd[dfProd['ESPECES'] == 'Maïs']
+    for i, j in dfEMA.groupby('Date'):
+        max_collecte = j['TOTAL_COLLECTE'].max()
+        dataEMA.append(j[j['TOTAL_COLLECTE'] == max_collecte])
+    finalEMA = pd.concat(dataEMA).drop('_id', axis=1)
+
+    dfECO = dfProd[dfProd['ESPECES'] == 'Colza']
+    for i, j in dfECO.groupby('Date'):
+        max_collecte = j['TOTAL_COLLECTE'].max()
+        dataECO.append(j[j['TOTAL_COLLECTE'] == max_collecte])
+    finalECO = pd.concat(dataECO).drop('_id', axis=1)
+
+
+    return render_template('production.html', dataEBM=finalEBM.to_dict(orient='records'), dataEMA=finalEMA.to_dict(orient='records'), dataECO=finalECO.to_dict(orient='records'))

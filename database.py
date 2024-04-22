@@ -11,6 +11,11 @@ def get_database_physical():
     client = MongoClient(CONNECTION_STRING)
     return client['agri_data']['physique']
 
+def get_database_production():
+    CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@146.59.157.18:27017/admin"
+    client = MongoClient(CONNECTION_STRING)
+    return client['agri_data']['production']
+
 def get_database():
     CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@146.59.157.18:27017/admin"
     client = MongoClient(CONNECTION_STRING)
