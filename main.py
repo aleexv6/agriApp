@@ -6,6 +6,8 @@ from bson import json_util
 import re
 from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
 import warnings
+import requests
+from datetime import datetime
 
 warnings.filterwarnings("ignore")
 
@@ -22,21 +24,55 @@ cursorFutures = db.get_database_euronext().find({})
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
 productFutures = dfFutures['Ticker'].unique()
 
-def reformat_date(date):
-    month_to_number = {
-        "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
-        "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
-        "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12"
-    }
-    month = date[:3]
-    year = date[3:]
-    return f"20{year}-{month_to_number[month]}-10"
+jours_feries = [
+    (1, 1),  # Nouvel An
+    (5, 1),  # Fête du Travail
+    (5, 8),  # Victoire des Alliés
+    (7, 14),  # Fête Nationale
+    (8, 15),  # Assomption
+    (11, 1),  # Toussaint
+    (11, 11),  # Armistice
+    (12, 25)  # Noël
+]
 
-def is_businnes_day(date):
-    while date.dayofweek >= 5 :
-         date = date + pd.Timedelta(days=1)
-    return date
+def est_jour_ferie(date):
+    # Vérifie si la date est un jour férié en France
+    return (date.month, date.day) in jours_feries
 
+def est_jour_ouvre(date):
+    # Vérifie si la date est un samedi ou un dimanche
+    return date.weekday() < 5
+
+def jour_ouvrable_francais(date):
+    # Compte le nombre de jours ouvrés français jusqu'à la date donnée
+    debut_annee = datetime(date.year, 1, 1)
+    jours_ouvrables = sum(1 for day in pd.date_range(debut_annee, date) if est_jour_ouvre(day) and not est_jour_ferie(day))
+    return jours_ouvrables
+
+# Fonction à appliquer sur la colonne des dates
+def jour_ouvrable_francais_apply(date):
+    return jour_ouvrable_francais(date.to_pydatetime())
+
+def get_fr_agr_mer_cotations():
+        url = 'https://visionet.franceagrimer.fr/Pages/OpenDocument.aspx?fileurl=SeriesChronologiques%2fproductions%20vegetales%2fgrandes%20cultures%2fcotations%2fSCR-COT-CER_FR-A23.xls&telechargersanscomptage=oui'
+        try:
+            r = requests.get(url)
+            r.raise_for_status()
+            with open("cotations.xls", "wb") as f:
+                f.write(r.content)
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading the file: {e}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+        dfBle = pd.read_excel('cotations.xls', sheet_name='cotations blé tendre')
+        dfBle['Date'] = pd.to_datetime(dfBle['Date'])
+        dfBlePalice = dfBle[['Date', 'Blé tendre Rendu Pallice Supérieur (A2)\nBase juillet']]
+        dfMais = pd.read_excel('cotations.xls', sheet_name='cotations maïs')
+        dfMais['Date'] = pd.to_datetime(dfMais['Date'])
+        dfMaisPalice = dfMais[['Date', 'Maïs\nFob Atlantique\nBase juillet']]
+        return dfBlePalice[1:], dfMaisPalice[1:]
 
 @app.route("/")
 def index():
@@ -279,27 +315,28 @@ def curve():
 
 @app.route("/saisonnalite")
 def saisonnalite():
-    data = []
-    df = dfFutures[dfFutures['Ticker'] == 'EBM']
-    df['FullExpi'] = pd.to_datetime(df['Expiration'].apply(reformat_date))
-    df['FullExpi'] = df['FullExpi'].apply(is_businnes_day)
-    df = df[['Date', 'Ticker', 'Expiration', 'Prix', 'Expired', 'FullExpi']]
+    dfBle, dfMais = get_fr_agr_mer_cotations()
+    dfBle = dfBle.rename(columns={'Blé tendre Rendu Pallice Supérieur (A2)\nBase juillet': 'Prix'})
+    dfBle = dfBle.dropna()
+    dfBle = dfBle[~(dfBle == 0).any(axis=1)]
+    dfBle = dfBle.drop_duplicates(subset=['Date'])
+    dfBle['JourOuvrableFrancais'] = dfBle['Date'].apply(jour_ouvrable_francais_apply)    
+    dfBle["Percentage Change"] = dfBle["Prix"].pct_change() * 100
+    dfBle["Year"] = dfBle['Date'].dt.year
+    yearly_cumulative_percentage_changeBle = dfBle.groupby("Year")["Percentage Change"].cumsum()
+    median_cumulative_percentage_changeBle = yearly_cumulative_percentage_changeBle.groupby(dfBle['JourOuvrableFrancais']).median()
 
-    for i, j in df.groupby(df['Date']):
-        j['Date_difference'] = abs(j['Date'] - j['FullExpi'])
-        closest_index = j['Date_difference'].idxmin()
-        closest_row = j.loc[closest_index]
-        data.append([closest_row['Date'], closest_row['Prix'], closest_row['FullExpi'], closest_row['Expiration']])
-    res = pd.DataFrame(data, columns=['Date', 'Prix', 'FullExpi', 'Expiration'])
-    res = res.set_index('Date')
-    res = res[res['Expiration'] == 'MAR24']
-    res["Percentage Change"] = res["Prix"].pct_change()
-    res["Year"] = res.index.year
-    yearly_cumulative_percentage_change = res.groupby("Year")["Percentage Change"].cumsum()
-
-    median_cumulative_percentage_change = yearly_cumulative_percentage_change.groupby(res.index.dayofyear).median()
-
-    return render_template('saisonnalite.html', data=median_cumulative_percentage_change.to_dict())
+    dfMais = dfMais.rename(columns={'Maïs\nFob Atlantique\nBase juillet': 'Prix'})
+    dfMais = dfMais.dropna()
+    dfMais = dfMais[~(dfMais == 0).any(axis=1)]
+    dfMais = dfMais[dfMais['Prix'] != 'Trêve des confiseurs']
+    dfMais = dfMais.drop_duplicates(subset=['Date'])
+    dfMais['JourOuvrableFrancais'] = dfMais['Date'].apply(jour_ouvrable_francais_apply)    
+    dfMais["Percentage Change"] = dfMais["Prix"].pct_change() * 100
+    dfMais["Year"] = dfMais['Date'].dt.year
+    yearly_cumulative_percentage_changeMais = dfMais.groupby("Year")["Percentage Change"].cumsum()
+    median_cumulative_percentage_changeMais = yearly_cumulative_percentage_changeMais.groupby(dfMais['JourOuvrableFrancais']).median()
+    return render_template('saisonnalite.html', dataBle=median_cumulative_percentage_changeBle[:247].to_dict(), dataMais=median_cumulative_percentage_changeMais[:247].to_dict())
 
 @app.route("/production")
 def production():
@@ -325,6 +362,5 @@ def production():
         max_collecte = j['TOTAL_COLLECTE'].max()
         dataECO.append(j[j['TOTAL_COLLECTE'] == max_collecte])
     finalECO = pd.concat(dataECO).drop('_id', axis=1)
-
 
     return render_template('production.html', dataEBM=finalEBM.to_dict(orient='records'), dataEMA=finalEMA.to_dict(orient='records'), dataECO=finalECO.to_dict(orient='records'))

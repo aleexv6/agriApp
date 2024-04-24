@@ -217,18 +217,9 @@
                             <h6 class="m-0 font-weight-bold text-primary">EMA</h6>
                         </div>
                         <div class="card-body">
-                            <div id="curve_ema" class="mb-4" style="height: 60vh;"></div>
+                            <div id="seasonnalite_ema" class="mb-4" style="height: 60vh;"></div>
                         </div>
-                    </div>
-
-                    <div class="card shadow mb-4">
-                        <div class="card-header d-flex justify-content-between py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">ECO</h6>
-                        </div>
-                        <div class="card-body">
-                            <div id="curve_eco" class="mb-4" style="height: 60vh;"></div>
-                        </div>
-                    </div>    
+                    </div>   
                 </div>
                 <!-- /.container-fluid -->
             </div>
@@ -299,33 +290,70 @@
     <script src="../static/js/demo/chart-pie-demo.js"></script>
 
     <script>
-        var rawData = JSON.parse('{{ data | tojson }}');
-        const categories = Object.keys(rawData).map(Number);
-        const data = Object.values(rawData);
-
-        alert('Logic done, but not enough historical data yet (since 2021)')
+        var dataBle = JSON.parse('{{ dataBle | tojson }}');
+        var dataMais = JSON.parse('{{ dataMais | tojson }}');
+        console.log(dataMais)
+        const categoriesBle = Object.keys(dataBle).map(Number);
+        const dataBleT = Object.values(dataBle);
+        const categoriesMais = Object.keys(dataMais).map(Number);
+        const dataMaisT = Object.values(dataMais);
 
         Highcharts.chart('seasonnalite_ebm', {
         chart: {
             type: 'line'
         },
         title: {
-            text: 'Seasonnalite '
+            text: 'Seasonnalite Blé tendre Physique Rendu La Pallice (2003-2023)'
         },
         xAxis: {
-            categories: categories,
+            categories: categoriesBle,
             title: {
-                text: 'Day of Year'
+                text: 'Business day of year'
             }
         },
         yAxis: {
             title: {
-                text: 'Prix'
+                text: 'Cumulative % change'
             }
         },
         series: [{
-            // name: "Median Daily Cumulative Change %",
-            // data: data,
+            name: "Median Daily Cumulative Change %",
+            data: dataBleT,
+        }],
+        plotOptions: {
+            series: {
+                marker: {
+                enabled: false
+                }
+            }
+        },
+
+        credits: {
+            enabled: false
+        }
+        });
+
+        Highcharts.chart('seasonnalite_ema', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Seasonnalite Mais Physique FOB Atlantique (2007-2023)'
+        },
+        xAxis: {
+            categories: categoriesMais,
+            title: {
+                text: 'Business day of year'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Cumulative % change'
+            }
+        },
+        series: [{
+            name: "Median Daily Cumulative Change %",
+            data: dataMaisT,
         }],
         plotOptions: {
             series: {
