@@ -35,6 +35,16 @@ jours_feries = [
     (12, 25)  # Noël
 ]
 
+def reformat_date(date):
+    month_to_number = {
+        "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
+        "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
+        "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12"
+    }
+    month = date[:3]
+    year = date[3:]
+    return f"20{year}-{month_to_number[month]}-10"
+
 def est_jour_ferie(date):
     # Vérifie si la date est un jour férié en France
     return (date.month, date.day) in jours_feries
@@ -345,6 +355,7 @@ def production():
     dataECO = []
     cursorProd = db.get_database_production().find({})
     dfProd = pd.DataFrame(list(cursorProd)).sort_values(by='Date', ascending=True) 
+    dfProd = dfProd.drop('Expired', axis=1)
     dfEBM = dfProd[dfProd['ESPECES'] == 'Blé tendre']
     for i, j in dfEBM.groupby('Date'):
         max_collecte = j['TOTAL_COLLECTE'].max()
@@ -362,5 +373,4 @@ def production():
         max_collecte = j['TOTAL_COLLECTE'].max()
         dataECO.append(j[j['TOTAL_COLLECTE'] == max_collecte])
     finalECO = pd.concat(dataECO).drop('_id', axis=1)
-
     return render_template('production.html', dataEBM=finalEBM.to_dict(orient='records'), dataEMA=finalEMA.to_dict(orient='records'), dataECO=finalECO.to_dict(orient='records'))

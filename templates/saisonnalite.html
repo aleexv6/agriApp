@@ -97,7 +97,13 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="saisonnalite.html">
+                <a class="nav-link" href="production">
+                    <i class="far fa-chart-bar"></i>
+                    <span>Production</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="saisonnalite">
                     <i class="far fa-chart-bar"></i>
                     <span>Saisonnalité</span></a>
             </li>
@@ -290,6 +296,7 @@
     <script src="../static/js/demo/chart-pie-demo.js"></script>
 
     <script>
+        alert('Besoin de meilleurs data pour cette section.')
         var dataBle = JSON.parse('{{ dataBle | tojson }}');
         var dataMais = JSON.parse('{{ dataMais | tojson }}');
         console.log(dataMais)
