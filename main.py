@@ -374,3 +374,36 @@ def production():
         dataECO.append(j[j['TOTAL_COLLECTE'] == max_collecte])
     finalECO = pd.concat(dataECO).drop('_id', axis=1)
     return render_template('production.html', dataEBM=finalEBM.to_dict(orient='records'), dataEMA=finalEMA.to_dict(orient='records'), dataECO=finalECO.to_dict(orient='records'))
+
+@app.route("/developpement")
+def developpement():
+    
+    return render_template('developpement.html')
+
+@app.route('/process_dev', methods=['POST', 'GET'])
+def process_dev():
+    if request.method == "POST":
+        data = request.get_json()
+        dates = data['Marketing_year'].split('_')
+        int_dates = [int(year) for year in dates]
+    cursorDev = db.get_database_dev().find({})
+    dfDev = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
+    dfDev['Date'] = pd.to_datetime(dfDev['Date'])
+    dfDev = dfDev[dfDev['Date'].dt.year.isin(int_dates)]
+    dfDev = dfDev.drop('_id', axis=1)
+    dfDevBleTendre = dfDev[dfDev['Produit'] == 'Ble tendre']
+    bleTendreMYStart = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[0]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+    bleTendreMYEnd = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[1]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+    dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreMYStart) & (dfDevBleTendre['Date'] <= bleTendreMYEnd)]
+
+    dfDevMais = dfDev[dfDev['Produit'] == 'Mais']
+    MaisMYStart = dfDevMais[(dfDevMais['Date'].dt.year == int_dates[0]) & (dfDevMais['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+    MaisMYEnd = dfDevMais[(dfDevMais['Date'].dt.year == int_dates[1]) & (dfDevMais['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+    dfMaisMY = dfDevMais[(dfDevMais['Date'] > MaisMYStart) & (dfDevMais['Date'] <= MaisMYEnd)]
+
+    dfDevBleDur = dfDev[dfDev['Produit'] == 'Ble dur']
+    bleDurMYStart = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[0]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+    bleDurMYEnd = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[1]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+    dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'] <= bleDurMYEnd)]
+    print(dfBleTendreMY[['Date', 'Produit', 'Developpement', 'Moyenne France']])
+    return data
