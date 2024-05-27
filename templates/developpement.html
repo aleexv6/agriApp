@@ -326,7 +326,10 @@
                 url: "/process_dev",
                 data: JSON.stringify({"Marketing_year": document.getElementById("market_year_selector").value}),
                 contentType: "application/json",
-                dataType: 'json'
+                dataType: 'json',
+                success: function(tendre, mais){
+                    console.log(tendre, mais)
+                }
             });
         }
 

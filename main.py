@@ -1,7 +1,6 @@
 from flask import Flask, render_template, url_for, request
 import database as db
 import pandas as pd
-from highcharts_core import highcharts
 from bson import json_util
 import re
 from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
@@ -190,7 +189,6 @@ def process_spread():
             merged = pd.merge(merged, df3, on='Date', how='inner')
             merged = merged.rename(columns={'Prix':'Prix3'})
             fmerged = pd.merge(merged, df4, on='Date', how='inner')
-            print(fmerged.columns)
             fmerged['Spread'] = fmerged['Prix1'] - fmerged['Prix2'] - fmerged['Prix3'] + fmerged['Prix']
             json_data = [[row['Date'], row['Spread']] for _, row in fmerged.iterrows()]
             json_string = pd.Series(json_data).to_json(orient='values')
@@ -405,5 +403,5 @@ def process_dev():
     bleDurMYStart = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[0]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
     bleDurMYEnd = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[1]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
     dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'] <= bleDurMYEnd)]
-    print(dfBleTendreMY[['Date', 'Produit', 'Developpement', 'Moyenne France']])
-    return data
+    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
+    return dfBleTendreMY.to_json(orient='values'), dfMaisMY.to_json(orient='values')
