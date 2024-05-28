@@ -220,6 +220,9 @@
                         <select name="market_year" class="custom-select mr-4" id="market_year_selector">
                             <option value='2019_2020' >2019/2020</option>
                             <option value='2020_2021' >2020/2021</option>
+                            <option value='2021_2022' >2021/2022</option>
+                            <option value='2022_2023' >2022/2023</option>
+                            <option value='2023_2024' >2023/2024</option>
                         </select>
                     </form>
                     <div class="card shadow mb-4">
@@ -227,7 +230,7 @@
                             <h6 class="m-0 font-weight-bold text-primary">EBM</h6>
                         </div>
                         <div class="card-body">
-                            <div id="curve_ebm" class="mb-4" style="height: 60vh;"></div>
+                            <div id="devEBM" class="mb-4" style="height: 60vh;"></div>
                         </div>
                     </div>
 
@@ -236,7 +239,7 @@
                             <h6 class="m-0 font-weight-bold text-primary">EMA</h6>
                         </div>
                         <div class="card-body">
-                            <div id="curve_ema" class="mb-4" style="height: 60vh;"></div>
+                            <div id="devEMA" class="mb-4" style="height: 60vh;"></div>
                         </div>
                     </div>
 
@@ -245,7 +248,7 @@
                             <h6 class="m-0 font-weight-bold text-primary">EDW</h6>
                         </div>
                         <div class="card-body">
-                            <div id="curve_ema" class="mb-4" style="height: 60vh;"></div>
+                            <div id="devEDW" class="mb-4" style="height: 60vh;"></div>
                         </div>
                     </div>
                 </div>
@@ -318,6 +321,18 @@
     <script src="../static/js/demo/chart-pie-demo.js"></script>
 
     <script>
+        function getFirstAndLastValues(lists) {
+            return lists.map(sublist => {
+                if (sublist.length === 0) {
+                return []; // Return an empty array if the sublist is empty
+                }
+                if (sublist.length === 1) {
+                return [sublist[0]]; // Return the single element if the sublist has only one element
+                }
+                return [sublist[0], sublist[sublist.length - 1]];
+            });
+        };
+
         document.getElementById("market_year_selector").addEventListener("change", handleSelectChange);
         handleSelectChange()
         function handleSelectChange() {
@@ -327,8 +342,183 @@
                 data: JSON.stringify({"Marketing_year": document.getElementById("market_year_selector").value}),
                 contentType: "application/json",
                 dataType: 'json',
-                success: function(tendre, mais){
-                    console.log(tendre, mais)
+                success: function(data, success){
+                    let bleTendreSemis = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Semis');
+                    let bleTendreLevee = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Levee');
+                    let bleTendreDebutT = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Debut Tallage');
+                    let bleTendreEpi1cm = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Epi 1cm');
+                    let bleTendre2noeuds = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === '2 noeuds');
+                    let bleTendreEpiaison = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Epiaison');
+                    let bleTendreRecolte = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Recolte');
+
+                    Highcharts.chart('devEBM', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Ble tendre developpement (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Semis',
+                        data: getFirstAndLastValues(bleTendreSemis)
+                    },
+                    {
+                        name: 'Levee',
+                        data: getFirstAndLastValues(bleTendreLevee)
+                    },
+                    {
+                        name: 'Debut Tallage',
+                        data: getFirstAndLastValues(bleTendreDebutT)
+                    },
+                    {
+                        name: 'Epi 1 cm',
+                        data: getFirstAndLastValues(bleTendreEpi1cm)
+                    },
+                    {
+                        name: '2 noeuds',
+                        data: getFirstAndLastValues(bleTendre2noeuds)
+                    },
+                    {
+                        name: 'Epiaison',
+                        data: getFirstAndLastValues(bleTendreEpiaison)
+                    },
+                    {
+                        name: 'Recolte',
+                        data: getFirstAndLastValues(bleTendreRecolte)
+                    },
+                    
+                    ],
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    let bleDurSemis = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Semis');
+                    let bleDurLevee = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Levee');
+                    let bleDurDebutT = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Debut Tallage');
+                    let bleDurEpi1cm = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Epi 1cm');
+                    let bleDur2noeuds = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === '2 noeuds');
+                    let bleDurEpiaison = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Epiaison');
+                    let bleDurRecolte = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Recolte');
+
+                    Highcharts.chart('devEDW', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Ble dur developpement (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Semis',
+                        data: getFirstAndLastValues(bleDurSemis)
+                    },
+                    {
+                        name: 'Levee',
+                        data: getFirstAndLastValues(bleDurLevee)
+                    },
+                    {
+                        name: 'Debut Tallage',
+                        data: getFirstAndLastValues(bleDurDebutT)
+                    },
+                    {
+                        name: 'Epi 1 cm',
+                        data: getFirstAndLastValues(bleDurEpi1cm)
+                    },
+                    {
+                        name: '2 noeuds',
+                        data: getFirstAndLastValues(bleDur2noeuds)
+                    },
+                    {
+                        name: 'Epiaison',
+                        data: getFirstAndLastValues(bleDurEpiaison)
+                    },
+                    {
+                        name: 'Recolte',
+                        data: getFirstAndLastValues(bleDurRecolte)
+                    },
+                    
+                    ],
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    let maisSemis = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === 'Semis');
+                    let maisLevee = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === 'Levee');
+                    let mais68Feuilles = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === '6-8 feuilles visibles');
+                    let maisFlorFem = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === 'Floraison femelle');
+                    let maisHum50 = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === 'Humidite du grain 50%');
+                    let maisRecolte = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === 'Recolte');
+
+                    Highcharts.chart('devEMA', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Mais developpement (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Semis',
+                        data: getFirstAndLastValues(maisSemis)
+                    },
+                    {
+                        name: 'Levee',
+                        data: getFirstAndLastValues(maisLevee)
+                    },
+                    {
+                        name: '6/8 feuilles visibles',
+                        data: getFirstAndLastValues(mais68Feuilles)
+                    },
+                    {
+                        name: 'Floraison femelle',
+                        data: getFirstAndLastValues(maisFlorFem)
+                    },
+                    {
+                        name: 'Humidité du grain 50%',
+                        data: getFirstAndLastValues(maisHum50)
+                    },
+                    {
+                        name: 'Recolte',
+                        data: getFirstAndLastValues(maisRecolte)
+                    }                  
+                    ],
+                    credits: {
+                        enabled: false
+                    }
+                    });
                 }
             });
         }

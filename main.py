@@ -386,9 +386,10 @@ def process_dev():
         int_dates = [int(year) for year in dates]
     cursorDev = db.get_database_dev().find({})
     dfDev = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
+    dfDev = dfDev.drop('_id', axis=1)
     dfDev['Date'] = pd.to_datetime(dfDev['Date'])
     dfDev = dfDev[dfDev['Date'].dt.year.isin(int_dates)]
-    dfDev = dfDev.drop('_id', axis=1)
+    
     dfDevBleTendre = dfDev[dfDev['Produit'] == 'Ble tendre']
     bleTendreMYStart = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[0]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
     bleTendreMYEnd = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[1]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
@@ -404,4 +405,5 @@ def process_dev():
     bleDurMYEnd = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[1]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
     dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'] <= bleDurMYEnd)]
     df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
-    return dfBleTendreMY.to_json(orient='values'), dfMaisMY.to_json(orient='values')
+    df['Moyenne France'] = df['Moyenne France'].astype(float)
+    return df[['Date', 'Produit', 'Developpement', 'Moyenne France']].to_json(orient='values')
