@@ -389,21 +389,31 @@ def process_dev():
     dfDev = dfDev.drop('_id', axis=1)
     dfDev['Date'] = pd.to_datetime(dfDev['Date'])
     dfDev = dfDev[dfDev['Date'].dt.year.isin(int_dates)]
-    
+
     dfDevBleTendre = dfDev[dfDev['Produit'] == 'Ble tendre']
     bleTendreMYStart = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[0]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    bleTendreMYEnd = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[1]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreMYStart) & (dfDevBleTendre['Date'] <= bleTendreMYEnd)]
+    if int_dates[1] == datetime.now().year:
+        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreMYStart) & (dfDevBleTendre['Date'].dt.year <= datetime.now().year)]
+    else:
+        bleTendreMYEnd = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[1]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreMYStart) & (dfDevBleTendre['Date'] <= bleTendreMYEnd)]
 
     dfDevMais = dfDev[dfDev['Produit'] == 'Mais']
     MaisMYStart = dfDevMais[(dfDevMais['Date'].dt.year == int_dates[0]) & (dfDevMais['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    MaisMYEnd = dfDevMais[(dfDevMais['Date'].dt.year == int_dates[1]) & (dfDevMais['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    dfMaisMY = dfDevMais[(dfDevMais['Date'] > MaisMYStart) & (dfDevMais['Date'] <= MaisMYEnd)]
+    if int_dates[1] == datetime.now().year:
+        dfMaisMY = dfDevMais[(dfDevMais['Date'] > MaisMYStart) & (dfDevMais['Date'].dt.year <= datetime.now().year)]
+    else:
+        MaisMYEnd = dfDevMais[(dfDevMais['Date'].dt.year == int_dates[1]) & (dfDevMais['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+        dfMaisMY = dfDevMais[(dfDevMais['Date'] > MaisMYStart) & (dfDevMais['Date']<= MaisMYEnd)]
 
     dfDevBleDur = dfDev[dfDev['Produit'] == 'Ble dur']
     bleDurMYStart = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[0]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    bleDurMYEnd = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[1]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'] <= bleDurMYEnd)]
+    if int_dates[1] == datetime.now().year: 
+        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'].dt.year <= datetime.now().year)]
+    else:
+        bleDurMYEnd = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[1]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'] <= bleDurMYEnd)]
+        
     df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
     df['Moyenne France'] = df['Moyenne France'].astype(float)
     return df[['Date', 'Produit', 'Developpement', 'Moyenne France']].to_json(orient='values')
