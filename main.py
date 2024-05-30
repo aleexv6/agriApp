@@ -7,6 +7,7 @@ from cot import format_data_euronext, net_position_euronext, get_cot_from_db_eur
 import warnings
 import requests
 from datetime import datetime
+import numpy as np
 
 warnings.filterwarnings("ignore")
 
@@ -388,6 +389,8 @@ def process_dev():
     dfDev = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
     dfDev = dfDev.drop('_id', axis=1)
     dfDev['Date'] = pd.to_datetime(dfDev['Date'])
+    dfDev['Week'] = dfDev['Date'].apply(lambda date: date.isocalendar().week if date.weekday() != 0 else date.isocalendar().week - 1)
+    dfMoy = dfDev
     dfDev = dfDev[dfDev['Date'].dt.year.isin(int_dates)]
 
     dfDevBleTendre = dfDev[dfDev['Produit'] == 'Ble tendre']
@@ -416,4 +419,16 @@ def process_dev():
         
     df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
     df['Moyenne France'] = df['Moyenne France'].astype(float)
-    return df[['Date', 'Produit', 'Developpement', 'Moyenne France']].to_json(orient='values')
+    
+    dfMoy = dfMoy.reset_index()
+    dfMoy['Moyenne France'] = dfMoy['Moyenne France'].astype(float)
+    dfMoy = dfMoy[['Date', 'Produit', 'Developpement', 'Moyenne France']]
+    dfMoy['Week'] = dfMoy['Date'].apply(lambda date: date.isocalendar().week if date.weekday() != 0 else date.isocalendar().week - 1)
+
+    aggregations = dfMoy.groupby(['Produit', 'Developpement', 'Week'])['Moyenne France'].agg(
+        Moyenne_Moyenne_France='mean',
+        Maximum='max',
+        Minimum='min'
+    ).reset_index()
+    merged = pd.merge(df, aggregations, on=['Produit', 'Developpement', 'Week'], how='inner')
+    return merged[['Date', 'Produit', 'Developpement', 'Week', 'Moyenne France', 'Moyenne_Moyenne_France', 'Minimum', 'Maximum']].to_json(orient='values')

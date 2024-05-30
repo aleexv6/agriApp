@@ -227,28 +227,101 @@
                     </form>
                     <div class="card shadow mb-4">
                         <div class="card-header d-flex justify-content-between py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">EBM</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Blé tendre</h6>
                         </div>
                         <div class="card-body">
-                            <div id="devEBM" class="mb-4" style="height: 60vh;"></div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEBMSemis" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEBMLevee" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEBMDebutT" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEBMEpi1cm" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEBM2noeuds" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEBMEpiaison" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEBMRecolte" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>                            
                         </div>
                     </div>
 
                     <div class="card shadow mb-4">
                         <div class="card-header d-flex justify-content-between py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">EMA</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Maïs</h6>
                         </div>
                         <div class="card-body">
-                            <div id="devEMA" class="mb-4" style="height: 60vh;"></div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEMASemis" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEMALevee" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEMA68Feuilles" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEMAFloraison" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEMAHumidite" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEMARecolte" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>                            
                         </div>
                     </div>
 
                     <div class="card shadow mb-4">
                         <div class="card-header d-flex justify-content-between py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">EDW</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Blé dur</h6>
                         </div>
                         <div class="card-body">
-                            <div id="devEDW" class="mb-4" style="height: 60vh;"></div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEDWSemis" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEDWLevee" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEDWDebutT" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEDWEpi1cm" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEDW2noeuds" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div id="devEDWEpiaison" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div id="devEDWRecolte" class="mb-4" style="height: 60vh;"></div>
+                                </div>
+                            </div>                            
                         </div>
                     </div>
                 </div>
@@ -303,6 +376,8 @@
     
     <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
     <script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
+    <script src="https://code.highcharts.com/modules/arearange.js"></script>
+    <script src="http://code.highcharts.com/stock/highcharts-more.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/js/highcharts_theme.js"></script>
@@ -321,7 +396,7 @@
     <script src="../static/js/demo/chart-pie-demo.js"></script>
 
     <script>
-        function getFirstAndLastValues(lists) {
+        function getDateAndMoyenneFrance(lists) {
             return lists.map(sublist => {
                 if (sublist.length === 0) {
                 return []; // Return an empty array if the sublist is empty
@@ -329,7 +404,29 @@
                 if (sublist.length === 1) {
                 return [sublist[0]]; // Return the single element if the sublist has only one element
                 }
-                return [sublist[0], sublist[sublist.length - 1]];
+                return [sublist[0], sublist[sublist.length - 4]];
+            });
+        };
+        function getDateAndMoyenneMoyenneFrance(lists) {
+            return lists.map(sublist => {
+                if (sublist.length === 0) {
+                return []; // Return an empty array if the sublist is empty
+                }
+                if (sublist.length === 1) {
+                return [sublist[0]]; // Return the single element if the sublist has only one element
+                }
+                return [sublist[0], sublist[sublist.length - 3]];
+            });
+        };
+        function getDateAndAreaMinMax(lists) {
+            return lists.map(sublist => {
+                if (sublist.length === 0) {
+                return []; // Return an empty array if the sublist is empty
+                }
+                if (sublist.length === 1) {
+                return [sublist[0]]; // Return the single element if the sublist has only one element
+                }
+                return [sublist[0], sublist[sublist.length - 2], sublist[sublist.length - 1]];
             });
         };
 
@@ -351,12 +448,12 @@
                     let bleTendreEpiaison = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Epiaison');
                     let bleTendreRecolte = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Recolte');
 
-                    Highcharts.chart('devEBM', {
+                    Highcharts.chart('devEBMSemis', {
                     chart: {
                         type: 'line'
                     },
                     title: {
-                        text: 'Ble tendre developpement (Moyenne France)'
+                        text: 'Semis (Moyenne France)'
                     },
                     xAxis: {
                         title: {
@@ -371,34 +468,310 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: getFirstAndLastValues(bleTendreSemis)
+                        data: getDateAndMoyenneFrance(bleTendreSemis)
                     },
                     {
-                        name: 'Levee',
-                        data: getFirstAndLastValues(bleTendreLevee)
+                        name: 'Semis Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleTendreSemis),
+                        color: '#000000'
                     },
                     {
-                        name: 'Debut Tallage',
-                        data: getFirstAndLastValues(bleTendreDebutT)
-                    },
-                    {
-                        name: 'Epi 1 cm',
-                        data: getFirstAndLastValues(bleTendreEpi1cm)
-                    },
-                    {
-                        name: '2 noeuds',
-                        data: getFirstAndLastValues(bleTendre2noeuds)
-                    },
-                    {
-                        name: 'Epiaison',
-                        data: getFirstAndLastValues(bleTendreEpiaison)
-                    },
-                    {
-                        name: 'Recolte',
-                        data: getFirstAndLastValues(bleTendreRecolte)
-                    },
-                    
+                        name: 'Semis Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleTendreSemis),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
                     ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEBMLevee', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Levée (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Levée',
+                        data: getDateAndMoyenneFrance(bleTendreLevee)
+                    },
+                    {
+                        name: 'Levée Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleTendreLevee),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Levée Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleTendreLevee),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEBMDebutT', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Debut Tallage (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Debut Tallage',
+                        data: getDateAndMoyenneFrance(bleTendreDebutT)
+                    },
+                    {
+                        name: 'Debut Tallage Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleTendreDebutT),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Debut Tallage Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleTendreDebutT),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEBMEpi1cm', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Epi 1 cm (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Epi 1cm',
+                        data: getDateAndMoyenneFrance(bleTendreEpi1cm)
+                    },
+                    {
+                        name: 'Epi 1cm Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleTendreEpi1cm),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Epi 1cm Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleTendreEpi1cm),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEBM2noeuds', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: '2 noeuds (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: '2 noeuds',
+                        data: getDateAndMoyenneFrance(bleTendre2noeuds)
+                    },
+                    {
+                        name: '2 noeuds Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleTendre2noeuds),
+                        color: '#000000'
+                    },
+                    {
+                        name: '2 noeuds Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleTendre2noeuds),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEBMEpiaison', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Epiaison (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Epiaison',
+                        data: getDateAndMoyenneFrance(bleTendreEpiaison)
+                    },
+                    {
+                        name: 'Epiaison Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleTendreEpiaison),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Epiaison Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleTendreEpiaison),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEBMRecolte', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Recolte (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Recolte',
+                        data: getDateAndMoyenneFrance(bleTendreRecolte)
+                    },
+                    {
+                        name: 'Recolte Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleTendreRecolte),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Recolte Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleTendreRecolte),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
                     credits: {
                         enabled: false
                     }
@@ -412,12 +785,12 @@
                     let bleDurEpiaison = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Epiaison');
                     let bleDurRecolte = data.filter(subArray => subArray[1] === 'Ble dur' && subArray[2] === 'Recolte');
 
-                    Highcharts.chart('devEDW', {
+                    Highcharts.chart('devEDWSemis', {
                     chart: {
                         type: 'line'
                     },
                     title: {
-                        text: 'Ble dur developpement (Moyenne France)'
+                        text: 'Semis (Moyenne France)'
                     },
                     xAxis: {
                         title: {
@@ -432,34 +805,310 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: getFirstAndLastValues(bleDurSemis)
+                        data: getDateAndMoyenneFrance(bleDurSemis)
                     },
                     {
-                        name: 'Levee',
-                        data: getFirstAndLastValues(bleDurLevee)
+                        name: 'Semis Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleDurSemis),
+                        color: '#000000'
                     },
                     {
-                        name: 'Debut Tallage',
-                        data: getFirstAndLastValues(bleDurDebutT)
-                    },
-                    {
-                        name: 'Epi 1 cm',
-                        data: getFirstAndLastValues(bleDurEpi1cm)
-                    },
-                    {
-                        name: '2 noeuds',
-                        data: getFirstAndLastValues(bleDur2noeuds)
-                    },
-                    {
-                        name: 'Epiaison',
-                        data: getFirstAndLastValues(bleDurEpiaison)
-                    },
-                    {
-                        name: 'Recolte',
-                        data: getFirstAndLastValues(bleDurRecolte)
-                    },
-                    
+                        name: 'Semis Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleDurSemis),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
                     ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEDWLevee', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Levée (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Levée',
+                        data: getDateAndMoyenneFrance(bleDurLevee)
+                    },
+                    {
+                        name: 'Levée Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleDurLevee),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Levée Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleDurLevee),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEDWDebutT', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Debut Tallage (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Debut Tallage',
+                        data: getDateAndMoyenneFrance(bleDurDebutT)
+                    },
+                    {
+                        name: 'Debut Tallage Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleDurDebutT),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Debut Tallage Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleDurDebutT),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEDWEpi1cm', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Epi 1 cm (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Epi 1cm',
+                        data: getDateAndMoyenneFrance(bleDurEpi1cm)
+                    },
+                    {
+                        name: 'Epi 1cm Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleDurEpi1cm),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Epi 1cm Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleDurEpi1cm),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEDW2noeuds', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: '2 noeuds (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: '2 noeuds',
+                        data: getDateAndMoyenneFrance(bleDur2noeuds)
+                    },
+                    {
+                        name: '2 noeuds Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleDur2noeuds),
+                        color: '#000000'
+                    },
+                    {
+                        name: '2 noeuds Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleDur2noeuds),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEDWEpiaison', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Epiaison (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Epiaison',
+                        data: getDateAndMoyenneFrance(bleDurEpiaison)
+                    },
+                    {
+                        name: 'Epiaison Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleDurEpiaison),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Epiaison Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleDurEpiaison),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEDWRecolte', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Recolte (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Recolte',
+                        data: getDateAndMoyenneFrance(bleDurRecolte)
+                    },
+                    {
+                        name: 'Recolte Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(bleDurRecolte),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Recolte Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(bleDurRecolte),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
                     credits: {
                         enabled: false
                     }
@@ -472,12 +1121,12 @@
                     let maisHum50 = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === 'Humidite du grain 50%');
                     let maisRecolte = data.filter(subArray => subArray[1] === 'Mais' && subArray[2] === 'Recolte');
 
-                    Highcharts.chart('devEMA', {
+                    Highcharts.chart('devEMASemis', {
                     chart: {
                         type: 'line'
                     },
                     title: {
-                        text: 'Mais developpement (Moyenne France)'
+                        text: 'Semis (Moyenne France)'
                     },
                     xAxis: {
                         title: {
@@ -492,29 +1141,263 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: getFirstAndLastValues(maisSemis)
+                        data: getDateAndMoyenneFrance(maisSemis)
                     },
                     {
-                        name: 'Levee',
-                        data: getFirstAndLastValues(maisLevee)
+                        name: 'Semis Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(maisSemis),
+                        color: '#000000'
                     },
                     {
-                        name: '6/8 feuilles visibles',
-                        data: getFirstAndLastValues(mais68Feuilles)
-                    },
-                    {
-                        name: 'Floraison femelle',
-                        data: getFirstAndLastValues(maisFlorFem)
-                    },
-                    {
-                        name: 'Humidité du grain 50%',
-                        data: getFirstAndLastValues(maisHum50)
-                    },
-                    {
-                        name: 'Recolte',
-                        data: getFirstAndLastValues(maisRecolte)
-                    }                  
+                        name: 'Semis Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(maisSemis),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
                     ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEMALevee', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Levée (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Levée',
+                        data: getDateAndMoyenneFrance(maisLevee)
+                    },
+                    {
+                        name: 'Levée Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(maisLevee),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Levée Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(maisLevee),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEMA68Feuilles', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: '6-8 Feuilles Visibles (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: '6-8 Feuilles Visibles',
+                        data: getDateAndMoyenneFrance(mais68Feuilles)
+                    },
+                    {
+                        name: '6-8 Feuilles Visibles Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(mais68Feuilles),
+                        color: '#000000'
+                    },
+                    {
+                        name: '6-8 Feuilles Visibles Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(mais68Feuilles),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEMAFloraison', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Floraison Femelle (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Floraison Femelle',
+                        data: getDateAndMoyenneFrance(maisFlorFem)
+                    },
+                    {
+                        name: 'Floraison Femelle Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(maisFlorFem),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Floraison Femelle Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(maisFlorFem),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEMAHumidite', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Humidité grain 50% (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Humidité grain 50%',
+                        data: getDateAndMoyenneFrance(maisHum50)
+                    },
+                    {
+                        name: 'Humidité grain 50% Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(maisHum50),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Humidité grain 50% Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(maisHum50),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('devEMARecolte', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Recolte (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: 'Recolte',
+                        data: getDateAndMoyenneFrance(maisRecolte)
+                    },
+                    {
+                        name: 'Recolte Moyenne 4 ans',
+                        data: getDateAndMoyenneMoyenneFrance(maisRecolte),
+                        color: '#000000'
+                    },
+                    {
+                        name: 'Recolte Min Max 4 ans',
+                        type: 'arearange',
+                        data: getDateAndAreaMinMax(maisRecolte),
+                        color: 'rgba(68, 170, 213, 0.2)',
+                        fillOpacity: 0.4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
                     credits: {
                         enabled: false
                     }
