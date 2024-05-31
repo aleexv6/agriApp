@@ -385,50 +385,56 @@ def process_dev():
         data = request.get_json()
         dates = data['Marketing_year'].split('_')
         int_dates = [int(year) for year in dates]
-    cursorDev = db.get_database_dev().find({})
-    dfDev = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
-    dfDev = dfDev.drop('_id', axis=1)
-    dfDev['Date'] = pd.to_datetime(dfDev['Date'])
-    dfDev['Week'] = dfDev['Date'].apply(lambda date: date.isocalendar().week if date.weekday() != 0 else date.isocalendar().week - 1)
-    dfMoy = dfDev
-    dfDev = dfDev[dfDev['Date'].dt.year.isin(int_dates)]
+    cursorDev = db.get_database_dev().find({
+        "Year": {
+        "$gte": int_dates[0] - 6,
+        "$lte": int_dates[1]
+    }
+    })
+    df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
+    df = df.drop('_id', axis=1)
+    dfMoy = df[df['Year'] < int_dates[0]]
+    dfDev = df[df['Year'].isin(int_dates)]
 
-    dfDevBleTendre = dfDev[dfDev['Produit'] == 'Ble tendre']
-    bleTendreMYStart = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[0]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    if int_dates[1] == datetime.now().year:
-        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreMYStart) & (dfDevBleTendre['Date'].dt.year <= datetime.now().year)]
-    else:
-        bleTendreMYEnd = dfDevBleTendre[(dfDevBleTendre['Date'].dt.year == int_dates[1]) & (dfDevBleTendre['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreMYStart) & (dfDevBleTendre['Date'] <= bleTendreMYEnd)]
-
-    dfDevMais = dfDev[dfDev['Produit'] == 'Mais']
-    MaisMYStart = dfDevMais[(dfDevMais['Date'].dt.year == int_dates[0]) & (dfDevMais['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-    if int_dates[1] == datetime.now().year:
-        dfMaisMY = dfDevMais[(dfDevMais['Date'] > MaisMYStart) & (dfDevMais['Date'].dt.year <= datetime.now().year)]
-    else:
-        MaisMYEnd = dfDevMais[(dfDevMais['Date'].dt.year == int_dates[1]) & (dfDevMais['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-        dfMaisMY = dfDevMais[(dfDevMais['Date'] > MaisMYStart) & (dfDevMais['Date']<= MaisMYEnd)]
-
-    dfDevBleDur = dfDev[dfDev['Produit'] == 'Ble dur']
-    bleDurMYStart = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[0]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
+    dfDevBleTendre = dfDev[(dfDev['Culture'] == 'Blé tendre') & (dfDev['Région'] == 'Moyenne France')]
+    bleTendreStart = dfDevBleTendre[dfDevBleTendre['Semis'] == 0]['Date'].iloc[0]
     if int_dates[1] == datetime.now().year: 
-        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'].dt.year <= datetime.now().year)]
+        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreStart) & (dfDevBleTendre['Year'] <= datetime.now().year)]
     else:
-        bleDurMYEnd = dfDevBleDur[(dfDevBleDur['Date'].dt.year == int_dates[1]) & (dfDevBleDur['Developpement'] == 'Recolte')]['Date'].iloc[-1]
-        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurMYStart) & (dfDevBleDur['Date'] <= bleDurMYEnd)]
-        
-    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
-    df['Moyenne France'] = df['Moyenne France'].astype(float)
-    
-    dfMoy = dfMoy.reset_index()
-    dfMoy['Moyenne France'] = dfMoy['Moyenne France'].astype(float)
-    dfMoy = dfMoy[['Date', 'Produit', 'Developpement', 'Moyenne France']]
-    dfMoy['Week'] = dfMoy['Date'].apply(lambda date: date.isocalendar().week if date.weekday() != 0 else date.isocalendar().week - 1)
+        bleTendreEnd = dfDevBleTendre[(dfDevBleTendre['Year'] == int_dates[1]) & (dfDevBleTendre['Récolte'] > 90)]['Date'].iloc[-1]
+        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] >= bleTendreStart) & (dfDevBleTendre['Date'] <= bleTendreEnd)]
 
-    aggregations = dfMoy.groupby(['Produit', 'Developpement', 'Week'])['Moyenne France'].agg(
-        Moyenne_Moyenne_France='mean',
-        Maximum='max',
-        Minimum='min'
-    ).reset_index()
-    merged = pd.merge(df, aggregations, on=['Produit', 'Developpement', 'Week'], how='inner')
-    return merged[['Date', 'Produit', 'Developpement', 'Week', 'Moyenne France', 'Moyenne_Moyenne_France', 'Minimum', 'Maximum']].to_json(orient='values')
+    dfDevBleDur = dfDev[(dfDev['Culture'] == 'Blé dur') & (dfDev['Région'] == 'Moyenne France')]
+    bleDurStart = dfDevBleDur[dfDevBleDur['Semis'] == 0]['Date'].iloc[0]
+    if int_dates[1] == datetime.now().year: 
+        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurStart) & (dfDevBleDur['Year'] <= datetime.now().year)]
+    else:
+        bleDurEnd = dfDevBleDur[(dfDevBleDur['Year'] == int_dates[1]) & (dfDevBleDur['Récolte'] > 90)]['Date'].iloc[-1]
+        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] >= bleDurStart) & (dfDevBleDur['Date'] <= bleDurEnd)]
+
+    dfDevMais = dfDev[(dfDev['Culture'] == 'Maïs grain') & (dfDev['Région'] == 'Moyenne France')].reset_index()
+    maisStart = dfDevMais[(dfDevMais['Semis'] > 0) & (dfDevMais['Year'] == int_dates[1])].index[0] - 1
+    if int_dates[1] == datetime.now().year: 
+        dfMaisMY = dfDevMais[(dfDevMais.index >= maisStart) & (dfDevMais['Year'] <= datetime.now().year)]
+    else: 
+        maisEnd = dfDevMais[(dfDevMais['Year'] == int_dates[1]) & (dfDevMais['Récolte'] > 90)]['Date'].iloc[-1]
+        dfMaisMY = dfDevMais[(dfDevMais.index >= maisStart) & (dfDevMais['Date'] <= maisEnd)]
+    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
+
+    dfMoy = dfMoy[dfMoy['Région'] == 'Moyenne France']
+    aggregated_stats = dfMoy.groupby(['Culture', 'Week']).agg({
+        'Semis': ['mean', 'min', 'max'],
+        'Levée': ['mean', 'min', 'max'],
+        'Début tallage': ['mean', 'min', 'max'],
+        'Épi 1 cm': ['mean', 'min', 'max'],
+        '2 noeuds': ['mean', 'min', 'max'],
+        'Épiaison': ['mean', 'min', 'max'],
+        '6/8 feuilles visibles': ['mean', 'min', 'max'],
+        'Floraison femelle': ['mean', 'min', 'max'],
+        'Début tallage': ['mean', 'min', 'max'],
+        'Humidité du grain 50%': ['mean', 'min', 'max'],
+        'Récolte': ['mean', 'min', 'max'],
+    }).reset_index()
+    aggregated_stats.columns = ['_'.join(col).strip() if col[1] else col[0] for col in aggregated_stats.columns.values]
+    merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner')
+    return merged.to_json(orient='values')

@@ -218,8 +218,6 @@
                     <form class="form-inline mb-4">
                         <label class="mr-2">Marketing Year : </label>
                         <select name="market_year" class="custom-select mr-4" id="market_year_selector">
-                            <option value='2019_2020' >2019/2020</option>
-                            <option value='2020_2021' >2020/2021</option>
                             <option value='2021_2022' >2021/2022</option>
                             <option value='2022_2023' >2022/2023</option>
                             <option value='2023_2024' >2023/2024</option>
@@ -440,13 +438,13 @@
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(data, success){
-                    let bleTendreSemis = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Semis');
+                    /* let bleTendreSemis = data.filter(subArray => subArray[0] === 'Blé tendre' && subArray[2] === 'Semis');
                     let bleTendreLevee = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Levee');
                     let bleTendreDebutT = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Debut Tallage');
                     let bleTendreEpi1cm = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Epi 1cm');
                     let bleTendre2noeuds = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === '2 noeuds');
                     let bleTendreEpiaison = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Epiaison');
-                    let bleTendreRecolte = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Recolte');
+                    let bleTendreRecolte = data.filter(subArray => subArray[1] === 'Ble tendre' && subArray[2] === 'Recolte'); */
 
                     Highcharts.chart('devEBMSemis', {
                     chart: {
@@ -468,17 +466,17 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: getDateAndMoyenneFrance(bleTendreSemis)
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreSemis)
                     },
                     {
-                        name: 'Semis Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleTendreSemis),
+                        name: 'Semis Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[22]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreSemis),
                         color: '#000000'
                     },
                     {
-                        name: 'Semis Min Max 4 ans',
+                        name: 'Semis Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleTendreSemis),
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[23], subarray[24]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreSemis),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -515,17 +513,17 @@
                     },
                     series: [{
                         name: 'Levée',
-                        data: getDateAndMoyenneFrance(bleTendreLevee)
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[4]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreLevee)
                     },
                     {
-                        name: 'Levée Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleTendreLevee),
+                        name: 'Levée Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[25]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreLevee),
                         color: '#000000'
                     },
                     {
-                        name: 'Levée Min Max 4 ans',
+                        name: 'Levée Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleTendreLevee),
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[26], subarray[27]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreLevee),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -562,17 +560,17 @@
                     },
                     series: [{
                         name: 'Debut Tallage',
-                        data: getDateAndMoyenneFrance(bleTendreDebutT)
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[17]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreDebutT)
                     },
                     {
-                        name: 'Debut Tallage Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleTendreDebutT),
+                        name: 'Debut Tallage Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[28]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreDebutT),
                         color: '#000000'
                     },
                     {
-                        name: 'Debut Tallage Min Max 4 ans',
+                        name: 'Debut Tallage Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleTendreDebutT),
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[29], subarray[30]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreDebutT),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -609,17 +607,17 @@
                     },
                     series: [{
                         name: 'Epi 1cm',
-                        data: getDateAndMoyenneFrance(bleTendreEpi1cm)
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[18]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreEpi1cm)
                     },
                     {
-                        name: 'Epi 1cm Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleTendreEpi1cm),
+                        name: 'Epi 1cm Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[31]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreEpi1cm),
                         color: '#000000'
                     },
                     {
-                        name: 'Epi 1cm Min Max 4 ans',
+                        name: 'Epi 1cm Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleTendreEpi1cm),
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[32], subarray[33]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreEpi1cm),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -656,17 +654,17 @@
                     },
                     series: [{
                         name: '2 noeuds',
-                        data: getDateAndMoyenneFrance(bleTendre2noeuds)
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[19]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(bleTendre2noeuds)
                     },
                     {
-                        name: '2 noeuds Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleTendre2noeuds),
+                        name: '2 noeuds Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[34]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendre2noeuds),
                         color: '#000000'
                     },
                     {
-                        name: '2 noeuds Min Max 4 ans',
+                        name: '2 noeuds Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleTendre2noeuds),
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[35], subarray[36]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendre2noeuds),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -703,17 +701,17 @@
                     },
                     series: [{
                         name: 'Epiaison',
-                        data: getDateAndMoyenneFrance(bleTendreEpiaison)
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[20]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(bleTendreEpiaison)
                     },
                     {
-                        name: 'Epiaison Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleTendreEpiaison),
+                        name: 'Epiaison Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[37]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreEpiaison),
                         color: '#000000'
                     },
                     {
-                        name: 'Epiaison Min Max 4 ans',
+                        name: 'Epiaison Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleTendreEpiaison),
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[38], subarray[39]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreEpiaison),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -750,17 +748,17 @@
                     },
                     series: [{
                         name: 'Recolte',
-                        data: getDateAndMoyenneFrance(bleTendreRecolte)
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[8]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(bleTendreRecolte)
                     },
                     {
-                        name: 'Recolte Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleTendreRecolte),
+                        name: 'Recolte Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[49]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreRecolte),
                         color: '#000000'
                     },
                     {
-                        name: 'Recolte Min Max 4 ans',
+                        name: 'Recolte Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleTendreRecolte),
+                        data: data.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[50], subarray[51]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreRecolte),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -805,17 +803,17 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: getDateAndMoyenneFrance(bleDurSemis)
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreSemis)
                     },
                     {
-                        name: 'Semis Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleDurSemis),
+                        name: 'Semis Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[22]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreSemis),
                         color: '#000000'
                     },
                     {
-                        name: 'Semis Min Max 4 ans',
+                        name: 'Semis Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleDurSemis),
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[23], subarray[24]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreSemis),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -852,17 +850,17 @@
                     },
                     series: [{
                         name: 'Levée',
-                        data: getDateAndMoyenneFrance(bleDurLevee)
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[4]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreLevee)
                     },
                     {
-                        name: 'Levée Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleDurLevee),
+                        name: 'Levée Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[25]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreLevee),
                         color: '#000000'
                     },
                     {
-                        name: 'Levée Min Max 4 ans',
+                        name: 'Levée Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleDurLevee),
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[26], subarray[27]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreLevee),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -899,17 +897,17 @@
                     },
                     series: [{
                         name: 'Debut Tallage',
-                        data: getDateAndMoyenneFrance(bleDurDebutT)
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[17]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreDebutT)
                     },
                     {
-                        name: 'Debut Tallage Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleDurDebutT),
+                        name: 'Debut Tallage Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[28]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreDebutT),
                         color: '#000000'
                     },
                     {
-                        name: 'Debut Tallage Min Max 4 ans',
+                        name: 'Debut Tallage Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleDurDebutT),
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[29], subarray[30]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreDebutT),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -946,17 +944,17 @@
                     },
                     series: [{
                         name: 'Epi 1cm',
-                        data: getDateAndMoyenneFrance(bleDurEpi1cm)
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[18]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreEpi1cm)
                     },
                     {
-                        name: 'Epi 1cm Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleDurEpi1cm),
+                        name: 'Epi 1cm Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[31]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreEpi1cm),
                         color: '#000000'
                     },
                     {
-                        name: 'Epi 1cm Min Max 4 ans',
+                        name: 'Epi 1cm Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleDurEpi1cm),
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[32], subarray[33]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreEpi1cm),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -993,17 +991,17 @@
                     },
                     series: [{
                         name: '2 noeuds',
-                        data: getDateAndMoyenneFrance(bleDur2noeuds)
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[19]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(bleTendre2noeuds)
                     },
                     {
-                        name: '2 noeuds Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleDur2noeuds),
+                        name: '2 noeuds Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[34]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendre2noeuds),
                         color: '#000000'
                     },
                     {
-                        name: '2 noeuds Min Max 4 ans',
+                        name: '2 noeuds Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleDur2noeuds),
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[35], subarray[36]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendre2noeuds),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1040,17 +1038,17 @@
                     },
                     series: [{
                         name: 'Epiaison',
-                        data: getDateAndMoyenneFrance(bleDurEpiaison)
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[20]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(bleTendreEpiaison)
                     },
                     {
-                        name: 'Epiaison Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleDurEpiaison),
+                        name: 'Epiaison Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[37]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreEpiaison),
                         color: '#000000'
                     },
                     {
-                        name: 'Epiaison Min Max 4 ans',
+                        name: 'Epiaison Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleDurEpiaison),
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[38], subarray[39]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreEpiaison),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1087,17 +1085,17 @@
                     },
                     series: [{
                         name: 'Recolte',
-                        data: getDateAndMoyenneFrance(bleDurRecolte)
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[8]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(bleTendreRecolte)
                     },
                     {
-                        name: 'Recolte Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(bleDurRecolte),
+                        name: 'Recolte Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[49]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreRecolte),
                         color: '#000000'
                     },
                     {
-                        name: 'Recolte Min Max 4 ans',
+                        name: 'Recolte Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(bleDurRecolte),
+                        data: data.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[50], subarray[51]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreRecolte),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1141,17 +1139,17 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: getDateAndMoyenneFrance(maisSemis)
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreSemis)
                     },
                     {
-                        name: 'Semis Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(maisSemis),
+                        name: 'Semis Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[22]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreSemis),
                         color: '#000000'
                     },
                     {
-                        name: 'Semis Min Max 4 ans',
+                        name: 'Semis Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(maisSemis),
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[23], subarray[24]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreSemis),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1188,17 +1186,17 @@
                     },
                     series: [{
                         name: 'Levée',
-                        data: getDateAndMoyenneFrance(maisLevee)
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[4]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(bleTendreLevee)
                     },
                     {
                         name: 'Levée Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(maisLevee),
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[25]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreLevee),
                         color: '#000000'
                     },
                     {
                         name: 'Levée Min Max 4 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(maisLevee),
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[26], subarray[27]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreLevee),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1235,17 +1233,17 @@
                     },
                     series: [{
                         name: '6-8 Feuilles Visibles',
-                        data: getDateAndMoyenneFrance(mais68Feuilles)
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[5]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(mais68Feuilles)
                     },
                     {
-                        name: '6-8 Feuilles Visibles Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(mais68Feuilles),
+                        name: '6-8 Feuilles Visibles Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[40]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(mais68Feuilles),
                         color: '#000000'
                     },
                     {
-                        name: '6-8 Feuilles Visibles Min Max 4 ans',
+                        name: '6-8 Feuilles Visibles Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(mais68Feuilles),
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[41], subarray[42]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(mais68Feuilles),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1282,17 +1280,17 @@
                     },
                     series: [{
                         name: 'Floraison Femelle',
-                        data: getDateAndMoyenneFrance(maisFlorFem)
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[6]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9)//getDateAndMoyenneFrance(maisFlorFem)
                     },
                     {
-                        name: 'Floraison Femelle Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(maisFlorFem),
+                        name: 'Floraison Femelle Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[43]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(maisFlorFem),
                         color: '#000000'
                     },
                     {
-                        name: 'Floraison Femelle Min Max 4 ans',
+                        name: 'Floraison Femelle Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(maisFlorFem),
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[44], subarray[45]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(maisFlorFem),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1329,17 +1327,17 @@
                     },
                     series: [{
                         name: 'Humidité grain 50%',
-                        data: getDateAndMoyenneFrance(maisHum50)
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[7]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(maisHum50)
                     },
                     {
-                        name: 'Humidité grain 50% Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(maisHum50),
+                        name: 'Humidité grain 50% Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[46]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(maisHum50),
                         color: '#000000'
                     },
                     {
-                        name: 'Humidité grain 50% Min Max 4 ans',
+                        name: 'Humidité grain 50% Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(maisHum50),
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[47], subarray[48]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(maisHum50),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
@@ -1376,17 +1374,17 @@
                     },
                     series: [{
                         name: 'Recolte',
-                        data: getDateAndMoyenneFrance(maisRecolte)
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[8]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneFrance(bleTendreRecolte)
                     },
                     {
-                        name: 'Recolte Moyenne 4 ans',
-                        data: getDateAndMoyenneMoyenneFrance(maisRecolte),
+                        name: 'Recolte Moyenne 5 ans',
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[49]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndMoyenneMoyenneFrance(bleTendreRecolte),
                         color: '#000000'
                     },
                     {
-                        name: 'Recolte Min Max 4 ans',
+                        name: 'Recolte Min Max 5 ans',
                         type: 'arearange',
-                        data: getDateAndAreaMinMax(maisRecolte),
+                        data: data.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[50], subarray[51]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9),//getDateAndAreaMinMax(bleTendreRecolte),
                         color: 'rgba(68, 170, 213, 0.2)',
                         fillOpacity: 0.4
                     }
