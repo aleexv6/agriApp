@@ -26,7 +26,7 @@ def get_database_price():
     client = MongoClient(CONNECTION_STRING)
     return client['agri_data']
 
-def get_database_dev():
+def get_database_dev_cond_france():
     CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@146.59.157.18:27017/admin"
     client = MongoClient(CONNECTION_STRING)
-    return client['agri_data']['new_developpement']
+    return client['agri_data']['dev_cond_france']

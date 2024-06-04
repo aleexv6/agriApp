@@ -385,7 +385,7 @@ def process_dev():
         data = request.get_json()
         dates = data['Marketing_year'].split('_')
         int_dates = [int(year) for year in dates]
-    cursorDev = db.get_database_dev().find({
+    cursorDev = db.get_database_dev_cond_france().find({
         "Year": {
         "$gte": int_dates[0] - 6,
         "$lte": int_dates[1]
@@ -396,23 +396,21 @@ def process_dev():
     dfMoy = df[df['Year'] < int_dates[0]]
     dfDev = df[df['Year'].isin(int_dates)]
 
-    dfDevBleTendre = dfDev[(dfDev['Culture'] == 'Blé tendre') & (dfDev['Région'] == 'Moyenne France')]
+    dfDevBleTendre = dfDev[dfDev['Culture'] == 'Blé tendre']
     bleTendreStart = dfDevBleTendre[dfDevBleTendre['Semis'] == 0]['Date'].iloc[0]
     if int_dates[1] == datetime.now().year: 
         dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreStart) & (dfDevBleTendre['Year'] <= datetime.now().year)]
     else:
         bleTendreEnd = dfDevBleTendre[(dfDevBleTendre['Year'] == int_dates[1]) & (dfDevBleTendre['Récolte'] > 90)]['Date'].iloc[-1]
         dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] >= bleTendreStart) & (dfDevBleTendre['Date'] <= bleTendreEnd)]
-
-    dfDevBleDur = dfDev[(dfDev['Culture'] == 'Blé dur') & (dfDev['Région'] == 'Moyenne France')]
+    dfDevBleDur = dfDev[dfDev['Culture'] == 'Blé dur']
     bleDurStart = dfDevBleDur[dfDevBleDur['Semis'] == 0]['Date'].iloc[0]
     if int_dates[1] == datetime.now().year: 
         dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurStart) & (dfDevBleDur['Year'] <= datetime.now().year)]
     else:
         bleDurEnd = dfDevBleDur[(dfDevBleDur['Year'] == int_dates[1]) & (dfDevBleDur['Récolte'] > 90)]['Date'].iloc[-1]
         dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] >= bleDurStart) & (dfDevBleDur['Date'] <= bleDurEnd)]
-
-    dfDevMais = dfDev[(dfDev['Culture'] == 'Maïs grain') & (dfDev['Région'] == 'Moyenne France')].reset_index()
+    dfDevMais = dfDev[dfDev['Culture'] == 'Maïs grain'].reset_index()
     maisStart = dfDevMais[(dfDevMais['Semis'] > 0) & (dfDevMais['Year'] == int_dates[1])].index[0] - 1
     if int_dates[1] == datetime.now().year: 
         dfMaisMY = dfDevMais[(dfDevMais.index >= maisStart) & (dfDevMais['Year'] <= datetime.now().year)]
@@ -421,7 +419,6 @@ def process_dev():
         dfMaisMY = dfDevMais[(dfDevMais.index >= maisStart) & (dfDevMais['Date'] <= maisEnd)]
     df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
 
-    dfMoy = dfMoy[dfMoy['Région'] == 'Moyenne France']
     aggregated_stats = dfMoy.groupby(['Culture', 'Week']).agg({
         'Semis': ['mean', 'min', 'max'],
         'Levée': ['mean', 'min', 'max'],
@@ -438,3 +435,60 @@ def process_dev():
     aggregated_stats.columns = ['_'.join(col).strip() if col[1] else col[0] for col in aggregated_stats.columns.values]
     merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner')
     return merged.to_json(orient='values')
+
+@app.route("/condition")
+def condition():
+    
+    return render_template('condition.html')
+
+@app.route('/process_cond', methods=['POST', 'GET'])
+def process_cond():
+    if request.method == "POST":
+        data = request.get_json()
+        dates = data['Marketing_year'].split('_')
+        int_dates = [int(year) for year in dates]
+    cursorDev = db.get_database_dev_cond_france().find({
+        "Year": {
+        "$gte": int_dates[0] - 6,
+        "$lte": int_dates[1]
+    }
+    })
+    df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
+    df = df.drop('_id', axis=1)
+    df = df[['Culture', 'Date', 'Semaine', 'Week', 'Year', 'Très mauvaises', 'Mauvaises', 'Assez bonnes', 'Bonnes', 'Très bonnes']]
+    dfMoy = df[df['Year'] < int_dates[0]]
+    dfData = df[df['Year'].isin(int_dates)]
+    
+    dfBleTendre = dfData[(dfData['Culture'] == 'Blé tendre')]
+    dfBleTendreMY = dfBleTendre[(df['Year'] == int_dates[0]) & (dfBleTendre['Week'] >= 36) | (dfBleTendre['Year'] == int_dates[1]) & (dfBleTendre['Week'] <= 35)]
+    dfBleTendreMY['Bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Bonnes']) and not np.isnan(row['Très bonnes']) else row['Bonnes'], axis=1)
+    dfBleTendreMY['Très bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Très bonnes']) and not np.isnan(row['Bonnes']) else row['Très bonnes'], axis=1)
+    dfBleTendreMY['BonnesEtTresBonnes'] = dfBleTendreMY['Bonnes'] + dfBleTendreMY['Très bonnes']
+
+    dfBleDur = dfData[(dfData['Culture'] == 'Blé dur')]
+    dfBleDurMY = dfBleDur[(df['Year'] == int_dates[0]) & (dfBleDur['Week'] >= 36) | (dfBleDur['Year'] == int_dates[1]) & (dfBleDur['Week'] <= 35)]
+    dfBleDurMY['Bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Bonnes']) and not np.isnan(row['Très bonnes']) else row['Bonnes'], axis=1)
+    dfBleDurMY['Très bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Très bonnes']) and not np.isnan(row['Bonnes']) else row['Très bonnes'], axis=1)
+    dfBleDurMY['BonnesEtTresBonnes'] = dfBleDurMY['Bonnes'] + dfBleDurMY['Très bonnes']
+
+    dfMais = dfData[(dfData['Culture'] == 'Maïs grain')]
+    dfMaisMY = dfMais[(df['Year'] == int_dates[1]) & (dfMais['Week'] >= 9)]
+    dfMaisMY['Bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Bonnes']) and not np.isnan(row['Très bonnes']) else row['Bonnes'], axis=1)
+    dfMaisMY['Très bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Très bonnes']) and not np.isnan(row['Bonnes']) else row['Très bonnes'], axis=1)
+    dfMaisMY['BonnesEtTresBonnes'] = dfMaisMY['Bonnes'] + dfMaisMY['Très bonnes']
+    
+    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
+    dfMoy['BonnesEtTresBonnes'] = dfMoy['Bonnes'] + dfMoy['Très bonnes']
+    aggregated_stats = dfMoy.groupby(['Culture', 'Week']).agg({
+        'Très mauvaises': 'mean',
+        'Mauvaises': 'mean',
+        'Assez bonnes': 'mean',
+        'Bonnes': 'mean',
+        'Très bonnes': 'mean',
+        'BonnesEtTresBonnes': 'mean'
+    }).reset_index()
+    aggregated_stats = aggregated_stats.rename(columns={'Très mauvaises': 'Très mauvaises Mean', 'Mauvaises': 'Mauvaises Mean', 'Assez bonnes': 'Assez bonnes Mean', 'Bonnes': 'Bonnes Mean', 'Très bonnes': 'Très bonnes Mean', 'BonnesEtTresBonnes': 'BonnesEtTresBonnes Mean'})
+    merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner')
+    print(merged)
+    return merged.to_json(orient='values')
+
