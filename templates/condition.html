@@ -215,14 +215,6 @@
                 </nav>
                 <!-- End of Topbar -->
                 <div class="container-fluid">   
-                    <form class="form-inline mb-4">
-                        <label class="mr-2">Marketing Year : </label>
-                        <select name="market_year" class="custom-select mr-4" id="market_year_selector">
-                            <option value='2023_2024' >2023/2024</option>
-                            <option value='2022_2023' >2022/2023</option>
-                            <option value='2021_2022' >2021/2022</option>                          
-                        </select>
-                    </form>
                     <div class="card shadow mb-4">
                         <div class="card-header d-flex justify-content-between py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Blé tendre</h6>
@@ -327,17 +319,203 @@
     <script src="../static/js/demo/chart-pie-demo.js"></script>
 
     <script>
-        document.getElementById("market_year_selector").addEventListener("change", handleSelectChange);
         handleSelectChange()
         function handleSelectChange() {
             $.ajax({
                 type: "POST",
                 url: "/process_cond",
-                data: JSON.stringify({"Marketing_year": document.getElementById("market_year_selector").value}),
+                data: 0,
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(data, success){
-                    console.log(data)
+                    dataBleTendre = data.filter(subarray => subarray[0] === 'Blé tendre')
+                    dataBleDur = data.filter(subarray => subarray[0] === 'Blé dur')
+                    dataMais = data.filter(subarray => subarray[0] === 'Maïs grain')
+                    Highcharts.chart('condEBM', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Conditions bonnes et très bonnes (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Week'
+                        },
+                        categories: dataBleTendre.filter(subarray => subarray[10] === '2018/2019').map(subarray => [subarray[3]])
+                        //type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: '2023/2024',
+                        data: dataBleTendre.filter(subarray => subarray[10] === '2023/2024').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2022/2023',
+                        data: dataBleTendre.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2021/2022',
+                        data: dataBleTendre.filter(subarray => subarray[10] === '2021/2022').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2020/2021',
+                        data: dataBleTendre.filter(subarray => subarray[10] === '2020/2021').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2019/2020',
+                        data: dataBleTendre.filter(subarray => subarray[10] === '2019/2020').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2018/2019',
+                        data: dataBleTendre.filter(subarray => subarray[10] === '2018/2019').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: 'Moyenne 5 ans',
+                        data: dataBleTendre.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[17]]),
+                        color: '#000000',
+                        lineWidth: 4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('condEMA', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Conditions bonnes et très bonnes (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Week'
+                        },
+                        categories: dataMais.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[3]])
+                        //type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: '2023/2024',
+                        data: dataMais.filter(subarray => subarray[10] === '2023/2024').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2022/2023',
+                        data: dataMais.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2021/2022',
+                        data: dataMais.filter(subarray => subarray[10] === '2021/2022').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2020/2021',
+                        data: dataMais.filter(subarray => subarray[10] === '2020/2021').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2019/2020',
+                        data: dataMais.filter(subarray => subarray[10] === '2019/2020').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2018/2019',
+                        data: dataMais.filter(subarray => subarray[10] === '2018/2019').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: 'Moyenne 5 ans',
+                        data: dataMais.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[17]]),
+                        color: '#000000',
+                        lineWidth: 4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+
+                    Highcharts.chart('condEDW', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: 'Conditions bonnes et très bonnes (Moyenne France)'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Week'
+                        },
+                        categories: dataBleDur.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[3]])
+                        //type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: '% developpement'
+                        }
+                    },
+                    series: [{
+                        name: '2023/2024',
+                        data: dataBleDur.filter(subarray => subarray[10] === '2023/2024').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2022/2023',
+                        data: dataBleDur.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2021/2022',
+                        data: dataBleDur.filter(subarray => subarray[10] === '2021/2022').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2020/2021',
+                        data: dataBleDur.filter(subarray => subarray[10] === '2020/2021').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2019/2020',
+                        data: dataBleDur.filter(subarray => subarray[10] === '2019/2020').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: '2018/2019',
+                        data: dataBleDur.filter(subarray => subarray[10] === '2018/2019').map(subarray => [subarray[11]])
+                    },
+                    {
+                        name: 'Moyenne 5 ans',
+                        data: dataBleDur.filter(subarray => subarray[10] === '2022/2023').map(subarray => [subarray[17]]),
+                        color: '#000000',
+                        lineWidth: 4
+                    }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
                 }
             });
         }

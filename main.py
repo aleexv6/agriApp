@@ -84,6 +84,22 @@ def get_fr_agr_mer_cotations():
         dfMaisPalice = dfMais[['Date', 'Maïs\nFob Atlantique\nBase juillet']]
         return dfBlePalice[1:], dfMaisPalice[1:]
 
+def get_market_year(row):
+    year = row['Year']
+    week = row['Week']
+    culture = row['Culture']
+    if culture in ['Blé tendre', 'Blé dur']:
+        if week >= 36:
+            market_year = f"{year}/{year + 1}"
+        else:
+            market_year = f"{year - 1}/{year}"
+    else:
+        if 9 <= week <= 49:
+            market_year = f"{year - 1}/{year}"
+        else:
+            market_year = f"{year - 1}/{year}"
+    return market_year
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -443,41 +459,24 @@ def condition():
 
 @app.route('/process_cond', methods=['POST', 'GET'])
 def process_cond():
-    if request.method == "POST":
-        data = request.get_json()
-        dates = data['Marketing_year'].split('_')
-        int_dates = [int(year) for year in dates]
     cursorDev = db.get_database_dev_cond_france().find({
         "Year": {
-        "$gte": int_dates[0] - 6,
-        "$lte": int_dates[1]
+        "$gte": datetime.now().year - 7
     }
     })
     df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
     df = df.drop('_id', axis=1)
     df = df[['Culture', 'Date', 'Semaine', 'Week', 'Year', 'Très mauvaises', 'Mauvaises', 'Assez bonnes', 'Bonnes', 'Très bonnes']]
-    dfMoy = df[df['Year'] < int_dates[0]]
-    dfData = df[df['Year'].isin(int_dates)]
-    
-    dfBleTendre = dfData[(dfData['Culture'] == 'Blé tendre')]
-    dfBleTendreMY = dfBleTendre[(df['Year'] == int_dates[0]) & (dfBleTendre['Week'] >= 36) | (dfBleTendre['Year'] == int_dates[1]) & (dfBleTendre['Week'] <= 35)]
-    dfBleTendreMY['Bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Bonnes']) and not np.isnan(row['Très bonnes']) else row['Bonnes'], axis=1)
-    dfBleTendreMY['Très bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Très bonnes']) and not np.isnan(row['Bonnes']) else row['Très bonnes'], axis=1)
-    dfBleTendreMY['BonnesEtTresBonnes'] = dfBleTendreMY['Bonnes'] + dfBleTendreMY['Très bonnes']
+    dfMoy = df[df['Year'] < datetime.now().year - 1]
 
-    dfBleDur = dfData[(dfData['Culture'] == 'Blé dur')]
-    dfBleDurMY = dfBleDur[(df['Year'] == int_dates[0]) & (dfBleDur['Week'] >= 36) | (dfBleDur['Year'] == int_dates[1]) & (dfBleDur['Week'] <= 35)]
-    dfBleDurMY['Bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Bonnes']) and not np.isnan(row['Très bonnes']) else row['Bonnes'], axis=1)
-    dfBleDurMY['Très bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Très bonnes']) and not np.isnan(row['Bonnes']) else row['Très bonnes'], axis=1)
-    dfBleDurMY['BonnesEtTresBonnes'] = dfBleDurMY['Bonnes'] + dfBleDurMY['Très bonnes']
+    df['MarketYear'] = df.apply(get_market_year, axis=1)
+    dfMaisMY = df[(df['Culture'] == 'Maïs grain') & (df['Week']>=9)]
+    dfBleTendreMY = df[df['Culture'] == 'Blé tendre']
+    dfBleDurMY = df[df['Culture'] == 'Blé dur']
 
-    dfMais = dfData[(dfData['Culture'] == 'Maïs grain')]
-    dfMaisMY = dfMais[(df['Year'] == int_dates[1]) & (dfMais['Week'] >= 9)]
-    dfMaisMY['Bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Bonnes']) and not np.isnan(row['Très bonnes']) else row['Bonnes'], axis=1)
-    dfMaisMY['Très bonnes'] = df.apply(lambda row: 0 if np.isnan(row['Très bonnes']) and not np.isnan(row['Bonnes']) else row['Très bonnes'], axis=1)
-    dfMaisMY['BonnesEtTresBonnes'] = dfMaisMY['Bonnes'] + dfMaisMY['Très bonnes']
-    
     df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
+    df['BonneEtTresBonnes'] = df['Bonnes'] + df['Très bonnes']
+
     dfMoy['BonnesEtTresBonnes'] = dfMoy['Bonnes'] + dfMoy['Très bonnes']
     aggregated_stats = dfMoy.groupby(['Culture', 'Week']).agg({
         'Très mauvaises': 'mean',
@@ -488,7 +487,6 @@ def process_cond():
         'BonnesEtTresBonnes': 'mean'
     }).reset_index()
     aggregated_stats = aggregated_stats.rename(columns={'Très mauvaises': 'Très mauvaises Mean', 'Mauvaises': 'Mauvaises Mean', 'Assez bonnes': 'Assez bonnes Mean', 'Bonnes': 'Bonnes Mean', 'Très bonnes': 'Très bonnes Mean', 'BonnesEtTresBonnes': 'BonnesEtTresBonnes Mean'})
-    merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner')
-    print(merged)
+    merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner').sort_values(by='Date')
     return merged.to_json(orient='values')
 
