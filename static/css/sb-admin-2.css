@@ -10,6 +10,12 @@
  * Copyright 2011-2021 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
+
+ @font-face {
+  font-family: 'RobotoCustom';
+  src: url('../font/Roboto-Bold.ttf') format('ttf')
+ }
+
 :root {
   --blue: #4e73df;
   --indigo: #6610f2;
@@ -60,11 +66,11 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 
 body {
   margin: 0;
-  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: 'RobotoCustom' sans-serif;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #858796;
+  color: #2D3748;
   text-align: left;
   background-color: #fff;
 }
@@ -215,7 +221,7 @@ table {
 caption {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
-  color: #858796;
+  color: #2D3748;
   text-align: left;
   caption-side: bottom;
 }
@@ -362,8 +368,9 @@ template {
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
   margin-bottom: 0.5rem;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.2;
+  color: #2D3748
 }
 
 h1, .h1 {
@@ -1485,7 +1492,9 @@ pre code {
 .table {
   width: 100%;
   margin-bottom: 1rem;
-  color: #858796;
+  font-weight: 700;
+  color: #2D3748;
+  font-size: 15px;
 }
 
 .table th,
@@ -1498,6 +1507,7 @@ pre code {
 .table thead th {
   vertical-align: bottom;
   border-bottom: 2px solid #e3e6f0;
+  font-size: 0.75rem;
 }
 
 .table tbody + tbody {

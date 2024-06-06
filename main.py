@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 
-expi = {'Ble tendre' : 'MAY24', 'Mais' : 'JUN24', 'Colza' : 'MAY24'}
+expi = {'Ble tendre' : 'SEP24', 'Mais' : 'AUG24', 'Colza' : 'AUG24'}
 listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO'}
 
 cursorPhysique = db.get_database_physical().find({})
@@ -22,6 +22,7 @@ productPhysique = dfPhysique['Produit'].unique()
 
 cursorFutures = db.get_database_euronext().find({})
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
+dfFutures = dfFutures[dfFutures['Expired'] == False]
 productFutures = dfFutures['Ticker'].unique()
 
 jours_feries = [

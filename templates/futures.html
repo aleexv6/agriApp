@@ -12,13 +12,14 @@
     <title>SB Admin 2 - Dashboard</title>
 
     <!-- Custom fonts for this template-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}"/>
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sb-admin-2.css') }}"/>
 
 </head>
 
@@ -106,6 +107,18 @@
                 <a class="nav-link" href="saisonnalite">
                     <i class="far fa-chart-bar"></i>
                     <span>Saisonnalité</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="developpement">
+                    <i class="far fa-chart-bar"></i>
+                    <span>Developpement cultures</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="condition">
+                    <i class="far fa-chart-bar"></i>
+                    <span>Conditions cultures</span></a>
             </li>
 
             <!-- Sidebar Toggler (Sidebar) -->
@@ -246,7 +259,11 @@
                                             <td>{{ row['Expiration'] }}</td>
                                             <td>{{ row['Prix'] }}</td>
                                             <td>{{ previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0] }}</td>
-                                            <td>{{ (((row['Prix'] - previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0]) / (previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0]|abs)) * 100).round(2) }}%</td>
+                                            <td class="percentChange">
+                                                <i class="fa-solid fa-caret-down show-carret-down mr-2"></i>
+                                                <i class="fa-solid fa-caret-up show-carret-up mr-2"></i>
+                                                {{ (((row['Prix'] - previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0]) / (previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0]|abs)) * 100).round(2) }}%
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -318,6 +335,28 @@
     <!-- Page level custom scripts -->
     <script src="../static/js/demo/chart-area-demo.js"></script>
     <script src="../static/js/demo/chart-pie-demo.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var valueElements = document.querySelectorAll('.percentChange');
+
+            valueElements.forEach(function(element) {
+                var value = parseFloat(element.textContent);
+                var caretUp = element.querySelector('.fa-caret-up');
+                var caretDown = element.querySelector('.fa-caret-down');
+
+                if (value < 0) {
+                    element.style.color = '#E53E3E';
+                    caretUp.style.display = 'none';
+                    caretDown.style.display = 'inline';
+                } else {
+                    element.style.color = '#38A169';
+                    caretUp.style.display = 'inline';
+                    caretDown.style.display = 'none';
+                }
+            });
+        });
+    </script>
 
 </body>
 
