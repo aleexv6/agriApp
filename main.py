@@ -19,7 +19,6 @@ listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO'}
 cursorPhysique = db.get_database_physical().find({})
 dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True) 
 productPhysique = dfPhysique['Produit'].unique()
-
 cursorFutures = db.get_database_euronext().find({})
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
 dfFutures = dfFutures[dfFutures['Expired'] == False]
@@ -107,7 +106,7 @@ def index():
 
 @app.route("/physique")
 def physique():
-    return render_template('physique.html', data=dfPhysique, listProduct=productPhysique, datafutures=dfFutures, listProductFutures=listProductFutures, expi=expi)
+    return render_template('physique.html', data=dfPhysique, listProduct=productPhysique, datafutures=dfFutures, listProductFutures=listProductFutures, expi=expi, dataGraph = dfPhysique[['Date', 'Produit', 'Place', 'Prix']].to_dict(orient='records'))
 
 @app.route("/futures")
 def futures():

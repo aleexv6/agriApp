@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
 
@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Dashboard</title>
+    <title>AleexV6 Market Dashboard</title>
 
     <!-- Custom fonts for this template-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -29,14 +29,14 @@
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <ul class="navbar-nav bg-gradient-success sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                    <i class="fa-solid fa-seedling"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+                <div class="sidebar-brand-text mx-1">AleexV6 Dashboard</div>
             </a>
 
             <!-- Heading -->
@@ -143,82 +143,6 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
-                    <!-- Topbar Search -->
-                    <form
-                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                        <div class="input-group">
-                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                                aria-label="Search" aria-describedby="basic-addon2">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="button">
-                                    <i class="fas fa-search fa-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
-                                            aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
-
-                        <div class="topbar-divider d-none d-sm-block"></div>
-
-                        <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
-                                <img class="img-profile rounded-circle"
-                                    src="../static/img/undraw_profile.svg">
-                            </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
-                                </a>
-                            </div>
-                        </li>
-
-                    </ul>
-
                 </nav>
                 <!-- End of Topbar -->
                 <div class="container-fluid">
@@ -251,7 +175,7 @@
                         <div class="card shadow mb-4">
                             <div class="card-header d-flex justify-content-between py-3">
                                 <h6 class="m-0 font-weight-bold text-primary">{{ item.upper() }}</h6>
-                                <h6 class="m-0 font-italic text-primary" style="font-size: 0.7rem;">Mis à jour le : {{ df['Date'].iloc[-1] }}</h6>
+                                <h6 class="m-0 font-italic text-primary" style="font-size: 0.7rem;">Mis à jour le : {{ df['Date'].iloc[-1] }}, data terre-net.fr</h6>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -260,8 +184,8 @@
                                             <tr>
                                                 <th>PLACE</th>
                                                 <th>PRIX</th>
-                                                <th>BASE</th>
                                                 <th>MOIS FUTURES</th>
+                                                <th>BASE</th>                                                
                                                 <th>DAILY CHANGE %</th>                                                
                                                 <th>GRAPHIQUE</th>
                                             </tr>
@@ -273,8 +197,8 @@
                                                         <td>{{ row['Place'] }}</td>
                                                         <td>{{ row['Prix'] }}</td>
                                                         {% if item != 'Ble dur' %}
-                                                            <td>{{ (row['Prix'] - dfFutures.iloc[-1]['Prix']).round(2) }}</td>
                                                             <td>{{ expiration }}</td>
+                                                            <td>{{ (row['Prix'] - dfFutures.iloc[-1]['Prix']).round(2) }}</td>                                                            
                                                             {% if previousDf[previousDf['Place'] == row['Place']].empty %}
                                                                 <td>-</td>
                                                             {% else %}
@@ -297,7 +221,7 @@
                                                                     {{ (((row['Prix'] - previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]) / (previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]|abs)) * 100).round(2) }}%
                                                                 </td>
                                                             {% endif %}
-                                                        <td><i class="fa-solid fa-chart-simple" style="cursor: pointer;"></i></td>
+                                                        <td><i class="fa-solid fa-chart-simple logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{item}}/{{row['Place']}}"></i></td>
                                                     </tr>
                                                 {% endif %}
                                             {% endfor %}
@@ -307,7 +231,20 @@
                             </div>
                         </div>
                     {% endfor %}
-
+                    <div class="modal fade" id="graphModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="graphPhysique" class="mb-4" style="height: 60vh;"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                 </div>
             </div>
             <!-- End of Main Content -->
@@ -358,6 +295,10 @@
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+    <script src="https://code.highcharts.com/highcharts.js"></script>    
+    <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
+    <script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
+
     <!-- Core plugin JavaScript-->
     <script src="../static/vendor/jquery-easing/jquery.easing.min.js"></script>
 
@@ -370,6 +311,65 @@
     <!-- Page level custom scripts -->
     <script src="../static/js/demo/chart-area-demo.js"></script>
     <script src="../static/js/demo/chart-pie-demo.js"></script>
+
+    <script>
+        var physique = JSON.parse('{{ dataGraph | tojson }}');
+        // Fonction qui sera appelée lorsqu'un icône est cliqué
+        function handleIconClick(event) {
+            // Récupère l'ID de l'élément cliqué
+            var iconId = event.target.id;
+            // Affiche l'ID dans la console (ou utilisez-le comme vous le souhaitez)
+            const [produit, place] = iconId.split('/', 2);
+            var data = physique.filter(item => item.Produit === produit && item.Place === place);
+            var dataEnd = data.map(function(item) {
+                return [new Date(item['Date']).getTime(), item['Prix']];
+            });
+            console.log(dataEnd)
+            Highcharts.stockChart('graphPhysique', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: produit + ' ' + place
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Prix'
+                        }
+                    },
+                    series: [{
+                        name: "Prix",
+                        data: dataEnd,
+                    }],
+
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+        }
+
+        // Sélectionne tous les éléments avec la classe 'fa-icon'
+        var icons = document.querySelectorAll('.logoGraph');
+
+        // Ajoute un gestionnaire d'événements de clic à chaque élément
+        icons.forEach(function(icon) {
+            icon.addEventListener('click', handleIconClick);
+        });
+    </script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

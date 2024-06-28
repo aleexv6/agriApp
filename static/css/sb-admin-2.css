@@ -66,7 +66,7 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 
 body {
   margin: 0;
-  font-family: 'RobotoCustom' sans-serif;
+  font-family: 'RobotoCustom', sans-serif;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
@@ -2441,14 +2441,14 @@ fieldset:disabled a.btn {
 
 .btn-success {
   color: #fff;
-  background-color: #1cc88a;
-  border-color: #1cc88a;
+  background-color: #386641;
+  border-color: #386641;
 }
 
 .btn-success:hover {
   color: #fff;
-  background-color: #17a673;
-  border-color: #169b6b;
+  background-color: #6a994e;
+  border-color: #6a994e;
 }
 
 .btn-success:focus, .btn-success.focus {
@@ -5824,7 +5824,7 @@ a.close.disabled {
 
 @media (min-width: 576px) {
   .modal-dialog {
-    max-width: 500px;
+    max-width: 1000px;
     margin: 1.75rem auto;
   }
   .modal-dialog-scrollable {
@@ -9618,7 +9618,7 @@ a.text-secondary:hover, a.text-secondary:focus {
 }
 
 .text-success {
-  color: #1cc88a !important;
+  color: #6a994e !important;
 }
 
 a.text-success:hover, a.text-success:focus {
@@ -9922,9 +9922,9 @@ a:focus {
 }
 
 .bg-gradient-success {
-  background-color: #1cc88a;
-  background-image: linear-gradient(180deg, #1cc88a 10%, #13855c 100%);
-  background-size: cover;
+  background-color:#6a994e;
+  background-image:linear-gradient(180deg,#6a994e 10%,#386641 100%);
+  background-size:cover
 }
 
 .bg-gradient-info {
@@ -10459,6 +10459,7 @@ a:focus {
 }
 
 .sidebar .sidebar-brand {
+  font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   height: 4.375rem;
   text-decoration: none;
   font-size: 1rem;
