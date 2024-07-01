@@ -170,7 +170,7 @@
                             {% endif %}
 
                             {% set dfFutures = datafutures[datafutures['Ticker'] == ticker] %}
-                            {% set dfFutures = dfFutures[dfFutures['Date'] == dfFutures.iloc[-1]['Date']] %}
+                            {% set dfFutures = dfFutures[dfFutures['Expiration'] == expiration] %}
                         {% endif %}
                         <div class="card shadow mb-4">
                             <div class="card-header d-flex justify-content-between py-3">
