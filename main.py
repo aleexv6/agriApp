@@ -340,28 +340,22 @@ def curve():
 
 @app.route("/saisonnalite")
 def saisonnalite():
-    dfBle, dfMais = get_fr_agr_mer_cotations()
-    dfBle = dfBle.rename(columns={'Blé tendre Rendu Pallice Supérieur (A2)\nBase juillet': 'Prix'})
-    dfBle = dfBle.dropna()
-    dfBle = dfBle[~(dfBle == 0).any(axis=1)]
-    dfBle = dfBle.drop_duplicates(subset=['Date'])
-    dfBle['JourOuvrableFrancais'] = dfBle['Date'].apply(jour_ouvrable_francais_apply)    
-    dfBle["Percentage Change"] = dfBle["Prix"].pct_change() * 100
-    dfBle["Year"] = dfBle['Date'].dt.year
-    yearly_cumulative_percentage_changeBle = dfBle.groupby("Year")["Percentage Change"].cumsum()
-    median_cumulative_percentage_changeBle = yearly_cumulative_percentage_changeBle.groupby(dfBle['JourOuvrableFrancais']).median()
-
-    dfMais = dfMais.rename(columns={'Maïs\nFob Atlantique\nBase juillet': 'Prix'})
-    dfMais = dfMais.dropna()
-    dfMais = dfMais[~(dfMais == 0).any(axis=1)]
-    dfMais = dfMais[dfMais['Prix'] != 'Trêve des confiseurs']
-    dfMais = dfMais.drop_duplicates(subset=['Date'])
-    dfMais['JourOuvrableFrancais'] = dfMais['Date'].apply(jour_ouvrable_francais_apply)    
-    dfMais["Percentage Change"] = dfMais["Prix"].pct_change() * 100
-    dfMais["Year"] = dfMais['Date'].dt.year
-    yearly_cumulative_percentage_changeMais = dfMais.groupby("Year")["Percentage Change"].cumsum()
-    median_cumulative_percentage_changeMais = yearly_cumulative_percentage_changeMais.groupby(dfMais['JourOuvrableFrancais']).median()
-    return render_template('saisonnalite.html', dataBle=median_cumulative_percentage_changeBle[:247].to_dict(), dataMais=median_cumulative_percentage_changeMais[:247].to_dict())
+    dfBle = pd.read_csv("EBM.txt", index_col='Date', parse_dates=['Date'])
+    dfBleDaily = dfBle.resample('1D').agg({
+    'Open': 'first',
+    'High': 'max',
+    'Low': 'min',
+    'Close': 'last',
+    'Volume': 'sum'
+    })
+    dfBleDaily = dfBleDaily.dropna()
+    dfBleDaily = dfBleDaily.reset_index()
+    dfBleDaily['JourOuvrableFrancais'] = dfBleDaily['Date'].apply(jour_ouvrable_francais_apply)    
+    dfBleDaily["Percentage Change"] = dfBleDaily['Close'].pct_change() * 100
+    dfBleDaily["Year"] = dfBleDaily['Date'].dt.year
+    dfBleDaily['Yearly cumulative'] = dfBleDaily.groupby("Year")['Percentage Change'].cumsum()
+    median_cumulative = dfBleDaily.groupby('JourOuvrableFrancais')['Yearly cumulative'].median()
+    return render_template('saisonnalite.html', dfBle=median_cumulative[:250].to_dict())
 
 @app.route("/production")
 def production():
