@@ -204,7 +204,7 @@ def seasonality_euronext(df):
     df = df.sort_index()
     years = list(set(df.index.year))
     for i, act in enumerate(["Fonds d'investissement", "Entreprises commerciales", "Autres institutions financières", "Entreprises d'investissement et établissements de crédit"]):
-        for year in years[:-1]:
+        for year in years:
             if df['Produit'][0] == "Corn / Mais":
                 year_data = df[(df.index >= pd.to_datetime(f"{year}-09-01")) & (df.index < pd.to_datetime(f"{year+1}-09-01"))]
                 year_data['Net'] = (year_data[act + " positions Long (Total)"] - year_data[act + " positions Short (Total)"]).sort_index()
@@ -232,7 +232,7 @@ def seasonality_cftc(df, start_year):
     fig, axs = plt.subplots(2, 2, figsize=(13, 6.25))
     for i, act in enumerate(["M_Money", "Prod_Merc", "Other_Rept", "Swap"]):
         row, col = divmod(i, 2)
-        for year in years[:-1]:
+        for year in years:
             if df['Market_and_Exchange_Names'][0] == "CORN - CHICAGO BOARD OF TRADE" or df['Market_and_Exchange_Names'][0] == "SOYBEANS - CHICAGO BOARD OF TRADE":
                 year_data = df[(df.index >= pd.to_datetime(f"{year}-09-01")) & (df.index < pd.to_datetime(f"{year+1}-09-01"))]
                 net = (year_data[act + "_Positions_Long_All"] - year_data[act + "_Positions_Short_All"]).sort_index()
