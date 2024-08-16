@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, render_template_string, url_for, request, jsonify
 import database as db
 import pandas as pd
 from bson import json_util
@@ -8,12 +8,14 @@ import warnings
 import requests
 from datetime import datetime
 import numpy as np
+import folium
+import jenkspy
 
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 
-expi = {'Ble tendre' : 'SEP24', 'Mais' : 'AUG24', 'Colza' : 'AUG24'}
+expi = {'Ble tendre' : 'SEP24', 'Mais' : 'NOV24', 'Colza' : 'NOV24'}
 listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO'}
 
 cursorPhysique = db.get_database_physical().find({})
@@ -484,3 +486,64 @@ def process_cond():
     merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner').sort_values(by='Date')
     return merged.to_json(orient='values')
 
+@app.route("/surfrendprod", methods=['GET', 'POST'])
+def surfrendprod():
+
+    def create_map(df, column, legend_name):
+        m = folium.Map(location=(47, 2.349014), zoom_start=4, 
+                       tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', 
+                       attr='Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS')
+        choropleth = folium.Choropleth(
+            geo_data=geojson_data,
+            name="choropleth",
+            data=df,
+            columns=["DEP", column],
+            key_on="feature.properties.code",
+            fill_color="YlGn",
+            fill_opacity=0.7,
+            line_opacity=0.2,
+            use_jenks=True,
+            legend_name=legend_name,
+        )
+        choropleth.add_to(m)
+        choropleth.color_scale.width = 400
+        return m.get_root()._repr_html_()
+
+    with open('static/files/geojsonfrance.json') as jsonfile:
+        geojson_data = jsonfile.read()
+    
+    df = pd.read_csv('static/files/surfrendprod.csv', encoding='ISO-8859-1', delimiter=';')
+    df['DEP'] = df['DEP'].str.strip()
+    df[['CULT_SURF', 'CULT_REND', 'CULT_PROD']] = round(df[['CULT_SURF', 'CULT_REND', 'CULT_PROD']].replace(',', '.', regex=True).astype(float), 0)
+
+    years = df['ANNEE'].unique()[::-1]
+
+    crops = {
+        'Ble': 'Blé tendre                          ',
+        'Mais': 'Maïs (grain et semence)             ',
+        'Colza': 'Colza                               '
+    }
+
+    if request.method == 'POST':
+        data = request.get_json()
+        dfs = {crop: df[(df['ANNEE'] == int(data['Date'])) & (df['ESPECES'] == species)] for crop, species in crops.items()}
+
+    elif request.method == 'GET':
+        dfs = {crop: df[(df['ANNEE'] == years[0]) & (df['ESPECES'] == species)] for crop, species in crops.items()}
+
+    metrics = {
+        'Surf': ('CULT_SURF', 'Surface {} (ha)'),
+        'Yield': ('CULT_REND', 'Rendement {} (t/ha)'),
+        'Prod': ('CULT_PROD', 'Production {} (t)')
+    }
+
+    maps = {}
+    for crop, df in dfs.items():
+        for metric, (column, legend_template) in metrics.items():
+            map_key = f'{crop.lower()}Iframe{metric}'
+            maps[map_key] = create_map(df, column, legend_template.format(crop))
+
+    if request.method == 'POST':
+        return jsonify(maps)
+    else:
+        return render_template('surfrendprod.html', years=years, **maps)
