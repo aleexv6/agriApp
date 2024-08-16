@@ -1,4 +1,4 @@
-from flask import Flask, render_template, render_template_string, url_for, request, jsonify
+from flask import Flask, render_template, url_for, request, jsonify, send_from_directory
 import database as db
 import pandas as pd
 from bson import json_util
@@ -10,6 +10,7 @@ from datetime import datetime
 import numpy as np
 import folium
 import jenkspy
+import os
 
 warnings.filterwarnings("ignore")
 
@@ -547,3 +548,7 @@ def surfrendprod():
         return jsonify(maps)
     else:
         return render_template('surfrendprod.html', years=years, **maps)
+
+@app.route('/cot/<filename>')
+def download_cot(filename):
+    return send_from_directory(os.path.join(app.root_path, 'static/files'), filename, as_attachment=True)
