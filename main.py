@@ -115,7 +115,6 @@ def physique():
 def futures():
     return render_template('futures.html', listProduct=productFutures, data=dfFutures, listProductFutures=listProductFutures)
 
-
 @app.route("/basis", methods=['GET', 'POST'])
 def base():
     prod = dict()
@@ -325,7 +324,7 @@ def cot():
 
     return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_fonds_euronext_ebm=seasonality_fonds_euronext_ebm, seasonality_comm_euronext_ebm=seasonality_comm_euronext_ebm, seasonality_fonds_euronext_ema=seasonality_fonds_euronext_ema, seasonality_comm_euronext_ema=seasonality_comm_euronext_ema, seasonality_fonds_euronext_eco=seasonality_fonds_euronext_eco, seasonality_comm_euronext_eco=seasonality_comm_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'), df_variation_fonds_eco=df_variation_fonds_eco.to_dict(orient='records'), df_variation_fonds_ema=df_variation_fonds_ema.to_dict(orient='records'))
 
-@app.route("/futures_curve")
+@app.route("/futures-curve")
 def curve():
     df = dfFutures[dfFutures['Expired'] == False]
     df = df[['Date', 'Ticker', 'Expiration', 'Prix']]
@@ -552,3 +551,7 @@ def surfrendprod():
 @app.route('/cot/<filename>')
 def download_cot(filename):
     return send_from_directory(os.path.join(app.root_path, 'static/files'), filename, as_attachment=True)
+
+@app.route("/arome-anomaly")
+def arome():
+    return render_template('arome.html')
