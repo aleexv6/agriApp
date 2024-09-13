@@ -488,7 +488,6 @@ def process_cond():
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():
-
     def create_map(df, column, legend_name):
         m = folium.Map(location=(47, 2.349014), zoom_start=4, 
                        tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', 
@@ -512,16 +511,16 @@ def surfrendprod():
     with open('static/files/geojsonfrance.json') as jsonfile:
         geojson_data = jsonfile.read()
     
-    df = pd.read_csv('static/files/surfrendprod.csv', encoding='ISO-8859-1', delimiter=';')
+    df = pd.read_csv('static/files/SCR-GRC-hist_dep_surface_prod_cult_cer-A24.csv', encoding='ISO-8859-1', delimiter=';')
     df['DEP'] = df['DEP'].str.strip()
     df[['CULT_SURF', 'CULT_REND', 'CULT_PROD']] = round(df[['CULT_SURF', 'CULT_REND', 'CULT_PROD']].replace(',', '.', regex=True).astype(float), 0)
-
+    df['ESPECES'] = df['ESPECES'].str.rstrip()
     years = df['ANNEE'].unique()[::-1]
 
     crops = {
-        'Ble': 'Blé tendre                          ',
-        'Mais': 'Maïs (grain et semence)             ',
-        'Colza': 'Colza                               '
+        'Ble': 'Blé tendre',
+        'Mais': 'Maïs (grain et semence)',
+        'Colza': 'Colza'
     }
 
     if request.method == 'POST':
