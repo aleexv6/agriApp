@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 
-expi = {'Ble tendre' : 'SEP24', 'Mais' : 'NOV24', 'Colza' : 'NOV24'}
+expi = {'Ble tendre' : 'SEP25', 'Mais' : 'NOV24', 'Colza' : 'NOV24'}
 listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO'}
 
 cursorPhysique = db.get_database_physical().find({})
