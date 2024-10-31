@@ -11,6 +11,7 @@ import numpy as np
 import folium
 import jenkspy
 import os
+import json
 
 warnings.filterwarnings("ignore")
 
@@ -409,28 +410,24 @@ def process_dev():
     dfDev = df[df['Year'].isin(int_dates)]
 
     dfDevBleTendre = dfDev[dfDev['Culture'] == 'Blé tendre']
-    bleTendreStart = dfDevBleTendre[dfDevBleTendre['Semis'] == 0]['Date'].iloc[0]
-    if int_dates[1] == datetime.now().year: 
-        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] > bleTendreStart) & (dfDevBleTendre['Year'] <= datetime.now().year)]
-    else:
-        bleTendreEnd = dfDevBleTendre[(dfDevBleTendre['Year'] == int_dates[1]) & (dfDevBleTendre['Récolte'] > 90)]['Date'].iloc[-1]
-        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Date'] >= bleTendreStart) & (dfDevBleTendre['Date'] <= bleTendreEnd)]
+    if datetime.now().year < int_dates[1]:
+        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Year'] == int_dates[0]) & (dfDevBleTendre['Week'] >= 36)]
+    else :
+        dfBleTendreMY = dfDevBleTendre[((dfDevBleTendre['Year'] == int_dates[0]) & (dfDevBleTendre['Week'] >= 36)) | ((dfDevBleTendre['Year'] == int_dates[1]) & (dfDevBleTendre['Week'] <= 35))]
+    
     dfDevBleDur = dfDev[dfDev['Culture'] == 'Blé dur']
-    bleDurStart = dfDevBleDur[dfDevBleDur['Semis'] == 0]['Date'].iloc[0]
-    if int_dates[1] == datetime.now().year: 
-        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] > bleDurStart) & (dfDevBleDur['Year'] <= datetime.now().year)]
-    else:
-        bleDurEnd = dfDevBleDur[(dfDevBleDur['Year'] == int_dates[1]) & (dfDevBleDur['Récolte'] > 90)]['Date'].iloc[-1]
-        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Date'] >= bleDurStart) & (dfDevBleDur['Date'] <= bleDurEnd)]
-    dfDevMais = dfDev[dfDev['Culture'] == 'Maïs grain'].reset_index()
-    maisStart = dfDevMais[(dfDevMais['Semis'] > 0) & (dfDevMais['Year'] == int_dates[1])].index[0] - 1
-    if int_dates[1] == datetime.now().year: 
-        dfMaisMY = dfDevMais[(dfDevMais.index >= maisStart) & (dfDevMais['Year'] <= datetime.now().year)]
-    else: 
-        maisEnd = dfDevMais[(dfDevMais['Year'] == int_dates[1]) & (dfDevMais['Récolte'] > 90)]['Date'].iloc[-1]
-        dfMaisMY = dfDevMais[(dfDevMais.index >= maisStart) & (dfDevMais['Date'] <= maisEnd)]
-    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
+    if datetime.now().year < int_dates[1]:
+        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Year'] == int_dates[0]) & (dfDevBleDur['Week'] >= 36)]
+    else :
+        dfBleDurMY = dfDevBleDur[((dfDevBleDur['Year'] == int_dates[0]) & (dfDevBleDur['Week'] >= 36)) | ((dfDevBleDur['Year'] == int_dates[1]) & (dfDevBleDur['Week'] <= 35))]
 
+    dfDevMais = dfDev[dfDev['Culture'] == 'Maïs grain']
+    if datetime.now().year < int_dates[1]:
+        dfMaisMY = pd.DataFrame()
+    else :
+        dfMaisMY = dfDevMais[(dfDevMais['Year'] == int_dates[1]) & ((dfDevMais['Week'] >= 2) & (dfDevMais['Week'] <= 49))]
+
+    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
     aggregated_stats = dfMoy.groupby(['Culture', 'Week']).agg({
         'Semis': ['mean', 'min', 'max'],
         'Levée': ['mean', 'min', 'max'],
@@ -445,8 +442,31 @@ def process_dev():
         'Récolte': ['mean', 'min', 'max'],
     }).reset_index()
     aggregated_stats.columns = ['_'.join(col).strip() if col[1] else col[0] for col in aggregated_stats.columns.values]
-    merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner')
-    return merged.to_json(orient='values')
+    aggregated_stats_cereales = aggregated_stats[(aggregated_stats['Culture'] == 'Blé tendre') | (aggregated_stats['Culture'] == 'Blé dur')]
+    start_date_cereales = np.where(
+        aggregated_stats_cereales['Week'] >= 36,
+        pd.to_datetime(f'{int_dates[0]}-01-01'),  # Use int_dates[0] if Week >= 36
+        pd.to_datetime(f'{int_dates[1]}-01-01')   # Use int_dates[1] if Week < 36
+    )
+
+    # Add timedelta to calculate the Date column
+    aggregated_stats_cereales['Date'] = start_date_cereales + pd.to_timedelta(aggregated_stats_cereales['Week'], unit="w")
+    aggregated_stats_cereales = pd.concat([aggregated_stats_cereales[aggregated_stats_cereales['Week'] >= 36], aggregated_stats_cereales[aggregated_stats_cereales['Week'] <= 35]]).reset_index(drop=True)
+
+
+    aggregated_stats_mais = aggregated_stats[aggregated_stats['Culture'] == 'Maïs grain']
+
+    # Add timedelta to calculate the Date column
+    aggregated_stats_mais['Date'] = pd.to_datetime(f'{int_dates[1]}-01-01') + pd.to_timedelta(aggregated_stats_mais['Week'], unit="w")
+    #merged = pd.merge(aggregated_stats, df, on=['Culture', 'Week'], how='left')
+
+    response = {
+        'Data': df.to_json(orient='values'),
+        'MeanCereales': aggregated_stats_cereales.to_json(orient='values'),
+        'MeanMais': aggregated_stats_mais.to_json(orient='values'),
+    }
+
+    return response
 
 @app.route("/condition")
 def condition():
@@ -541,7 +561,6 @@ def surfrendprod():
         for metric, (column, legend_template) in metrics.items():
             map_key = f'{crop.lower()}Iframe{metric}'
             maps[map_key] = create_map(df, column, legend_template.format(crop))
-
     if request.method == 'POST':
         return jsonify(maps)
     else:
