@@ -398,7 +398,7 @@ def process_dev():
         data = request.get_json()
         dates = data['Marketing_year'].split('_')
         int_dates = [int(year) for year in dates]
-    cursorDev = db.get_database_dev_cond_france().find({
+    cursorDev = db.get_database_dev_cond().find({
         "Year": {
         "$gte": int_dates[0] - 6,
         "$lte": int_dates[1]
@@ -406,6 +406,7 @@ def process_dev():
     })
     df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
     df = df.drop('_id', axis=1)
+    df = df[df['Région'] == "Moyenne France"]
     dfMoy = df[df['Year'] < int_dates[0]]
     dfDev = df[df['Year'].isin(int_dates)]
 
@@ -465,7 +466,6 @@ def process_dev():
         'MeanCereales': aggregated_stats_cereales.to_json(orient='values'),
         'MeanMais': aggregated_stats_mais.to_json(orient='values'),
     }
-
     return response
 
 @app.route("/condition")
@@ -475,13 +475,14 @@ def condition():
 
 @app.route('/process_cond', methods=['POST', 'GET'])
 def process_cond():
-    cursorDev = db.get_database_dev_cond_france().find({
+    cursorDev = db.get_database_dev_cond().find({
         "Year": {
         "$gte": datetime.now().year - 7
     }
     })
     df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
     df = df.drop('_id', axis=1)
+    df = df[df['Région'] == 'Moyenne France']
     df = df[['Culture', 'Date', 'Semaine', 'Week', 'Year', 'Très mauvaises', 'Mauvaises', 'Assez bonnes', 'Bonnes', 'Très bonnes']]
     dfMoy = df[df['Year'] < datetime.now().year - 1]
 

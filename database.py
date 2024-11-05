@@ -30,3 +30,8 @@ def get_database_dev_cond_france():
     CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@"+config.DB_IP_ADRESS+":27017/"+config.DB_USER
     client = MongoClient(CONNECTION_STRING)
     return client['agri_data']['dev_cond_france']
+
+def get_database_dev_cond():
+    CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@"+config.DB_IP_ADRESS+":27017/"+config.DB_USER
+    client = MongoClient(CONNECTION_STRING)
+    return client['agri_data']['dev_cond']

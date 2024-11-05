@@ -161,7 +161,9 @@
                     currentData = JSON.parse(data['Data'])
                     meanDataCereales = JSON.parse(data['MeanCereales'])
                     meanDataMais = JSON.parse(data['MeanMais'])
-                    
+                    console.log(currentData)
+                    console.log(meanDataCereales)
+                    console.log(meanDataMais)
                     Highcharts.chart('devEBMSemis', {
                     chart: {
                         type: 'line'
@@ -182,7 +184,7 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[15], subarray[2]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9&& subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreSemis)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9&& subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreSemis)
                     },
                     {
                         name: 'Semis Moyenne 5 ans',
@@ -229,7 +231,7 @@
                     },
                     series: [{
                         name: 'Levée',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[15], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreLevee)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[4]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreLevee)
                     },
                     {
                         name: 'Levée Moyenne 5 ans',
@@ -276,7 +278,7 @@
                     },
                     series: [{
                         name: 'Debut Tallage',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[15], subarray[16]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreDebutT)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[17]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreDebutT)
                     },
                     {
                         name: 'Debut Tallage Moyenne 5 ans',
@@ -323,7 +325,7 @@
                     },
                     series: [{
                         name: 'Epi 1cm',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[15], subarray[17]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreEpi1cm)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[18]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreEpi1cm)
                     },
                     {
                         name: 'Epi 1cm Moyenne 5 ans',
@@ -370,7 +372,7 @@
                     },
                     series: [{
                         name: '2 noeuds',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[15], subarray[18]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendre2noeuds)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[19]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendre2noeuds)
                     },
                     {
                         name: '2 noeuds Moyenne 5 ans',
@@ -417,7 +419,7 @@
                     },
                     series: [{
                         name: 'Epiaison',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[15], subarray[19]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreEpiaison)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[20]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreEpiaison)
                     },
                     {
                         name: 'Epiaison Moyenne 5 ans',
@@ -464,7 +466,7 @@
                     },
                     series: [{
                         name: 'Recolte',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[15], subarray[7]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreRecolte)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé tendre').map(subarray => [subarray[16], subarray[8]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreRecolte)
                     },
                     {
                         name: 'Recolte Moyenne 5 ans',
@@ -511,7 +513,7 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[15], subarray[2]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreSemis)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreSemis)
                     },
                     {
                         name: 'Semis Moyenne 5 ans',
@@ -558,7 +560,7 @@
                     },
                     series: [{
                         name: 'Levée',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[15], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreLevee)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[4]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreLevee)
                     },
                     {
                         name: 'Levée Moyenne 5 ans',
@@ -605,7 +607,7 @@
                     },
                     series: [{
                         name: 'Debut Tallage',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[15], subarray[16]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreDebutT)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[17]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreDebutT)
                     },
                     {
                         name: 'Debut Tallage Moyenne 5 ans',
@@ -652,7 +654,7 @@
                     },
                     series: [{
                         name: 'Epi 1cm',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[15], subarray[17]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreEpi1cm)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[18]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreEpi1cm)
                     },
                     {
                         name: 'Epi 1cm Moyenne 5 ans',
@@ -699,7 +701,7 @@
                     },
                     series: [{
                         name: '2 noeuds',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[15], subarray[18]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendre2noeuds)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[19]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendre2noeuds)
                     },
                     {
                         name: '2 noeuds Moyenne 5 ans',
@@ -746,7 +748,7 @@
                     },
                     series: [{
                         name: 'Epiaison',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[15], subarray[19]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreEpiaison)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[20]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreEpiaison)
                     },
                     {
                         name: 'Epiaison Moyenne 5 ans',
@@ -793,7 +795,7 @@
                     },
                     series: [{
                         name: 'Recolte',
-                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[15], subarray[7]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreRecolte)
+                        data: currentData.filter(subarray => subarray[0] === 'Blé dur').map(subarray => [subarray[16], subarray[8]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreRecolte)
                     },
                     {
                         name: 'Recolte Moyenne 5 ans',
@@ -840,7 +842,7 @@
                     },
                     series: [{
                         name: 'Semis',
-                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[15], subarray[2]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreSemis)
+                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreSemis)
                     },
                     {
                         name: 'Semis Moyenne 5 ans',
@@ -887,7 +889,7 @@
                     },
                     series: [{
                         name: 'Levée',
-                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[15], subarray[3]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreLevee)
+                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[4]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(bleTendreLevee)
                     },
                     {
                         name: 'Levée Moyenne 4 ans',
@@ -934,7 +936,7 @@
                     },
                     series: [{
                         name: '6-8 Feuilles Visibles',
-                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[15], subarray[4]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(mais68Feuilles)
+                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[5]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(mais68Feuilles)
                     },
                     {
                         name: '6-8 Feuilles Visibles Moyenne 5 ans',
@@ -981,7 +983,7 @@
                     },
                     series: [{
                         name: 'Floraison Femelle',
-                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[15], subarray[5]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(maisFlorFem)
+                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[6]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null)//getDateAndMoyenneFrance(maisFlorFem)
                     },
                     {
                         name: 'Floraison Femelle Moyenne 5 ans',
@@ -1028,7 +1030,7 @@
                     },
                     series: [{
                         name: 'Humidité grain 50%',
-                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[15], subarray[6]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(maisHum50)
+                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[7]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(maisHum50)
                     },
                     {
                         name: 'Humidité grain 50% Moyenne 5 ans',
@@ -1075,7 +1077,7 @@
                     },
                     series: [{
                         name: 'Recolte',
-                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[15], subarray[7]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreRecolte)
+                        data: currentData.filter(subarray => subarray[0] === 'Maïs grain').map(subarray => [subarray[16], subarray[8]]).filter(subarray => subarray[1] !== 0 && subarray[1] <= 99.9 && subarray[1] !== null),//getDateAndMoyenneFrance(bleTendreRecolte)
                     },
                     {
                         name: 'Recolte Moyenne 5 ans',
