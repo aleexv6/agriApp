@@ -37,46 +37,51 @@
                         <tr>
                             <th>PLACE</th>
                             <th>PRIX</th>
-                            <th>MOIS FUTURES</th>
-                            <th>BASE</th>                                                
+                            <th>MOIS FUTURES</th>          
+                            <th>BASE</th>                  
                             <th>DAILY CHANGE %</th>                                                
                             <th>GRAPHIQUE</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for index, row in df.iterrows() %}
-                            {% if row['Place'] != 'Sud-Est Depart' and row['Place'] != 'Sud-Ouest Depart' %}
-                                <tr>
-                                    <td>{{ row['Place'] }}</td>
-                                    <td>{{ row['Prix'] }}</td>
-                                    {% if item != 'Ble dur' %}
-                                        <td>{{ expiration }}</td>
-                                        <td>{{ (row['Prix'] - dfFutures.iloc[-1]['Prix']).round(2) }}</td>                                                            
-                                        {% if previousDf[previousDf['Place'] == row['Place']].empty %}
-                                            <td>-</td>
-                                        {% else %}
+                            <!-- if row['Place'] != 'Sud-Est Depart' and row['Place'] != 'Sud-Ouest Depart' -->
+                            <tr>
+                                <td>{{ row['Place'] }}</td>
+                                <td>{{ row['Prix'] }}</td>
+                                {% if item != 'Ble dur' %}
+                                    <td>{{ expiration }}</td>
+                                    <td>{{ (row['Prix'] - dfFutures['Prix'].iloc[-1]).round(2) }}</td>                             
+                                    {% if previousDf[previousDf['Place'] == row['Place']].empty %}
+                                        <td>-</td>
+                                    {% else %}
+                                    <td class="percentChange">
+                                        <i class="fa-solid fa-caret-down show-carret-down mr-2"></i>
+                                        <i class="fa-solid fa-caret-up show-carret-up mr-2"></i>
+                                        {{ (((row['Prix'] - previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]) / (previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]|abs)) * 100).round(2) }}%
+                                    </td>
+                                    {% endif %}
+                                {% else %}
+                                    <td>N/C</td>
+                                    {% if previousDf[previousDf['Place'] == row['Place']].empty %}
+                                        <td>-</td>
+                                        <td class="percentChange">
+                                            <i class="fa-solid fa-caret-down show-carret-down mr-2"></i>
+                                            <i class="fa-solid fa-caret-up show-carret-up mr-2"></i>
+                                            0%
+                                        </td>
+                                    {% else %}
+                                        <td>-</td>
                                         <td class="percentChange">
                                             <i class="fa-solid fa-caret-down show-carret-down mr-2"></i>
                                             <i class="fa-solid fa-caret-up show-carret-up mr-2"></i>
                                             {{ (((row['Prix'] - previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]) / (previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]|abs)) * 100).round(2) }}%
                                         </td>
-                                        {% endif %}
-                                    {% else %}
-                                        <td>N/C</td>
-                                        {% if previousDf[previousDf['Place'] == row['Place']].empty %}
-                                            <td>-</td>
-                                        {% else %}
-                                            <td>N/C</td>
-                                        {% endif %}
-                                            <td class="percentChange">
-                                                <i class="fa-solid fa-caret-down show-carret-down mr-2"></i>
-                                                <i class="fa-solid fa-caret-up show-carret-up mr-2"></i>
-                                                {{ (((row['Prix'] - previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]) / (previousDf[previousDf['Place'] == row['Place']]['Prix'].values[0]|abs)) * 100).round(2) }}%
-                                            </td>
-                                        {% endif %}
-                                    <td><i class="fa-solid fa-chart-simple logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{item}}/{{row['Place']}}"></i></td>
-                                </tr>
-                            {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                                <td><i class="fa-solid fa-chart-simple logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{item}}/{{row['Place']}}"></i></td>
+                            </tr>
+                            <!-- endif -->
                         {% endfor %}
                     </tbody>
                 </table>
