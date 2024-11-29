@@ -1,28 +1,22 @@
-from flask import Flask, render_template, url_for, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import database as db
 import pandas as pd
-from bson import json_util
 import re
 from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
 import warnings
 import requests
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import numpy as np
 import folium
-import jenkspy
 import os
-import json
 
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 
 expi = {'Ble tendre' : 'DEC24', 'Mais' : 'MAR25', 'Colza' : 'FEB25'}
-listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO'}
+listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO', 'Ble dur':'EDW'}
 
-cursorPhysique = db.get_database_physical().find({})
-dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True) 
-productPhysique = dfPhysique['Produit'].unique()
 cursorFutures = db.get_database_euronext().find({})
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
 dfFutures = dfFutures[dfFutures['Expired'] == False]
@@ -38,6 +32,84 @@ jours_feries = [
     (11, 11),  # Armistice
     (12, 25)  # Noël
 ]
+
+def EBM_current_futures_month(current_date=None):
+    if current_date is None:
+        current_date = date.today()
+    
+    # Mois d'expiration : mars, mai, septembre, décembre
+    expiration_months = [3, 5, 9, 12]
+    month_to_str = {3: "MAR", 5: "MAY", 9: "SEP", 12: "DEC"}
+
+    # Fonction pour trouver le 10e jour ouvré du mois (ou le jour ouvré suivant)
+    def get_expiration_date(year, month):
+        expiration_date = date(year, month, 10)
+        # Si le 10e jour est un week-end, avancer au prochain jour ouvré
+        while expiration_date.weekday() >= 5:  # 5 = samedi, 6 = dimanche
+            expiration_date += timedelta(days=1)
+        return expiration_date
+
+    # Parcourir les mois d'expiration pour trouver le contrat actif
+    for month in expiration_months:
+        expiration_date = get_expiration_date(current_date.year, month)
+        if current_date <= expiration_date:
+            return f"{month_to_str[month]}{str(current_date.year)[-2:]}"
+    
+    # Si on dépasse tous les mois de l'année courante, retourner le premier contrat de l'année suivante
+    next_year = current_date.year + 1
+    return f"{month_to_str[expiration_months[0]]}{str(next_year)[-2:]}"
+
+def EMA_current_futures_month(current_date=None):
+    if current_date is None:
+        current_date = date.today()
+    
+    # Mois d'expiration : mars, mai, septembre, décembre
+    expiration_months = [3, 6, 8, 11]
+    month_to_str = {3: "MAR", 6: "JUN", 8: "AUG", 11: "NOV"}
+
+    # Fonction pour trouver le 10e jour ouvré du mois (ou le jour ouvré suivant)
+    def get_expiration_date(year, month):
+        expiration_date = date(year, month, 5)
+        # Si le 10e jour est un week-end, avancer au prochain jour ouvré
+        while expiration_date.weekday() >= 5:  # 5 = samedi, 6 = dimanche
+            expiration_date += timedelta(days=1)
+        return expiration_date
+
+    # Parcourir les mois d'expiration pour trouver le contrat actif
+    for month in expiration_months:
+        expiration_date = get_expiration_date(current_date.year, month)
+        if current_date <= expiration_date:
+            return f"{month_to_str[month]}{str(current_date.year)[-2:]}"
+    
+    # Si on dépasse tous les mois de l'année courante, retourner le premier contrat de l'année suivante
+    next_year = current_date.year + 1
+    return f"{month_to_str[expiration_months[0]]}{str(next_year)[-2:]}"
+
+def ECO_current_futures_month(current_date=None):
+    if current_date is None:
+        current_date = date.today()
+    
+    # Mois d'expiration : mars, mai, septembre, décembre
+    expiration_months = [1, 4, 7, 10]
+    month_to_str = {1: "FEB", 4: "MAY", 7: "AUG", 10: "NOV"}
+
+    # Fonction pour trouver le 10e jour ouvré du mois (ou le jour ouvré suivant)
+    def get_expiration_date(year, month):
+        expiration_date = date(year, month, 28)
+        # Si le 10e jour est un week-end, avancer au prochain jour ouvré
+        while expiration_date.weekday() >= 5:  # 5 = samedi, 6 = dimanche
+            expiration_date += timedelta(days=1)
+        return expiration_date
+
+    # Parcourir les mois d'expiration pour trouver le contrat actif
+    for month in expiration_months:
+        expiration_date = get_expiration_date(current_date.year, month)
+        if current_date <= expiration_date:
+            return f"{month_to_str[month]}{str(current_date.year)[-2:]}"
+    
+    # Si on dépasse tous les mois de l'année courante, retourner le premier contrat de l'année suivante
+    next_year = current_date.year + 1
+    return f"{month_to_str[expiration_months[0]]}{str(next_year)[-2:]}"
 
 def reformat_date(date):
     month_to_number = {
@@ -110,7 +182,36 @@ def index():
 
 @app.route("/physique")
 def physique():
-    return render_template('physique.html', data=dfPhysique, listProduct=productPhysique, datafutures=dfFutures, listProductFutures=listProductFutures, expi=expi, dataGraph = dfPhysique[['Date', 'Produit', 'Place', 'Prix']].to_dict(orient='records'))
+    cursorPhysique = db.get_database_physical().find({}, {'_id': 0}) #get data from db removing id column
+    dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True).reset_index(drop=True) #put data in df for sorting on date and reindexing
+    dfPhysique = dfPhysique[dfPhysique['Produit'] != 'Ble dur'] #remove ble dur product because we do not have quality futures for it
+    uniqueDates = dfPhysique['Date'].unique() #get unique dates
+    lastTwoDates = uniqueDates[-2:] #get last two dates 
+    lastTwoDays= dfPhysique[dfPhysique['Date'].isin(lastTwoDates)] #get data from last two dates
+    uniqueProduct = sorted(lastTwoDays['Produit'].unique()) #get unique product sorted alphabeticaly
+
+    currenData = lastTwoDays[lastTwoDays['Date'] == lastTwoDates[1]] #get very last daily data
+    previousData = lastTwoDays[lastTwoDays['Date'] == lastTwoDates[0]] #get currentData -1 trading day
+    currenData['Expiration'] = currenData['Produit'].apply( #auto set the expiration date of contract
+        lambda x: EBM_current_futures_month() if x == "Ble tendre" 
+        else EMA_current_futures_month() if x == "Mais" 
+        else ECO_current_futures_month() if x == "Colza" 
+        else '-'
+    )
+    currenData['Ticker'] = currenData['Produit'].map(listProductFutures) #map futures ticker to product name in df
+    cursorFutures = db.get_database_new_euronext().find({'Date': {'$gte': str(lastTwoDates[1].date())}}, {'_id': 0}) #get futures data from db (only the daily data) without id
+    dfFutures = pd.DataFrame(list(cursorFutures)) #make it a df
+    dfFutures['Date'] = pd.to_datetime(dfFutures['Date']) #set as pd datetime
+
+    tableData = pd.merge(currenData, dfFutures, on=['Date', 'Ticker', 'Expiration'], how='inner') #merge physical data and futures data with inner join for basis calculation
+
+    tableData['Base'] = round(tableData['Prix'] - tableData['Close'], 2) #basis calculation
+
+    calculateChange = pd.merge(currenData, previousData, on=['Produit', 'Place'], how='outer') #merge current and prev physical data with outer join for % change | x is current, y is previous
+
+    tableData['Change'] = round(((calculateChange['Prix_x'] - calculateChange['Prix_y']) / calculateChange['Prix_y']) * 100, 2).fillna('-') #make % change calculation
+
+    return render_template('physique.html', data=dfPhysique.to_dict('records'), produits=uniqueProduct, tableData=tableData.to_dict('records'))
 
 @app.route("/futures")
 def futures():

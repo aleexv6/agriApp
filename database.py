@@ -6,10 +6,15 @@ def get_database_euronext():
     client = MongoClient(CONNECTION_STRING)
     return client['agri_data']['euronext']
 
+def get_database_new_euronext():
+    CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@"+config.DB_IP_ADRESS+":27017/"+config.DB_USER
+    client = MongoClient(CONNECTION_STRING)
+    return client['agri_data']['futures']
+
 def get_database_physical():
     CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@"+config.DB_IP_ADRESS+":27017/"+config.DB_USER
     client = MongoClient(CONNECTION_STRING)
-    return client['agri_data']['physique']
+    return client['agri_data']['new_physique']
 
 def get_database_production():
     CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@"+config.DB_IP_ADRESS+":27017/"+config.DB_USER
