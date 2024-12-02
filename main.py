@@ -17,6 +17,9 @@ app = Flask(__name__)
 expi = {'Ble tendre' : 'DEC24', 'Mais' : 'MAR25', 'Colza' : 'FEB25'}
 listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO', 'Ble dur':'EDW'}
 
+cursorPhysique = db.get_database_physical().find({})
+dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True) 
+productPhysique = dfPhysique['Produit'].unique()
 cursorFutures = db.get_database_euronext().find({})
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
 dfFutures = dfFutures[dfFutures['Expired'] == False]
@@ -176,6 +179,25 @@ def get_market_year(row):
             market_year = f"{year - 1}/{year}"
     return market_year
 
+def full_expiration_date(Expiration):
+
+    # Define month mapping
+    month_map = {
+        'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 
+        'MAY': 5, 'JUN': 6, 'JUL': 7, 'AUG': 8, 
+        'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12
+    }
+    
+    # Extract month and year
+    month_str = Expiration[:3]
+    year_str = Expiration[3:]
+    
+    # Convert to full year assuming no year < 2000
+    full_year = 2000 + int(year_str)
+    
+    # Create datetime object (using first of the month for sorting)
+    return date(full_year, month_map[month_str], 1)
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -215,7 +237,27 @@ def physique():
 
 @app.route("/futures")
 def futures():
-    return render_template('futures.html', listProduct=productFutures, data=dfFutures, listProductFutures=listProductFutures)
+    cursor = db.get_database_new_euronext().find({}, {'_id': 0}) #get data from db removing id column
+    dfFutures = pd.DataFrame(list(cursor)).sort_values(by='Date', ascending=True).reset_index(drop=True) #put data in df for sorting on date and reindexing
+    dfFutures['Date'] = pd.to_datetime(dfFutures['Date'])
+    uniqueDates = dfFutures['Date'].unique() #get unique dates
+    lastTwoDates = uniqueDates[-2:] #get last two dates 
+    lastTwoDays= dfFutures[dfFutures['Date'].isin(lastTwoDates)] #get data from last two dates
+    uniqueTicker = sorted(lastTwoDays['Ticker'].unique()) #get unique product sorted alphabeticaly
+
+    currenData = lastTwoDays[lastTwoDays['Date'] == lastTwoDates[1]] #get very last daily data
+    previousData = lastTwoDays[lastTwoDays['Date'] == lastTwoDates[0]] #get currentData -1 trading day
+
+    tableData = pd.merge(currenData, previousData, on=['Ticker', 'Expiration'], how='outer') #merge current and prev physical data with outer join for % change | x is current, y is previous
+    tableData['Change'] = round(((tableData['Close_x'] - tableData['Close_y']) / tableData['Close_y']) * 100, 2)
+    tableData = tableData.fillna('-')
+    tableData = tableData.rename(columns={'Date_x': 'Date', 'Open_x': 'Open', 'High_x': 'High', 'Low_x': 'Low', 'Close_x': 'Close', 'Volume_x': 'Volume', 'Open Interest_x': 'Open Interest'})
+
+    tableData['Expiration Full Date'] = tableData['Expiration'].apply(full_expiration_date)
+    tableData = tableData.sort_values(by='Expiration Full Date')
+    print(tableData)
+    
+    return render_template('futures.html', data=dfFutures, tickers=uniqueTicker, tableData=tableData.to_dict('records'))
 
 @app.route("/basis", methods=['GET', 'POST'])
 def base():

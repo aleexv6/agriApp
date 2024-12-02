@@ -4,42 +4,47 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Futures</h1>
 </div>      
-{% for item in listProduct %}
-
-{% set df = data[data['Ticker'] == item] %}
-
-    {% set date = (df[df['Date'] < df.iloc[-1]['Date']])['Date'].max() %}
-    {% set previousDf = df[df['Date'] == date] %}
-
-    {% set df = df[df['Date'] == df.iloc[-1]['Date']] %}
+{% for ticker in tickers %}
 <div class="card shadow mb-4">
     <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-primary">{{ item }}</h6>
-        <h6 class="m-0 font-italic text-primary" style="font-size: 0.7rem;">Mis à jour le : {{ df['Date'].iloc[-1] }}, data agritel.com</h6>
+        <h6 class="m-0 font-weight-bold text-primary">{{ ticker }}</h6>
+        <h6 class="m-0 font-italic text-primary" style="font-size: 0.7rem;">Mis à jour le : {{tableData[0]['Date']}}, data Euronext</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>Contrat</th>
-                        <th>Prix</th>
-                        <th>Précédent</th>
-                        <th>Change</th>
+                        <th>Mois</th>
+                        <th>Open</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Close</th>
+                        <th>Daily Change</th>
+                        <th>Volume</th>
+                        <th>Open Interest</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for index, row in df.iterrows() %}
-                    <tr>
-                        <td>{{ row['Expiration'] }}</td>
-                        <td>{{ row['Prix'] }}</td>
-                        <td>{{ previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0] }}</td>
-                        <td class="percentChange">
-                            <i class="fa-solid fa-caret-down show-carret-down mr-2"></i>
-                            <i class="fa-solid fa-caret-up show-carret-up mr-2"></i>
-                            {{ (((row['Prix'] - previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0]) / (previousDf[previousDf['Expiration'] == row['Expiration']]['Prix'].values[0]|abs)) * 100).round(2) }}%
-                        </td>
-                    </tr>
+                    {% for item in tableData %}
+                        {% if item['Ticker'] == ticker %}
+                            <tr>
+                                <td>{{ item['Expiration'] }}</td>
+                                <td>{{ item['Open'] }}</td>
+                                <td>{{ item['High'] }}</td>
+                                <td>{{ item['Low'] }}</td>
+                                <td>{{ item['Close'] }}</td>
+                                <td class="percentChange">
+                                    <i class="fa-solid fa-caret-down show-carret-down mr-2" style="display: none;"></i>
+                                    <i class="fa-solid fa-caret-up show-carret-up mr-2" style="display: none;"></i>
+                                    <i class="fa-solid fa-equals show-equals mr-2" style="display: none;"></i>
+                                    {{ item['Change'] }}
+                                </td>
+                                <td>{{ item['Volume'] }}</td>
+                                <td>{{ item['Open Interest'] }}</td>
+                                
+                            </tr>
+                        {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -59,14 +64,23 @@
                 var value = parseFloat(element.textContent);
                 var caretUp = element.querySelector('.fa-caret-up');
                 var caretDown = element.querySelector('.fa-caret-down');
+                var equals = element.querySelector('.fa-equals');
 
                 if (value < 0) {
                     element.style.color = '#E53E3E';
                     caretUp.style.display = 'none';
+                    equals.style.display = 'none';
                     caretDown.style.display = 'inline';
-                } else {
+                } else if (value > 0) {
                     element.style.color = '#38A169';
                     caretUp.style.display = 'inline';
+                    equals.style.display = 'none';
+                    caretDown.style.display = 'none';
+                }
+                else{
+                    element.style.color = '#2D3748';
+                    caretUp.style.display = 'none';
+                    equals.style.display = 'inline';
                     caretDown.style.display = 'none';
                 }
             });
