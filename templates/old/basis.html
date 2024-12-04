@@ -7,24 +7,26 @@
 <form class="form-inline mb-4">
     <label class="mr-2">Produit : </label>
     <select name="produit" class="custom-select mr-4" id="basisProductSelector">
-        {% for item in baseSelector %}
-            <option value="{{ item['Produit'] }}" >{{ item['Produit'] }}</option>
+        {% for produit in productPhysique if produit != 'Ble dur' %}
+            <option value='{{ produit }}' >{{ produit }}</option>
         {% endfor %}
     </select>
     <label class="mr-2">Place : </label>
     <select name="place" class="custom-select mr-4" id ="basisPlaceSelector">
-        {% for place in baseSelector[0]['Place'] %}
-            <option value="{{ place }}">{{ place }}</option>
+        {% for place in dfPhysique[dfPhysique['Produit'] == productPhysique[0]]['Place'].unique() %}
+        <option value="{{ place }}">{{ place }}</option>
         {% endfor %}
     </select>
     <label class="mr-2">Contrat : </label>
     <select name="expiration" class="custom-select mr-4" id="basisContractSelector">
-        {% for expi in baseSelector[0]['Expi'] %}
-            <option value="{{ expi }}">{{ expi }}</option>
+        
+        {% for ex in expi[productPhysique[0]] %}
+        <option value="{{ ex }}">{{ ex }}</option>
         {% endfor %}
     </select>
-    <!-- <label class="mr-2" for="checkbox">Show expired : </label>
-    <input type="checkbox" id="expiredCheckbox" name="checkbox"> -->
+
+    <label class="mr-2" for="checkbox">Show expired : </label>
+    <input type="checkbox" id="expiredCheckbox" name="checkbox">
 </form>             
 
 <div id="myChartBase"></div>
@@ -34,56 +36,78 @@
     {{ super() }}
     <script>
         // Get the select element
-        var baseData = JSON.parse('{{ baseSelector | tojson }}');
-        var maisPlaces = baseData
-            .filter(item => item.Produit === 'Mais')
-            .map(item => item.Place)[0];
-        var blePlaces = baseData
-            .filter(item => item.Produit === 'Ble tendre')
-            .map(item => item.Place)[0];
-        var colzaPlaces = baseData
-            .filter(item => item.Produit === 'Colza')
-            .map(item => item.Place)[0];
-
-        var maisExpis = baseData
-            .filter(item => item.Produit === 'Mais')
-            .map(item => item.Expi)[0];
-        var bleExpis = baseData
-            .filter(item => item.Produit === 'Ble tendre')
-            .map(item => item.Expi)[0];
-        var colzaExpis = baseData
-            .filter(item => item.Produit === 'Colza')
-            .map(item => item.Expi)[0];
-
+        let dataPlace = JSON.parse('{{ prod | tojson }}');
+        let dataExpi = JSON.parse('{{ expi | tojson }}');
+        let dataExpiAll = JSON.parse('{{ expiAll | tojson }}');
         var selectElement = document.getElementById("basisProductSelector");
         var outputPlace = document.getElementById("basisPlaceSelector");
         var outputExpi = document.getElementById("basisContractSelector");
+        var expired = document.getElementById("expiredCheckbox")
         selectElement.addEventListener("change", function() {
             var selectedValue = selectElement.value;
             outputPlace.innerHTML = "";
             outputExpi.innerHTML = "";
             switch(selectedValue) {
                 case "Mais":
-                    addOptions(maisPlaces, outputPlace);
-                    addOptions(maisExpis, outputExpi);
+                    addOptions(dataPlace['Mais'], outputPlace);
+                    addOptions(dataExpi['Mais'], outputExpi);
                     break;
                 case "Ble tendre":
-                    addOptions(blePlaces, outputPlace);
-                    addOptions(bleExpis, outputExpi);
+                    addOptions(dataPlace['Ble tendre'], outputPlace);
+                    addOptions(dataExpi['Ble tendre'], outputExpi);
                     break;
                 case "Colza":
-                    addOptions(colzaPlaces, outputPlace);
-                    addOptions(colzaExpis, outputExpi);
+                    addOptions(dataPlace['Colza'], outputPlace);
+                    addOptions(dataExpi['Colza'], outputExpi);
                     break;
                 default:
                     outputPlace.innerHTML = "Default content";
                     outputExpi.innerHTML = "Default content";
             }
         });
-
+        expired.addEventListener("change", function() {
+            if (expired.checked){
+                var selectedValue = selectElement.value;
+                outputExpi.innerHTML = "";
+                switch(selectedValue) {
+                    case "Mais":
+                        addOptions(dataExpiAll['Mais'], outputExpi);
+                        break;
+                    case "Ble tendre":
+                        addOptions(dataExpiAll['Ble tendre'], outputExpi);
+                        break;
+                    case "Colza":
+                        addOptions(dataExpiAll['Colza'], outputExpi);
+                        break;
+                    default:
+                        outputPlace.innerHTML = "Default content";
+                        outputExpi.innerHTML = "Default content";
+                }
+            }
+            else {
+                var selectedValue = selectElement.value;
+                outputExpi.innerHTML = "";
+                switch(selectedValue) {
+                    case "Mais":
+                        addOptions(dataExpi['Mais'], outputExpi);
+                        break;
+                    case "Ble tendre":
+                        addOptions(dataExpi['Ble tendre'], outputExpi);
+                        break;
+                    case "Colza":
+                        addOptions(dataExpi['Colza'], outputExpi);
+                        break;
+                    default:
+                        outputPlace.innerHTML = "Default content";
+                        outputExpi.innerHTML = "Default content";
+                }
+            }
+        });
         function addOptions(options, outputDoc) {
             options.forEach(function(optionText) {
-                var option = new Option(optionText, optionText);
+                var option = document.createElement("option");
+                option.value = optionText;
+                option.text = optionText;
                 outputDoc.add(option);
             });
         }
@@ -93,11 +117,12 @@
         var produit = document.getElementById("basisProductSelector");
         var place = document.getElementById("basisPlaceSelector");
         var expiration = document.getElementById("basisContractSelector");
+        var expired = document.getElementById("expiredCheckbox");
         document.addEventListener("DOMContentLoaded", function() {
             $.ajax({
                 type: "POST",
                 url: "/process_basis",
-                data: JSON.stringify({"Produit": produit.value, "Place": place.value, "Expiration": expiration.value}),
+                data: JSON.stringify([{"Produit": produit.value}, {"Place": place.value}, {"Expiration": expiration.value}, {"Expired": expired.checked}]),
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(result) {
@@ -133,12 +158,13 @@
             produit.addEventListener("change", handleSelectChange);
             place.addEventListener("change", handleSelectChange);
             expiration.addEventListener("change", handleSelectChange);
+            expired.addEventListener("change", handleSelectChange);
         });
         function handleSelectChange() {                
             $.ajax({
                 type: "POST",
                 url: "/process_basis",
-                data: JSON.stringify({"Produit": produit.value, "Place": place.value, "Expiration": expiration.value}),
+                data: JSON.stringify([{"Produit": produit.value}, {"Place": place.value}, {"Expiration": expiration.value}, {"Expired": expired.checked}]),
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(result, data) {

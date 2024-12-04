@@ -23,6 +23,7 @@
                         <th>Daily Change</th>
                         <th>Volume</th>
                         <th>Open Interest</th>
+                        <th>Graphique</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,11 +39,11 @@
                                     <i class="fa-solid fa-caret-down show-carret-down mr-2" style="display: none;"></i>
                                     <i class="fa-solid fa-caret-up show-carret-up mr-2" style="display: none;"></i>
                                     <i class="fa-solid fa-equals show-equals mr-2" style="display: none;"></i>
-                                    {{ item['Change'] }}
+                                    {{ item['Change'] }}%
                                 </td>
                                 <td>{{ item['Volume'] }}</td>
                                 <td>{{ item['Open Interest'] }}</td>
-                                
+                                <td><i class="fa-solid fa-chart-simple logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{item['Ticker']}}/{{item['Expiration']}}"></i></td>
                             </tr>
                         {% endif %}
                     {% endfor %}
@@ -52,10 +53,80 @@
     </div>
 </div>
 {% endfor %}
+<div class="modal fade" id="graphModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="graphFuture" class="mb-4" style="height: 60vh;"></div>
+        </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 
 
 {% block scripts %}
     {{ super() }}    
+    <script>
+        var futures = JSON.parse('{{ data | tojson }}');
+        // Fonction qui sera appelée lorsqu'un icône est cliqué
+        function handleIconClick(event) {
+            // Récupère l'ID de l'élément cliqué
+            var iconId = event.target.id;
+            // Affiche l'ID dans la console (ou utilisez-le comme vous le souhaitez)
+            const [ticker, expi] = iconId.split('/', 2);
+            var data = futures.filter(item => item.Ticker === ticker && item.Expiration === expi);
+            var dataEnd = data.map(function(item) {
+                return [new Date(item['Date']).getTime(), item['Close']];
+            });
+            Highcharts.stockChart('graphFuture', {
+                    chart: {
+                        type: 'line'
+                    },
+                    title: {
+                        text: ticker + ' ' + expi
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Date'
+                        },
+                        type: 'datetime'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Prix'
+                        }
+                    },
+                    series: [{
+                        name: "Prix",
+                        data: dataEnd,
+                    }],
+
+                    plotOptions: {
+                        series: {
+                            marker: {
+                            enabled: false
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                    });
+        }
+
+        // Sélectionne tous les éléments avec la classe 'fa-icon'
+        var icons = document.querySelectorAll('.logoGraph');
+
+        // Ajoute un gestionnaire d'événements de clic à chaque élément
+        icons.forEach(function(icon) {
+            icon.addEventListener('click', handleIconClick);
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var valueElements = document.querySelectorAll('.percentChange');

@@ -9,32 +9,11 @@ from datetime import datetime, date, timedelta
 import numpy as np
 import folium
 import os
+from collections import defaultdict
 
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
-
-expi = {'Ble tendre' : 'DEC24', 'Mais' : 'MAR25', 'Colza' : 'FEB25'}
-listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO', 'Ble dur':'EDW'}
-
-cursorPhysique = db.get_database_physical().find({})
-dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True) 
-productPhysique = dfPhysique['Produit'].unique()
-cursorFutures = db.get_database_euronext().find({})
-dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True)
-dfFutures = dfFutures[dfFutures['Expired'] == False]
-productFutures = dfFutures['Ticker'].unique()
-
-jours_feries = [
-    (1, 1),  # Nouvel An
-    (5, 1),  # Fête du Travail
-    (5, 8),  # Victoire des Alliés
-    (7, 14),  # Fête Nationale
-    (8, 15),  # Assomption
-    (11, 1),  # Toussaint
-    (11, 11),  # Armistice
-    (12, 25)  # Noël
-]
 
 def EBM_current_futures_month(current_date=None):
     if current_date is None:
@@ -138,7 +117,6 @@ def jour_ouvrable_francais(date):
     jours_ouvrables = sum(1 for day in pd.date_range(debut_annee, date) if est_jour_ouvre(day) and not est_jour_ferie(day))
     return jours_ouvrables
 
-# Fonction à appliquer sur la colonne des dates
 def jour_ouvrable_francais_apply(date):
     return jour_ouvrable_francais(date.to_pydatetime())
 
@@ -179,8 +157,7 @@ def get_market_year(row):
             market_year = f"{year - 1}/{year}"
     return market_year
 
-def full_expiration_date(Expiration):
-
+def full_expiration_date(row):
     # Define month mapping
     month_map = {
         'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 
@@ -189,23 +166,55 @@ def full_expiration_date(Expiration):
     }
     
     # Extract month and year
-    month_str = Expiration[:3]
-    year_str = Expiration[3:]
+    month_str = row['Expiration'][:3]
+    year_str = row['Expiration'][3:]
     
     # Convert to full year assuming no year < 2000
     full_year = 2000 + int(year_str)
+
+    if row['Ticker'] == 'EBM':
+        fulldate = date(full_year, month_map[month_str], 10)
+    elif row['Ticker'] == 'EMA':
+        fulldate = date(full_year, month_map[month_str], 5)
+    elif row['Ticker'] == 'ECO':
+        fulldate = date(full_year, month_map[month_str], 1)
+    else:
+        fulldate = 0
     
     # Create datetime object (using first of the month for sorting)
-    return date(full_year, month_map[month_str], 1)
+    return fulldate
+
+expi = {'Ble tendre' : 'DEC24', 'Mais' : 'MAR25', 'Colza' : 'FEB25'}
+listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO', 'Ble dur':'EDW'}
+
+cursorPhysique = db.get_database_physical().find({}, {'_id': 0})#get data from db removing id column
+dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True).reset_index(drop=True)#put data in df for sorting on date and reindexing
+productPhysique = dfPhysique['Produit'].unique()
+cursorFutures = db.get_database_new_euronext().find({}, {'_id': 0})#get data from db removing id column
+dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True).reset_index(drop=True)#put data in df for sorting on date and reindexing
+dfFutures['Expiration Full Date'] = dfFutures[['Ticker', 'Expiration']].apply(full_expiration_date, axis=1)
+#dfFutures = dfFutures[dfFutures['Expired'] == False]
+productFutures = dfFutures['Ticker'].unique()
+
+jours_feries = [
+    (1, 1),  # Nouvel An
+    (5, 1),  # Fête du Travail
+    (5, 8),  # Victoire des Alliés
+    (7, 14),  # Fête Nationale
+    (8, 15),  # Assomption
+    (11, 1),  # Toussaint
+    (11, 11),  # Armistice
+    (12, 25)  # Noël
+]
 
 @app.route("/")
 def index():
     return render_template('index.html')
 
 @app.route("/physique")
-def physique():
-    cursorPhysique = db.get_database_physical().find({}, {'_id': 0}) #get data from db removing id column
-    dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True).reset_index(drop=True) #put data in df for sorting on date and reindexing
+def physique(dfPhysique=dfPhysique):
+    #cursorPhysique = db.get_database_physical().find({}, {'_id': 0}) #get data from db removing id column
+    #dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending=True).reset_index(drop=True) #put data in df for sorting on date and reindexing
     dfPhysique = dfPhysique[dfPhysique['Produit'] != 'Ble dur'] #remove ble dur product because we do not have quality futures for it
     uniqueDates = dfPhysique['Date'].unique() #get unique dates
     lastTwoDates = uniqueDates[-2:] #get last two dates 
@@ -231,15 +240,18 @@ def physique():
 
     calculateChange = pd.merge(currenData, previousData, on=['Produit', 'Place'], how='outer') #merge current and prev physical data with outer join for % change | x is current, y is previous
 
-    tableData['Change'] = round(((calculateChange['Prix_x'] - calculateChange['Prix_y']) / calculateChange['Prix_y']) * 100, 2).fillna('-') #make % change calculation
+    calculateChange['Change'] = round(((calculateChange['Prix_x'] - calculateChange['Prix_y']) / calculateChange['Prix_y']) * 100, 2).fillna('-') #make % change calculation
+
+    tableData = tableData.merge(calculateChange[['Produit', 'Place', 'Change']], on=['Produit', 'Place'], how='inner') #merge data to put each change with valid product and place
 
     return render_template('physique.html', data=dfPhysique.to_dict('records'), produits=uniqueProduct, tableData=tableData.to_dict('records'))
 
 @app.route("/futures")
-def futures():
-    cursor = db.get_database_new_euronext().find({}, {'_id': 0}) #get data from db removing id column
-    dfFutures = pd.DataFrame(list(cursor)).sort_values(by='Date', ascending=True).reset_index(drop=True) #put data in df for sorting on date and reindexing
+def futures(dfFutures=dfFutures):
+    #cursor = db.get_database_new_euronext().find({}, {'_id': 0}) #get data from db removing id column
+    #dfFutures = pd.DataFrame(list(cursor)).sort_values(by='Date', ascending=True).reset_index(drop=True) #put data in df for sorting on date and reindexing
     dfFutures['Date'] = pd.to_datetime(dfFutures['Date'])
+    dfFutures = dfFutures.fillna(0)
     uniqueDates = dfFutures['Date'].unique() #get unique dates
     lastTwoDates = uniqueDates[-2:] #get last two dates 
     lastTwoDays= dfFutures[dfFutures['Date'].isin(lastTwoDates)] #get data from last two dates
@@ -250,53 +262,42 @@ def futures():
 
     tableData = pd.merge(currenData, previousData, on=['Ticker', 'Expiration'], how='outer') #merge current and prev physical data with outer join for % change | x is current, y is previous
     tableData['Change'] = round(((tableData['Close_x'] - tableData['Close_y']) / tableData['Close_y']) * 100, 2)
+    tableData = tableData.rename(columns={'Date_x': 'Date', 'Open_x': 'Open', 'High_x': 'High', 'Low_x': 'Low', 'Close_x': 'Close', 'Volume_x': 'Volume', 'Open Interest_x': 'Open Interest', 'Expiration Full Date_x': 'Expiration Full Date'})
+    tableData['Volume'] = tableData['Volume'].astype(int)
+    tableData['Open Interest'] = tableData['Open Interest'].astype(int)
     tableData = tableData.fillna('-')
-    tableData = tableData.rename(columns={'Date_x': 'Date', 'Open_x': 'Open', 'High_x': 'High', 'Low_x': 'Low', 'Close_x': 'Close', 'Volume_x': 'Volume', 'Open Interest_x': 'Open Interest'})
+    tableData = tableData.replace(0, '-')
 
-    tableData['Expiration Full Date'] = tableData['Expiration'].apply(full_expiration_date)
-    tableData = tableData.sort_values(by='Expiration Full Date')
-    print(tableData)
+    #tableData['Expiration Full Date'] = tableData['Expiration'].apply(full_expiration_date) #set expiration date to a date to sort data
+    tableData = tableData.sort_values(by='Expiration Full Date') #sort by date
     
-    return render_template('futures.html', data=dfFutures, tickers=uniqueTicker, tableData=tableData.to_dict('records'))
+    return render_template('futures.html', data=dfFutures.to_dict('records'), tickers=uniqueTicker, tableData=tableData.to_dict('records'))
 
 @app.route("/basis", methods=['GET', 'POST'])
-def base():
-    prod = dict()
-    expi = dict()
-    expiAll = dict()
-    for produit in productPhysique:
-        if produit != 'Ble dur':
-            data = {produit : list(dfPhysique[dfPhysique['Produit'] == produit]['Place'].unique())}
-            prod.update(data)
-    for produit in productPhysique:
-        if produit != 'Ble dur':
-            ticktick = listProductFutures[produit]
-            data = {produit : list(dfFutures[(dfFutures['Ticker'] == ticktick) & (dfFutures['Expired'] == False)]['Expiration'].unique())}
-            expi.update(data)    
-    for produit in productPhysique:
-        if produit != 'Ble dur':
-            ticktick = listProductFutures[produit]
-            data = {produit : list(dfFutures[dfFutures['Ticker'] == ticktick]['Expiration'].unique())}
-            expiAll.update(data)
+def base(dfPhysique=dfPhysique, dfFutures=dfFutures):
+    sampleFutures = dfFutures.tail(100).sort_values(by='Expiration Full Date') #sample 100 last values (to avoid sorting full df) to sort expiration date by date
+    baseSelector = []
+    for produit in sorted(dfPhysique['Produit'].unique()): #sort product to have always same order
+        if produit != 'Ble dur': #remove ble dur we do not have futures
+            place = sorted(list(dfPhysique[dfPhysique['Produit'] == produit]['Place'].unique())) #keep unique places for this product, sorted to always have same order
+            ticker = listProductFutures[produit] #use dict to get futures ticker from product
+            expi = list(sampleFutures[(sampleFutures['Ticker'] == ticker) & (sampleFutures['Expiration Full Date'] > date.today())]['Expiration'].unique()) #get expiration for the productn sorted by expiration date
+            baseSelector.append({'Produit': produit, 'Place':place, 'Expi':expi})
 
-    return render_template('basis.html', dfFutures=dfFutures, listProductFutures=listProductFutures, productPhysique=productPhysique, dfPhysique=dfPhysique, prod=prod, expi=expi, expiAll=expiAll)
+    return render_template('basis.html', dfFutures=dfFutures, baseSelector=baseSelector)
 
 @app.route('/process_basis', methods=['POST', 'GET'])
 def process_basis():
-  if request.method == "POST":
-    data = request.get_json()
-    df = dfPhysique[(dfPhysique['Produit'] == data[0]['Produit']) & (dfPhysique['Place'] == data[1]['Place'])]
-    dfFut = dfFutures[(dfFutures['Ticker'] == listProductFutures[data[0]['Produit']]) & (dfFutures['Expiration'] == data[2]['Expiration'])]
+  if request.method == "POST": # if we get a POST from front
+    data = request.get_json() #get data from front (Produit, Place, Expiration)
+    physique = dfPhysique[(dfPhysique['Produit'] == data['Produit']) & (dfPhysique['Place'] == data['Place'])] #search physical price for current product and place
+    futures = dfFutures[(dfFutures['Ticker'] == listProductFutures[data['Produit']]) & (dfFutures['Expiration'] == data['Expiration'])] #search futures price for current contract
+    futures['Date'] = pd.to_datetime(futures['Date'])
+    df = pd.merge(physique, futures, on='Date', how='inner') #merge on dates
+    df['Basis'] = df['Prix'] - df['Close'] #basis calculation
+    df = df[['Date', 'Basis']]
 
-    df = df[['Date', 'Prix']]
-    df['Date'] = df['Date'].dt.date
-    dfFut = dfFut[['Date', 'Prix']]
-    dfFut['Date'] = dfFut['Date'].dt.date
-    merged_df = pd.merge(df, dfFut, on='Date', how='inner')
-    merged_df['Basis'] = merged_df['Prix_x'] - merged_df['Prix_y']
-
-    json_data = [[row['Date'], row['Basis']] for _, row in merged_df.iterrows()]
-    json_string = pd.Series(json_data).to_json(orient='values')
+    json_string = df.to_json(orient='values') #df to json for sending data
 
     return json_string
   
