@@ -1,161 +1,56 @@
 {% extends "nav.html" %}
 
 {% block content %}
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">EBM</h6>
+{% for item in curveData %}
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between py-3">
+            <h6 class="m-0 font-weight-bold text-success">{{item['Ticker']}}</h6>
+        </div>
+        <div class="card-body">
+            <div id="curve{{ item['Ticker'] }}" class="mb-4" style="height: 60vh;"></div>
+        </div>
     </div>
-    <div class="card-body">
-        <div id="curve_ebm" class="mb-4" style="height: 60vh;"></div>
-    </div>
-</div>
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">EMA</h6>
-    </div>
-    <div class="card-body">
-        <div id="curve_ema" class="mb-4" style="height: 60vh;"></div>
-    </div>
-</div>
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">ECO</h6>
-    </div>
-    <div class="card-body">
-        <div id="curve_eco" class="mb-4" style="height: 60vh;"></div>
-    </div>
-</div>    
+{% endfor %}
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <script>
-        var curve_ebm = JSON.parse('{{ curve_ebm | tojson }}');
-        var curve_ema = JSON.parse('{{ curve_ema | tojson }}');
-        var curve_eco = JSON.parse('{{ curve_eco | tojson }}');
-
-        var EBM = curve_ebm.map(function(item) {
-            return [item['Expiration'], item['Prix']];
-        });
-
-        var EMA = curve_ema.map(function(item) {
-            return [item['Expiration'], item['Prix']];
-        });
-
-        var ECO = curve_eco.map(function(item) {
-            return [item['Expiration'], item['Prix']];
-        });
-
-        Highcharts.chart('curve_ebm', {
-        chart: {
-            type: 'line'
-        },
-        title: {
-            text: 'Curve ' + curve_ebm[0]['Ticker']
-        },
-        xAxis: {
-            title: {
-                text: 'Expiration'
+        var data = JSON.parse('{{ curveData | tojson }}');
+        data.forEach(dict => {
+            Highcharts.chart(`curve${dict.Ticker}`, {
+            chart: {
+                type: 'line'
             },
-            categories : EBM.map(function(subArray) {
-                return subArray[0];
-            })
-        },
-        yAxis: {
             title: {
-                text: 'Prix'
-            }
-        },
-        series: [{
-            name: "EBM",
-            data: EBM,
-        }],
-        plotOptions: {
-            series: {
-                marker: {
-                enabled: false
-                }
-            }
-        },
-
-        credits: {
-            enabled: false
-        }
-        });
-
-        Highcharts.chart('curve_ema', {
-        chart: {
-            type: 'line'
-        },
-        title: {
-            text: 'Curve ' + curve_ema[0]['Ticker']
-        },
-        xAxis: {
-            title: {
-                text: 'Expiration'
+                text: 'Curve ' + dict.Ticker
             },
-            categories : EMA.map(function(subArray) {
-                return subArray[0];
-            })
-        },
-        yAxis: {
-            title: {
-                text: 'Prix'
-            }
-        },
-        series: [{
-            name: "EMA",
-            data: EMA,
-        }],
-        plotOptions: {
-            series: {
-                marker: {
-                enabled: false
-                }
-            }
-        },
-
-        credits: {
-            enabled: false
-        }
-        });
-
-        Highcharts.chart('curve_eco', {
-        chart: {
-            type: 'line'
-        },
-        title: {
-            text: 'Curve ' + curve_eco[0]['Ticker']
-        },
-        xAxis: {
-            title: {
-                text: 'Expiration'
+            xAxis: {
+                title: {
+                    text: 'Expiration'
+                },
+                categories : dict.Expirations
             },
-            categories : ECO.map(function(subArray) {
-                return subArray[0];
-            })
-        },
-        yAxis: {
-            title: {
-                text: 'Prix'
-            }
-        },
-        series: [{
-            name: "ECO",
-            data: ECO,
-        }],
-        plotOptions: {
-            series: {
-                marker: {
-                enabled: false
+            yAxis: {
+                title: {
+                    text: 'Prix'
                 }
+            },
+            series: [{
+                name: dict.Ticker,
+                data: dict.Prix,
+            }],
+            plotOptions: {
+                series: {
+                    marker: {
+                    enabled: false
+                    }
+                }
+            },
+            credits: {
+                enabled: false
             }
-        },
-
-        credits: {
-            enabled: false
-        }
+            });
         });
-
     </script>
 {% endblock %}
