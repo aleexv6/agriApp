@@ -9,60 +9,22 @@
         {% endfor %}
     </select>
 </div>  
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">Blé tendre</h6>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-lg-4" id="bleIframeSurf">
-                {{ bleIframeSurf|safe }}
+<div id= "master">
+    {% for item in img %}
+        <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between py-3">
+                <h6 class="m-0 font-weight-bold text-success">{{ item['Produit'] }}</h6>
             </div>
-            <div class="col-lg-4" id="bleIframeYield">
-                {{ bleIframeYield|safe }}
+            <div class="card-body">
+                <div class="row">
+                    {% for str in item['imgs'] %}
+                        <div class="col-lg-4">{{ str | safe }}</div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="col-lg-4" id="bleIframeProd">
-                {{ bleIframeProd|safe }}
-            </div>
-        </div>
-    </div>
-</div>   
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">Maïs</h6>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-lg-4" id="maisIframeSurf">
-                {{ maisIframeSurf|safe }}
-            </div>
-            <div class="col-lg-4" id="maisIframeYield">
-                {{ maisIframeYield|safe }}
-            </div>
-            <div class="col-lg-4" id="maisIframeProd">
-                {{ maisIframeProd|safe }}
-            </div>
-        </div>
-    </div>
-</div>   
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">Colza</h6>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-lg-4" id="colzaIframeSurf">
-                {{ colzaIframeSurf|safe }}
-            </div>
-            <div class="col-lg-4" id="colzaIframeYield">
-                {{ colzaIframeYield|safe }}
-            </div>
-            <div class="col-lg-4" id="colzaIframeProd">
-                {{ colzaIframeProd|safe }}
-            </div>
-        </div>
-    </div>
-</div>    
+        </div>   
+    {% endfor %}
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -78,10 +40,25 @@
                     dataType: 'json',
                     contentType: "application/json; charset=utf-8",
                     success: function(response) {
-                        // Update the HTML content for each map
-                        for (const [key, value] of Object.entries(response)) {
-                            $('#' + key).html(value);
+                        function createProductCard(item) {
+                            return `
+                                <div class="card shadow mb-4">
+                                    <div class="card-header d-flex justify-content-between py-3">
+                                        <h6 class="m-0 font-weight-bold text-success">${item.Produit}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            ${item.imgs.map(img => `
+                                                <div class="col-lg-4">${img}</div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
                         }
+                        const cardsHTML = response.map(createProductCard).join('');
+                        document.getElementById('master').innerHTML = cardsHTML;
+                        
                     },
                     error: function(error) {
                         console.error("Error updating maps:", error);

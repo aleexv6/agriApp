@@ -10,6 +10,15 @@ import numpy as np
 import folium
 import os
 from collections import defaultdict
+import geopandas as gpd
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+from matplotlib.colors import ListedColormap, BoundaryNorm
+import matplotlib.pyplot as plt
+import base64
+from io import BytesIO
+import matplotlib as mpl
+
 
 warnings.filterwarnings("ignore")
 
@@ -611,63 +620,76 @@ def process_cond():
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():
-    def create_map(df, column, legend_name):
-        m = folium.Map(location=(47, 2.349014), zoom_start=4, 
-                       tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', 
-                       attr='Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS')
-        choropleth = folium.Choropleth(
-            geo_data=geojson_data,
-            name="choropleth",
-            data=df,
-            columns=["DEP", column],
-            key_on="feature.properties.code",
-            fill_color="YlGn",
-            fill_opacity=0.7,
-            line_opacity=0.2,
-            use_jenks=True,
-            legend_name=legend_name,
-        )
-        choropleth.add_to(m)
-        choropleth.color_scale.width = 400
-        return m.get_root()._repr_html_()
-
-    with open('static/files/geojsonfrance.json') as jsonfile:
-        geojson_data = jsonfile.read()
+    df = pd.read_csv('static/files/SCR-GRC-hist_dep_surface_prod_cult_cer-A24.csv', encoding='ISO-8859-1', delimiter=';', decimal=',')
+    years = sorted(df['ANNEE'].unique(), reverse=True)
+    produits = ['Blé tendre', 'Maïs (grain et semence)', 'Colza']
+    renderType = ['CULT_SURF', 'CULT_REND', 'CULT_PROD']
     
-    df = pd.read_csv('static/files/SCR-GRC-hist_dep_surface_prod_cult_cer-A24.csv', encoding='ISO-8859-1', delimiter=';')
-    df['DEP'] = df['DEP'].str.strip()
-    df[['CULT_SURF', 'CULT_REND', 'CULT_PROD']] = round(df[['CULT_SURF', 'CULT_REND', 'CULT_PROD']].replace(',', '.', regex=True).astype(float), 0)
+    imgProduct = []
+    for produit in produits:
+        imgStringList = []
+        if request.method == "POST":
+            postResponse = request.get_json()['Date']
+            data = produce_data(df, produit, int(postResponse))
+        else:
+            data = produce_data(df, produit, years[0])
+        for rType in renderType:
+            img = produce_map(data, rType)
+            imgStringList.append(img)
+        imgProduct.append({'Produit': produit, 'imgs': imgStringList})
+
+    if request.method == "POST":
+        return imgProduct
+    else: 
+        return render_template('surfrendprod.html', years=years, img=imgProduct) 
+    
+
+def produce_data(df, produit, year):
     df['ESPECES'] = df['ESPECES'].str.rstrip()
-    years = df['ANNEE'].unique()[::-1]
+    df['DEP'] = df['DEP'].str.rstrip()
+    df = df[(df['ANNEE'] == year) & (df['ESPECES'] == produit)]
+    df = df[['DEP', 'CULT_SURF', 'CULT_REND', 'CULT_PROD']]
+    corsica = df[(df['DEP'] == '2A') | (df['DEP'] == '2B')]
+    corsicaSurf = corsica['CULT_SURF'].sum()
+    corsicaProd = corsica['CULT_PROD'].sum()
+    corsicaRend = corsica['CULT_REND'].mean()
+    newCorsica = pd.DataFrame({
+        'DEP': ['20'],
+        'CULT_SURF': [corsicaSurf],
+        'CULT_REND': [corsicaRend],
+        'CULT_PROD': [corsicaProd]
+    })
+    df = pd.concat([df, newCorsica]).reset_index(drop=True)
+    df = df[~df['DEP'].isin(['2A', '2B'])]
+    df['DEP'] = df['DEP'].astype(int)
+    departments = gpd.read_file('static/files/geojsonfrance_corse_20.json')[['code', 'geometry']]
+    departments['code'] = departments['code'].astype(int)
+    final_df = departments.merge(df, how='left', left_on='code', right_on='DEP')
+    final_df['DEP'] = final_df['DEP'].fillna(final_df['code'])
+    final_df = final_df.fillna(0)
+    final_df['DEP'] = final_df['DEP'].astype(int)
 
-    crops = {
-        'Ble': 'Blé tendre',
-        'Mais': 'Maïs (grain et semence)',
-        'Colza': 'Colza'
-    }
+    return final_df
 
-    if request.method == 'POST':
-        data = request.get_json()
-        dfs = {crop: df[(df['ANNEE'] == int(data['Date'])) & (df['ESPECES'] == species)] for crop, species in crops.items()}
+def produce_map(produced_data, typeCult):
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': ccrs.PlateCarree()})
+    extent = [-5, 10, 41, 52]
+    ax.set_extent(extent, crs=ccrs.PlateCarree())
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS)
+            
+    produced_data.plot(column=typeCult, ax=ax)
 
-    elif request.method == 'GET':
-        dfs = {crop: df[(df['ANNEE'] == years[0]) & (df['ESPECES'] == species)] for crop, species in crops.items()}
-
-    metrics = {
-        'Surf': ('CULT_SURF', 'Surface {} (ha)'),
-        'Yield': ('CULT_REND', 'Rendement {} (t/ha)'),
-        'Prod': ('CULT_PROD', 'Production {} (t)')
-    }
-
-    maps = {}
-    for crop, df in dfs.items():
-        for metric, (column, legend_template) in metrics.items():
-            map_key = f'{crop.lower()}Iframe{metric}'
-            maps[map_key] = create_map(df, column, legend_template.format(crop))
-    if request.method == 'POST':
-        return jsonify(maps)
-    else:
-        return render_template('surfrendprod.html', years=years, **maps)
+    cmap = mpl.cm.cool
+    norm = mpl.colors.Normalize(vmin=produced_data[typeCult].min(), vmax=produced_data[typeCult].max())
+    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', label='Some Units')
+    
+    buf = BytesIO()
+    fig.tight_layout()
+    fig.savefig(buf, format="png")
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    img = f"<img src='data:image/png;base64,{data}' class='img-fluid'/>"
+    return img
 
 @app.route('/cot/<filename>')
 def download_cot(filename):
