@@ -1,24 +1,19 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import database as db
 import pandas as pd
-import re
 from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
 import warnings
 import requests
 from datetime import datetime, date, timedelta
 import numpy as np
-import folium
 import os
-from collections import defaultdict
 import geopandas as gpd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
 import matplotlib as mpl
-
 
 warnings.filterwarnings("ignore")
 
@@ -620,72 +615,87 @@ def process_cond():
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():
-    df = pd.read_csv('static/files/SCR-GRC-hist_dep_surface_prod_cult_cer-A24.csv', encoding='ISO-8859-1', delimiter=';', decimal=',')
-    years = sorted(df['ANNEE'].unique(), reverse=True)
-    produits = ['Blé tendre', 'Maïs (grain et semence)', 'Colza']
-    renderType = ['CULT_SURF', 'CULT_REND', 'CULT_PROD']
+    df = pd.read_csv('static/files/SCR-GRC-hist_dep_surface_prod_cult_cer-A24.csv', encoding='ISO-8859-1', delimiter=';', decimal=',') #read surf,rend,prod file
+    years = sorted(df['ANNEE'].unique(), reverse=True) #get every years in descending order
+    produits = ['Blé tendre', 'Maïs (grain et semence)', 'Colza'] #products to filter
+    renderType = ['CULT_SURF', 'CULT_REND', 'CULT_PROD'] #type to filter
     
     imgProduct = []
-    for produit in produits:
+    for produit in produits: #loop through products
         imgStringList = []
-        if request.method == "POST":
-            postResponse = request.get_json()['Date']
-            data = produce_data(df, produit, int(postResponse))
-        else:
-            data = produce_data(df, produit, years[0])
-        for rType in renderType:
-            img = produce_map(data, rType)
-            imgStringList.append(img)
-        imgProduct.append({'Produit': produit, 'imgs': imgStringList})
+        if request.method == "POST": #if we sent a poste (meaning we changed the date)
+            postResponse = request.get_json()['Date'] #get the wanted date from response
+            data = produce_data(df, produit, int(postResponse)) #make data for this date
+            for rType in renderType: #loop through each type
+                img = produce_map(data, rType, produit, int(postResponse)) #produce the map
+                imgStringList.append(img) #append img string to list of string
+        else: #if we have get (first load of page)
+            data = produce_data(df, produit, years[0]) #data for the first year of years, meaning most recent year
+            for rType in renderType:
+                img = produce_map(data, rType, produit, years[0]) #data for most recent year
+                imgStringList.append(img)        
+        imgProduct.append({'Produit': produit, 'imgs': imgStringList}) #make a list of dict with data
 
     if request.method == "POST":
-        return imgProduct
+        return imgProduct #if we are post we just have to send data to front 
     else: 
         return render_template('surfrendprod.html', years=years, img=imgProduct) 
-    
 
 def produce_data(df, produit, year):
-    df['ESPECES'] = df['ESPECES'].str.rstrip()
-    df['DEP'] = df['DEP'].str.rstrip()
-    df = df[(df['ANNEE'] == year) & (df['ESPECES'] == produit)]
-    df = df[['DEP', 'CULT_SURF', 'CULT_REND', 'CULT_PROD']]
-    corsica = df[(df['DEP'] == '2A') | (df['DEP'] == '2B')]
+    df['ESPECES'] = df['ESPECES'].str.rstrip() #remove spaces
+    df['DEP'] = df['DEP'].str.rstrip() #remove spaces
+    df = df[(df['ANNEE'] == year) & (df['ESPECES'] == produit)] #filter on year and product
+    df = df[['DEP', 'CULT_SURF', 'CULT_REND', 'CULT_PROD']] #keep essential data
+    #corsica is two departements but here we will make it one
+    corsica = df[(df['DEP'] == '2A') | (df['DEP'] == '2B')] #filter corsica
     corsicaSurf = corsica['CULT_SURF'].sum()
     corsicaProd = corsica['CULT_PROD'].sum()
     corsicaRend = corsica['CULT_REND'].mean()
-    newCorsica = pd.DataFrame({
+    newCorsica = pd.DataFrame({ #make a df with new values
         'DEP': ['20'],
         'CULT_SURF': [corsicaSurf],
         'CULT_REND': [corsicaRend],
         'CULT_PROD': [corsicaProd]
     })
-    df = pd.concat([df, newCorsica]).reset_index(drop=True)
-    df = df[~df['DEP'].isin(['2A', '2B'])]
-    df['DEP'] = df['DEP'].astype(int)
-    departments = gpd.read_file('static/files/geojsonfrance_corse_20.json')[['code', 'geometry']]
-    departments['code'] = departments['code'].astype(int)
-    final_df = departments.merge(df, how='left', left_on='code', right_on='DEP')
-    final_df['DEP'] = final_df['DEP'].fillna(final_df['code'])
-    final_df = final_df.fillna(0)
-    final_df['DEP'] = final_df['DEP'].astype(int)
+    df = pd.concat([df, newCorsica]).reset_index(drop=True) #concat new corsica data
+    df = df[~df['DEP'].isin(['2A', '2B'])] #then remove the two corsican departements
+    df['DEP'] = df['DEP'].astype(int) #set as int to merge
+    departments = gpd.read_file('static/files/geojsonfrance_corse_20.json')[['code', 'geometry']] #find geometry data for each departement
+    departments['code'] = departments['code'].astype(int) #set as int for merge
+    final_df = departments.merge(df, how='left', left_on='code', right_on='DEP') #merge geometry and df
+    final_df['DEP'] = final_df['DEP'].fillna(final_df['code']) #fill na with code if we dont have value for dep (can happen)
+    final_df = final_df.fillna(0) #fill rest of values with 0
+    final_df['DEP'] = final_df['DEP'].astype(int) #set as int
 
     return final_df
 
-def produce_map(produced_data, typeCult):
-    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': ccrs.PlateCarree()})
-    extent = [-5, 10, 41, 52]
+def produce_map(produced_data, typeCult, produit, year):
+    typeCultLegend= { #for legend
+        'CULT_SURF': 'Surface (ha)',
+        'CULT_REND': 'Rendement (t/ha)',
+        'CULT_PROD': 'Production (tonnes)'
+    }
+    typeCultTitle= { #for title
+        'CULT_SURF': 'surface',
+        'CULT_REND': 'rendement',
+        'CULT_PROD': 'production'
+    }
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': ccrs.PlateCarree()}) #initialize fig axe
+    extent = [-5, 10, 41, 52] #to be centered on france
     ax.set_extent(extent, crs=ccrs.PlateCarree())
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS)
             
-    produced_data.plot(column=typeCult, ax=ax)
+    cmap = mpl.cm.YlGn #cmap color
+    norm = mpl.colors.Normalize(vmin=produced_data[typeCult].min(), vmax=produced_data[typeCult].max()) #map normalization
 
-    cmap = mpl.cm.cool
-    norm = mpl.colors.Normalize(vmin=produced_data[typeCult].min(), vmax=produced_data[typeCult].max())
-    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', label='Some Units')
-    
+    produced_data.plot(column=typeCult, ax=ax, cmap=cmap, norm=norm) #plot data
+    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', location='bottom', pad=0.04, shrink=0.70, label=typeCultLegend[typeCult]) #setup colorbar
+    plt.suptitle(f'{produit} {typeCultTitle[typeCult]} {year}', fontsize=18) #set title
+
+    fig.tight_layout() 
+    #prepare buffer to return an image link
     buf = BytesIO()
-    fig.tight_layout()
     fig.savefig(buf, format="png")
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     img = f"<img src='data:image/png;base64,{data}' class='img-fluid'/>"
