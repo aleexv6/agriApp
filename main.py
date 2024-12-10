@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, send_from_directory
 import database as db
 import pandas as pd
 from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
@@ -96,33 +96,6 @@ def ECO_current_futures_month(current_date=None):
     # Si on dépasse tous les mois de l'année courante, retourner le premier contrat de l'année suivante
     next_year = current_date.year + 1
     return f"{month_to_str[expiration_months[0]]}{str(next_year)[-2:]}"
-
-def reformat_date(date):
-    month_to_number = {
-        "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
-        "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
-        "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12"
-    }
-    month = date[:3]
-    year = date[3:]
-    return f"20{year}-{month_to_number[month]}-10"
-
-def est_jour_ferie(date):
-    # Vérifie si la date est un jour férié en France
-    return (date.month, date.day) in jours_feries
-
-def est_jour_ouvre(date):
-    # Vérifie si la date est un samedi ou un dimanche
-    return date.weekday() < 5
-
-def jour_ouvrable_francais(date):
-    # Compte le nombre de jours ouvrés français jusqu'à la date donnée
-    debut_annee = datetime(date.year, 1, 1)
-    jours_ouvrables = sum(1 for day in pd.date_range(debut_annee, date) if est_jour_ouvre(day) and not est_jour_ferie(day))
-    return jours_ouvrables
-
-def jour_ouvrable_francais_apply(date):
-    return jour_ouvrable_francais(date.to_pydatetime())
 
 def get_fr_agr_mer_cotations():
         url = 'https://visionet.franceagrimer.fr/Pages/OpenDocument.aspx?fileurl=SeriesChronologiques%2fproductions%20vegetales%2fgrandes%20cultures%2fcotations%2fSCR-COT-CER_FR-A23.xls&telechargersanscomptage=oui'
@@ -448,23 +421,41 @@ def curve(dfFutures=dfFutures):
     return render_template('curve.html', curveData=curveData)
 
 @app.route("/saisonnalite")
-def saisonnalite():
-    dfBle = pd.read_csv("EBM.txt", index_col='Date', parse_dates=['Date'])
-    dfBleDaily = dfBle.resample('1D').agg({
-    'Open': 'first',
-    'High': 'max',
-    'Low': 'min',
-    'Close': 'last',
-    'Volume': 'sum'
-    })
-    dfBleDaily = dfBleDaily.dropna()
-    dfBleDaily = dfBleDaily.reset_index()
-    dfBleDaily['JourOuvrableFrancais'] = dfBleDaily['Date'].apply(jour_ouvrable_francais_apply)    
-    dfBleDaily["Percentage Change"] = dfBleDaily['Close'].pct_change() * 100
-    dfBleDaily["Year"] = dfBleDaily['Date'].dt.year
-    dfBleDaily['Yearly cumulative'] = dfBleDaily.groupby("Year")['Percentage Change'].cumsum()
-    median_cumulative = dfBleDaily.groupby('JourOuvrableFrancais')['Yearly cumulative'].median()
-    return render_template('saisonnalite.html', dfBle=median_cumulative[:250].to_dict())
+def saisonnalite(dfFutures=dfFutures):
+    todayofyear = pd.to_datetime(date.today().strftime('%Y-%m-%d')).dayofyear # get day of year to print on chart
+    lst = []
+    for _, ticker in listProductFutures.items(): #loop through futures tickers
+        if ticker != 'EDW': #we remove EDW we do not have data
+            dfFuturesProduct = dfFutures[dfFutures['Ticker'] == ticker] #filter on current ticker
+            dfFuturesProduct['Date'] = pd.to_datetime(dfFuturesProduct['Date']) #set as type date
+            dfFuturesProduct = dfFuturesProduct[(dfFuturesProduct['Date'].dt.year > 2003) & (dfFuturesProduct['Date'].dt.year < date.today().year)] #filter data from 2003 to current year -1
+            dfFuturesProduct = dfFuturesProduct[~((dfFuturesProduct['Date'].dt.month == 2) & (dfFuturesProduct['Date'].dt.day == 29))] #remove 02/29 for leap year
+            dfFuturesProduct = dfFuturesProduct.reset_index(drop=True)
+            dfFuturesProduct = dfFuturesProduct.set_index(['Date', 'Expiration'])
+
+            rollingContractsPctChange = dfFuturesProduct.groupby('Expiration')['Close'].pct_change() * 100 #groupby expi and percent change for each contracts
+            rollingContractsPctChange.name = 'Percent Change'
+            continuous = pd.merge(dfFuturesProduct, rollingContractsPctChange, left_index=True, right_index=True) #merge new data on df
+            continuous = continuous.reset_index()
+
+            continuousOI = continuous.loc[continuous.groupby('Date')['Open Interest'].idxmax()] #filter on contract with largest Open interest to have the one infront
+            continuousOI['Year'] = continuousOI['Date'].dt.year
+            continuousOI = continuousOI.set_index('Date')
+
+            yearly_cumulative_percentage_change = continuousOI.groupby("Year")["Percent Change"].cumsum() #groupby year and cumsum on full year to have each day represent the cummulative % change  
+            filled_series = yearly_cumulative_percentage_change.reindex(pd.date_range(start=yearly_cumulative_percentage_change.index.min(), end=yearly_cumulative_percentage_change.index.max())) #fill series with dates that are not present
+            filled_series.loc[(filled_series.index.month == 1) & (filled_series.index.day == 1)] = 0 #set value to 0 for first days of year that have been set
+            filled_series = filled_series.ffill().fillna(0) #fill with last know value or 0 if no know values
+
+            median_cumulative_percentage_change = filled_series.groupby(filled_series.index.dayofyear).median() #groupby day of year and median the values
+            if 366 in median_cumulative_percentage_change.index:
+                median_cumulative_percentage_change = median_cumulative_percentage_change.drop(index=366) #remove the value if dayofyear is 366
+            
+            median_cumulative_percentage_change = median_cumulative_percentage_change.round(2) #round it
+
+            lst.append({'Ticker': ticker, 'Cumulative': median_cumulative_percentage_change.to_dict()}) #append to list to send to front
+
+    return render_template('saisonnalite.html', data=lst, dayofyear=todayofyear)
 
 @app.route("/production")
 def production():

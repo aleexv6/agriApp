@@ -1,65 +1,75 @@
 {% extends "nav.html" %}
 
 {% block content %} 
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">EBM</h6>
+{% for item in data %}
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between py-3">
+            <h6 class="m-0 font-weight-bold text-success">{{ item['Ticker'] }}</h6>
+        </div>
+        <div class="card-body">
+            <div id="saisonnalite_{{ item['Ticker'] }}" class="mb-4" style="height: 60vh;"></div>
+        </div>
     </div>
-    <div class="card-body">
-        <div id="seasonnalite_ebm" class="mb-4" style="height: 60vh;"></div>
-    </div>
-</div>
-
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">EMA</h6>
-    </div>
-    <div class="card-body">
-        <div id="seasonnalite_ema" class="mb-4" style="height: 60vh;"></div>
-    </div>
-</div>   
+{% endfor %}
 {% endblock %}               
 
 {% block scripts %}
     {{ super() }}
     <script>
-        var dataBle = JSON.parse('{{ dfBle | tojson }}');
-        const categoriesBle = Object.keys(dataBle).map(Number);
-        const dataBleT = Object.values(dataBle);
+        var data = JSON.parse('{{ data | tojson }}');
+        var dayofyear = JSON.parse('{{ dayofyear | tojson }}');
+        
+        data.forEach((item) => {
+            var categories = Object.keys(item.Cumulative);
+            var values = Object.values(item.Cumulative);
 
-        Highcharts.chart('seasonnalite_ebm', {
-        chart: {
-            type: 'line'
-        },
-        title: {
-            text: 'Seasonnalite EBM Continuous (2008-2023)'
-        },
-        xAxis: {
-            categories: categoriesBle,
+            Highcharts.chart(`saisonnalite_${item.Ticker}`, {
+            chart: {
+                type: 'line'
+            },
             title: {
-                text: 'Business day of year'
-            }
-        },
-        yAxis: {
-            title: {
-                text: 'Cumulative % change'
-            }
-        },
-        series: [{
-            name: "Median Cumulative Change %",
-            data: dataBleT,
-        }],
-        plotOptions: {
-            series: {
+                text: `Saisonnalité ${item.Ticker} Continuous (2004-2023)`
+            },
+            xAxis: {
+                categories: categories,
+                title: {
+                    text: 'Business day of year'
+                },
+                plotLines: [{ // Vertical line for today
+                color: '#FF0000', // Red
+                width: 2,
+                value: dayofyear, 
+            }]
+            },
+            yAxis: {
+                title: {
+                    text: 'Cumulative % change'
+                }
+            },
+            series: [{
+                name: "Median Cumulative Change %",
+                data: values,
+            },
+            {
+                color: '#FF0000',
+                name: 'Today',
                 marker: {
-                enabled: false
+                    enabled: false
                 }
             }
-        },
+            ],
+            plotOptions: {
+                series: {
+                    marker: {
+                    enabled: false
+                    }
+                }
+            },
 
-        credits: {
-            enabled: false
-        }
+            credits: {
+                enabled: false
+            }
+            });
         });
     </script>
 {% endblock %}
