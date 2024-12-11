@@ -222,7 +222,8 @@ def physique(dfPhysique=dfPhysique):
 @app.route("/futures")
 def futures(dfFutures=dfFutures):
     dfFutures['Date'] = pd.to_datetime(dfFutures['Date'])
-    dfFutures = dfFutures.fillna(0)
+    dfFutures = dfFutures[dfFutures['Expiration Full Date'] > date.today()] #show data that are not expired
+    dfFutures = dfFutures.fillna(0) #fill nan for JSON compatibility
     uniqueDates = dfFutures['Date'].unique() #get unique dates
     lastTwoDates = uniqueDates[-2:] #get last two dates 
     lastTwoDays= dfFutures[dfFutures['Date'].isin(lastTwoDates)] #get data from last two dates
@@ -412,10 +413,11 @@ def cot():
 @app.route("/futures-curve")
 def curve(dfFutures=dfFutures):
     curveData = []
+    dfFutures = dfFutures[dfFutures['Expiration Full Date'] > date.today()] #show data that are not expired
     lastFuturesDate = dfFutures.iloc[-1]['Date'] #get last date from df
     lastFutures = dfFutures[dfFutures['Date'] == lastFuturesDate] #filter on last date
     lastFutures = lastFutures.sort_values(by='Expiration Full Date').reset_index(drop=True) #sort by expiration date
-    for ticker in lastFutures['Ticker'].unique(): #loop through unique tickers 
+    for ticker in sorted(lastFutures['Ticker'].unique()): #loop through unique tickers 
         data = {'Ticker': ticker, 'Expirations': list(lastFutures[lastFutures['Ticker'] == ticker]['Expiration']), 'Prix': list(lastFutures[lastFutures['Ticker'] == ticker]['Close'])} #create data for ticker, expis and prices
         curveData.append(data)    
     return render_template('curve.html', curveData=curveData)
@@ -484,9 +486,8 @@ def production():
     finalECO = pd.concat(dataECO).drop('_id', axis=1)
     return render_template('production.html', dataEBM=finalEBM.to_dict(orient='records'), dataEMA=finalEMA.to_dict(orient='records'), dataECO=finalECO.to_dict(orient='records'))
 
-@app.route("/developpement")
+@app.route("/developpement") #Dev and process_dev to rework
 def developpement():
-    
     return render_template('developpement.html')
 
 @app.route('/process_dev', methods=['POST', 'GET'])
@@ -696,7 +697,8 @@ def produce_map(produced_data, typeCult, produit, year):
     norm = mpl.colors.Normalize(vmin=produced_data[typeCult].min(), vmax=produced_data[typeCult].max()) #map normalization
 
     produced_data.plot(column=typeCult, ax=ax, cmap=cmap, norm=norm) #plot data
-    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', location='bottom', pad=0.04, shrink=0.70, label=typeCultLegend[typeCult]) #setup colorbar
+    cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, orientation='horizontal', location='bottom', pad=0.04, shrink=0.70) #setup colorbar
+    cbar.set_label(label=typeCultLegend[typeCult], size=14)
     plt.suptitle(f'{produit} {typeCultTitle[typeCult]} {year}', fontsize=18) #set title
 
     fig.tight_layout() 
