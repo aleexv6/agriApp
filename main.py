@@ -128,7 +128,7 @@ def get_market_year(row):
         else:
             market_year = f"{year - 1}/{year}"
     else:
-        if 9 <= week <= 49:
+        if 2 <= week <= 49:
             market_year = f"{year - 1}/{year}"
         else:
             market_year = f"{year - 1}/{year}"
@@ -567,31 +567,37 @@ def process_dev():
 
 @app.route("/condition")
 def condition():
-    
-    return render_template('condition.html')
-
-@app.route('/process_cond', methods=['POST', 'GET'])
-def process_cond():
-    cursorDev = db.get_database_dev_cond().find({
+    produits = ['Blé tendre', 'Blé dur', 'Maïs grain'] # set the products
+    cursorDev = db.get_database_dev_cond().find({ #find data from db 
         "Year": {
         "$gte": datetime.now().year - 7
     }
-    })
-    df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
-    df = df.drop('_id', axis=1)
-    df = df[df['Région'] == 'Moyenne France']
-    df = df[['Culture', 'Date', 'Semaine', 'Week', 'Year', 'Très mauvaises', 'Mauvaises', 'Assez bonnes', 'Bonnes', 'Très bonnes']]
-    dfMoy = df[df['Year'] < datetime.now().year - 1]
+    }, {'_id': 0})
+    df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) #make it a df ordered by date 
+    df = df[df['Région'] == 'Moyenne France'] #filter on Moyenne France only
+    df = df[['Culture', 'Date', 'Semaine', 'Week', 'Year', 'Très mauvaises', 'Mauvaises', 'Assez bonnes', 'Bonnes', 'Très bonnes']] #filter on wanted columns
+    dfMoy = df[df['Year'] < datetime.now().year - 1] #select a portion of the df and make it another df for stats
 
-    df['MarketYear'] = df.apply(get_market_year, axis=1)
-    dfMaisMY = df[(df['Culture'] == 'Maïs grain') & (df['Week']>=9)]
-    dfBleTendreMY = df[df['Culture'] == 'Blé tendre']
-    dfBleDurMY = df[df['Culture'] == 'Blé dur']
+    df['MarketYear'] = df.apply(get_market_year, axis=1) #apply function to get marketyear
 
-    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
-    df['BonneEtTresBonnes'] = df['Bonnes'] + df['Très bonnes']
+    productLst = [] #we are making the list of dict for returning data to view
+    for produit in produits: #loop throught products
+        dfProduit = df[df['Culture'] == produit] #select wanted product
+        dfProduit = dfProduit.reset_index(drop=True)
+        MYLst = []
+        for year in dfProduit['MarketYear'].unique(): #now loop through each marketyear
+            dfMY = dfProduit[dfProduit['MarketYear'] == year] #filter on MY
+            dfMY[['Bonnes', 'Très bonnes']] = dfMY[['Bonnes', 'Très bonnes']].fillna(0) #set NaN to 0 for calculation
+            dfMY['BonneEtTresBonnes'] = dfMY['Bonnes'] + dfMY['Très bonnes'] #add bonnes and très bonnes values 
+            dfMY = dfMY.replace({np.nan: None}) #if some nan left we replace for JSON compatibility
+            dfMY = dfMY.replace({0: None}) #Replace 0 with None for JSON compatibility
+            MYLst.append({'Year': year, 'Data': dfMY.to_dict()}) #append the dict to the list of dict
+        productLst.append({'Produit': produit, 'MYs': MYLst}) #append the datas to a list of dict of each product
 
+    #Basically doing the same but for the stats dataframe (Mean of 5 last years)
+    dfMoy[['Bonnes', 'Très bonnes']] = dfMoy[['Bonnes', 'Très bonnes']].fillna(0)
     dfMoy['BonnesEtTresBonnes'] = dfMoy['Bonnes'] + dfMoy['Très bonnes']
+    dfMoy = dfMoy.replace(0, np.nan)
     aggregated_stats = dfMoy.groupby(['Culture', 'Week']).agg({
         'Très mauvaises': 'mean',
         'Mauvaises': 'mean',
@@ -600,9 +606,18 @@ def process_cond():
         'Très bonnes': 'mean',
         'BonnesEtTresBonnes': 'mean'
     }).reset_index()
-    aggregated_stats = aggregated_stats.rename(columns={'Très mauvaises': 'Très mauvaises Mean', 'Mauvaises': 'Mauvaises Mean', 'Assez bonnes': 'Assez bonnes Mean', 'Bonnes': 'Bonnes Mean', 'Très bonnes': 'Très bonnes Mean', 'BonnesEtTresBonnes': 'BonnesEtTresBonnes Mean'})
-    merged = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner').sort_values(by='Date')
-    return merged.to_json(orient='values')
+    aggregated_stats = aggregated_stats.rename(columns={'BonnesEtTresBonnes': 'BonnesEtTresBonnesMean'})    
+    aggregated_stats = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner').sort_values(by='Date')[['Culture', 'Week', 'MarketYear', 'BonnesEtTresBonnesMean']] #here we merge on df to align the data on the week (easier)
+    lastMY = aggregated_stats['MarketYear'].unique()[-3] #we choose a middle of MarketYear to keep only one year of stats
+
+    aggregateLst = []
+    for produit in produits:        
+        dfProduitAgg = aggregated_stats[(aggregated_stats['Culture'] == produit) & (aggregated_stats['MarketYear'] == lastMY)] #filter on product and choosed MY
+        dfProduitAgg = dfProduitAgg.reset_index(drop=True)
+        dfProduitAgg = dfProduitAgg.replace({np.nan: None})
+        aggregateLst.append({'Produit': produit, 'stats': dfProduitAgg.to_dict()}) #make the list of dict
+
+    return render_template('condition.html', data=productLst, stats=aggregateLst)
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():

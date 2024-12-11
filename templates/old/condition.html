@@ -1,0 +1,124 @@
+{% extends "nav.html" %}
+
+{% block content %} 
+<div class="card shadow mb-4">
+    <div class="card-header d-flex justify-content-between py-3">
+        <h6 class="m-0 font-weight-bold text-success">Blé tendre</h6>
+    </div>
+    <div class="card-body">
+            <div>
+                <div id="condBlétendre" class="mb-4" style="height: 60vh;"></div>
+            </div>
+    </div>                            
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header d-flex justify-content-between py-3">
+        <h6 class="m-0 font-weight-bold text-success">Maïs</h6>
+    </div>
+    <div class="card-body">
+            <div>
+                <div id="condMaïsgrain" class="mb-4" style="height: 60vh;"></div>
+            </div>
+    </div>                            
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header d-flex justify-content-between py-3">
+        <h6 class="m-0 font-weight-bold text-success">Blé dur</h6>
+    </div>
+    <div class="card-body">
+            <div>
+                <div id="condBlédur" class="mb-4" style="height: 60vh;"></div>
+            </div>
+    </div>                            
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        handleSelectChange()
+        function handleSelectChange() {
+            $.ajax({
+                type: "POST",
+                url: "/process_cond",
+                data: 0,
+                contentType: "application/json",
+                dataType: 'json',
+                success: function(data){
+                    const uniqueMY = [...new Set(data.map(subarray => subarray[10]))];
+                    uniqueMY.shift(); // Remove the first element (we do not have data for it as we have filtered on year)
+
+                    const uniqueProduct = [...new Set(data.map(subarray => subarray[0]))];
+
+                    uniqueProduct.forEach((item) => {
+                        // Filter data for the specific product
+                        const values = data.filter(subarray => subarray[0] === item);
+                        var categ = []
+                        if (item === 'Blé tendre' || item === 'Blé dur'){
+                            categ = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
+                        }
+                        else if (item === 'Maïs grain'){
+                            categ = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+                        }
+                        console.log(categ)
+                        // Dynamically generate series based on uniqueMY
+                        const series = uniqueMY.map(my => ({
+                            name: my,
+                            data: values
+                                .filter(subarray => subarray[10] === my)
+                                .map(subarray => subarray[11])
+                        }));
+                        console.log(series)
+
+                        // Add the 5-year average series
+                        series.push({
+                            name: 'Moyenne 5 ans',
+                            data: values
+                                .filter(subarray => subarray[10] === uniqueMY[0])
+                                .map(subarray => subarray[17]),
+                            color: '#000000',
+                            lineWidth: 4
+                        });
+
+                        Highcharts.chart(`cond${item.replace(/\s/g, '')}`, {
+                            chart: {
+                                type: 'line'
+                            },
+                            title: {
+                                text: 'Conditions bonnes et très bonnes (Moyenne France)'
+                            },
+                            xAxis: {
+                                title: {
+                                    text: 'Week'
+                                },
+                                categories: categ
+                                // values
+                                //     .filter(subarray => subarray[10] === uniqueMY[4])
+                                //     .map(subarray => subarray[3])
+                            },
+                            yAxis: {
+                                title: {
+                                    text: '% B + TB'
+                                }
+                            },
+                            series: series,
+                            plotOptions: {
+                                series: {
+                                    marker: {
+                                    enabled: false
+                                    }
+                                }
+                            },
+                            credits: {
+                                enabled: false
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
+    </script>
+{% endblock %}
