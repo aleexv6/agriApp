@@ -161,6 +161,110 @@ def full_expiration_date(row):
     # Create datetime object (using first of the month for sorting)
     return fulldate
 
+def dev(produits, stadeDevBle, stadeDevMais, statsStadeDevBle, statsStadeDevMais, marketYear=None):
+    if marketYear:
+        cursorDev = db.get_database_dev_cond().find({
+            "Year": {
+            "$gte": int(marketYear.split('/')[0]) - 6,
+            "$lte": int(marketYear.split('/')[1])
+            },
+            "Culture": {
+                "$in": produits
+            },
+            "Région": "Moyenne France"
+        }, {'_id': 0})
+    else:
+        cursorDev = db.get_database_dev_cond().find({
+            "Year": {
+            "$gte": date.today().year - 6,
+            },
+            "Culture": {
+                "$in": produits
+            },
+            "Région": "Moyenne France"
+        }, {'_id': 0})
+    df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True)
+    df['MarketYear'] = df.apply(get_market_year, axis=1) #apply function to get marketyear
+    uniqueMY = df['MarketYear'].unique()[1:]
+    if marketYear:
+        dfCurrent = df[df['MarketYear'] == marketYear]
+        reversedUniqueMY = uniqueMY[:-1][::-1]
+    else:
+        reversedUniqueMY = uniqueMY[::-1]
+        dfCurrent = df[df['MarketYear'] == reversedUniqueMY[0]]
+
+    dfCurrent = dfCurrent.replace(np.nan, None)
+    dfCurrent['epoch'] = dfCurrent['Date'].apply(lambda x: x.timestamp()) * 1000 #timestamp to milliseconds
+    prodList = []
+    for produit in produits:
+        devList = []
+        dfProduit = dfCurrent[dfCurrent['Culture'] == produit]
+        if (produit == 'Blé tendre') | (produit == 'Blé dur'):
+            stade = stadeDevBle
+        else:
+            stade = stadeDevMais
+        for dev in stade:
+            devList.append({'Dev': dev, 'Data': [[timestamp, value] for timestamp, value in zip(dfProduit['epoch'].to_list(), dfProduit[dev].to_list())]})
+        prodList.append({'Produit': produit, 'Stade': devList})
+
+    #stats
+    dfStats = df[df['MarketYear'].isin(reversedUniqueMY[1:-1])]
+    statsMY = dfStats['MarketYear'].unique()
+    aggregated_stats = dfStats.groupby(['Culture', 'Week']).agg({
+        'Semis': ['mean', 'min', 'max'],
+        'Levée': ['mean', 'min', 'max'],
+        'Début tallage': ['mean', 'min', 'max'],
+        'Épi 1 cm': ['mean', 'min', 'max'],
+        '2 noeuds': ['mean', 'min', 'max'],
+        'Épiaison': ['mean', 'min', 'max'],
+        '6/8 feuilles visibles': ['mean', 'min', 'max'],
+        'Floraison femelle': ['mean', 'min', 'max'],
+        'Début tallage': ['mean', 'min', 'max'],
+        'Humidité du grain 50%': ['mean', 'min', 'max'],
+        'Récolte': ['mean', 'min', 'max'],
+    }).reset_index()
+    aggregated_stats.columns = ['_'.join(col).strip() if col[1] else col[0] for col in aggregated_stats.columns.values]
+    aggregated_stats = pd.merge(df, aggregated_stats, on=['Culture', 'Week'], how='inner').sort_values(by='Date') #here we merge on df to align the data on the week (easier)
+    aggregated_stats = aggregated_stats[aggregated_stats['MarketYear'] == statsMY[-2]]
+    aggregated_stats_cereales = aggregated_stats[(aggregated_stats['Culture'] == 'Blé tendre') | (aggregated_stats['Culture'] == 'Blé dur')]
+    if marketYear:
+        start_date_cereales = np.where(
+            aggregated_stats_cereales['Week'] >= 36,
+            pd.to_datetime(f'{marketYear.split("/")[0]}-01-01'),  # Use int_dates[0] if Week >= 36
+            pd.to_datetime(f'{marketYear.split("/")[1]}-01-01')   # Use int_dates[1] if Week < 36
+        )
+    else:
+        start_date_cereales = np.where(
+            aggregated_stats_cereales['Week'] >= 36,
+            pd.to_datetime(f'{reversedUniqueMY[0].split("/")[0]}-01-01'),  # Use int_dates[0] if Week >= 36marketYear
+            pd.to_datetime(f'{reversedUniqueMY[0].split("/")[1]}-01-01')   # Use int_dates[1] if Week < 36
+        )
+    aggregated_stats_cereales['Date'] = start_date_cereales + pd.to_timedelta(aggregated_stats_cereales['Week'], unit="w")
+
+    aggregated_stats_mais = aggregated_stats[aggregated_stats['Culture'] == 'Maïs grain']
+    if marketYear:
+        aggregated_stats_mais['Date'] = pd.to_datetime(f'{marketYear.split("/")[1]}-01-01') + pd.to_timedelta(aggregated_stats_mais['Week'], unit="w")
+    else:
+        aggregated_stats_mais['Date'] = pd.to_datetime(f'{reversedUniqueMY[0].split("/")[1]}-01-01') + pd.to_timedelta(aggregated_stats_mais['Week'], unit="w")
+    
+    fullStats = pd.concat([aggregated_stats_cereales, aggregated_stats_mais])
+    fullStats = fullStats.replace(np.nan, None)
+    fullStats['epoch'] = fullStats['Date'].apply(lambda x: x.timestamp()) * 1000
+
+    statsProdList = []
+    for produit in produits:
+        statsDevList = []
+        dfProduit = fullStats[fullStats['Culture'] == produit]
+        if (produit == 'Blé tendre') | (produit == 'Blé dur'):
+            stade = statsStadeDevBle
+        else:
+            stade = statsStadeDevMais
+        for dev in stade:
+            statsDevList.append({'Dev': dev, 'Parent': dev.split("_")[0], 'Data': [[timestamp, value] for timestamp, value in zip(dfProduit['epoch'].to_list(), dfProduit[dev].to_list())]})
+        statsProdList.append({'Produit': produit, 'Stade': statsDevList})
+
+    return {'prodList': prodList, 'statsProdList': statsProdList, 'MarketYear': reversedUniqueMY.tolist()}
+
 listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO', 'Ble dur':'EDW'} #set a futures ticker for every product name
 
 #initalize data that we use in a lot of pages here
@@ -223,6 +327,7 @@ def physique(dfPhysique=dfPhysique):
 def futures(dfFutures=dfFutures):
     dfFutures['Date'] = pd.to_datetime(dfFutures['Date'])
     dfFutures = dfFutures[dfFutures['Expiration Full Date'] > date.today()] #show data that are not expired
+    dfFutures = dfFutures.replace('-', 0) #in case of change of contract sometimes volume is set at -
     dfFutures = dfFutures.fillna(0) #fill nan for JSON compatibility
     uniqueDates = dfFutures['Date'].unique() #get unique dates
     lastTwoDates = uniqueDates[-2:] #get last two dates 
@@ -486,85 +591,35 @@ def production():
     finalECO = pd.concat(dataECO).drop('_id', axis=1)
     return render_template('production.html', dataEBM=finalEBM.to_dict(orient='records'), dataEMA=finalEMA.to_dict(orient='records'), dataECO=finalECO.to_dict(orient='records'))
 
-@app.route("/developpement") #Dev and process_dev to rework
+@app.route("/developpement", methods=['POST', 'GET'])
 def developpement():
-    return render_template('developpement.html')
+    produits = ['Blé tendre', 'Blé dur', 'Maïs grain'] # set the products
+    stadeDevBle = ['Semis', 'Levée', 'Début tallage', 'Épi 1 cm', '2 noeuds', 'Épiaison', 'Récolte']
+    stadeDevMais = ['Semis', 'Levée', '6/8 feuilles visibles', 'Floraison femelle', 'Humidité du grain 50%', 'Récolte']
+    statsStadeDevBle = ['Semis_mean', 'Semis_min', 'Semis_max', 'Levée_mean', 'Levée_min', 'Levée_max', 'Début tallage_mean', 'Début tallage_min', 'Début tallage_max', 'Épi 1 cm_mean', 'Épi 1 cm_min', 'Épi 1 cm_max', '2 noeuds_mean', '2 noeuds_min', '2 noeuds_max', 'Épiaison_mean', 'Épiaison_min', 'Épiaison_max', 'Récolte_mean', 'Récolte_min', 'Récolte_max']
+    statsStadeDevMais = ['Semis_mean', 'Semis_min', 'Semis_max', 'Levée_mean', 'Levée_min', 'Levée_max', '6/8 feuilles visibles_mean', '6/8 feuilles visibles_min', '6/8 feuilles visibles_max', 'Floraison femelle_mean', 'Floraison femelle_min', 'Floraison femelle_max', 'Humidité du grain 50%_mean', 'Humidité du grain 50%_min', 'Humidité du grain 50%_max', 'Récolte_mean', 'Récolte_min', 'Récolte_max']
 
-@app.route('/process_dev', methods=['POST', 'GET'])
-def process_dev():
     if request.method == "POST":
-        data = request.get_json()
-        dates = data['Marketing_year'].split('_')
-        int_dates = [int(year) for year in dates]
-    cursorDev = db.get_database_dev_cond().find({
-        "Year": {
-        "$gte": int_dates[0] - 6,
-        "$lte": int_dates[1]
-    }
-    })
-    df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) 
-    df = df.drop('_id', axis=1)
-    df = df[df['Région'] == "Moyenne France"]
-    dfMoy = df[df['Year'] < int_dates[0]]
-    dfDev = df[df['Year'].isin(int_dates)]
+        marketingYear = request.get_json()['Marketing_year']
+        developpement = dev(produits, stadeDevBle, stadeDevMais, statsStadeDevBle, statsStadeDevMais, marketingYear)
+    else:
+        developpement = dev(produits, stadeDevBle, stadeDevMais, statsStadeDevBle, statsStadeDevMais)
 
-    dfDevBleTendre = dfDev[dfDev['Culture'] == 'Blé tendre']
-    if datetime.now().year < int_dates[1]:
-        dfBleTendreMY = dfDevBleTendre[(dfDevBleTendre['Year'] == int_dates[0]) & (dfDevBleTendre['Week'] >= 36)]
-    else :
-        dfBleTendreMY = dfDevBleTendre[((dfDevBleTendre['Year'] == int_dates[0]) & (dfDevBleTendre['Week'] >= 36)) | ((dfDevBleTendre['Year'] == int_dates[1]) & (dfDevBleTendre['Week'] <= 35))]
-    
-    dfDevBleDur = dfDev[dfDev['Culture'] == 'Blé dur']
-    if datetime.now().year < int_dates[1]:
-        dfBleDurMY = dfDevBleDur[(dfDevBleDur['Year'] == int_dates[0]) & (dfDevBleDur['Week'] >= 36)]
-    else :
-        dfBleDurMY = dfDevBleDur[((dfDevBleDur['Year'] == int_dates[0]) & (dfDevBleDur['Week'] >= 36)) | ((dfDevBleDur['Year'] == int_dates[1]) & (dfDevBleDur['Week'] <= 35))]
+    return render_template('developpement.html', marketYear=developpement['MarketYear'], data=developpement['prodList'], statsData=developpement['statsProdList'], stadeDevBle=stadeDevBle, stadeDevMais=stadeDevMais)
 
-    dfDevMais = dfDev[dfDev['Culture'] == 'Maïs grain']
-    if datetime.now().year < int_dates[1]:
-        dfMaisMY = pd.DataFrame()
-    else :
-        dfMaisMY = dfDevMais[(dfDevMais['Year'] == int_dates[1]) & ((dfDevMais['Week'] >= 2) & (dfDevMais['Week'] <= 49))]
+@app.route("/process_dev", methods=['POST', 'GET'])
+def process_dev():
+    produits = ['Blé tendre', 'Blé dur', 'Maïs grain'] # set the products
+    stadeDevBle = ['Semis', 'Levée', 'Début tallage', 'Épi 1 cm', '2 noeuds', 'Épiaison', 'Récolte']
+    stadeDevMais = ['Semis', 'Levée', '6/8 feuilles visibles', 'Floraison femelle', 'Humidité du grain 50%', 'Récolte']
+    statsStadeDevBle = ['Semis_mean', 'Semis_min', 'Semis_max', 'Levée_mean', 'Levée_min', 'Levée_max', 'Début tallage_mean', 'Début tallage_min', 'Début tallage_max', 'Épi 1 cm_mean', 'Épi 1 cm_min', 'Épi 1 cm_max', '2 noeuds_mean', '2 noeuds_min', '2 noeuds_max', 'Épiaison_mean', 'Épiaison_min', 'Épiaison_max', 'Récolte_mean', 'Récolte_min', 'Récolte_max']
+    statsStadeDevMais = ['Semis_mean', 'Semis_min', 'Semis_max', 'Levée_mean', 'Levée_min', 'Levée_max', '6/8 feuilles visibles_mean', '6/8 feuilles visibles_min', '6/8 feuilles visibles_max', 'Floraison femelle_mean', 'Floraison femelle_min', 'Floraison femelle_max', 'Humidité du grain 50%_mean', 'Humidité du grain 50%_min', 'Humidité du grain 50%_max', 'Récolte_mean', 'Récolte_min', 'Récolte_max']
 
-    df = pd.concat([dfBleTendreMY, dfMaisMY, dfBleDurMY])
-    aggregated_stats = dfMoy.groupby(['Culture', 'Week']).agg({
-        'Semis': ['mean', 'min', 'max'],
-        'Levée': ['mean', 'min', 'max'],
-        'Début tallage': ['mean', 'min', 'max'],
-        'Épi 1 cm': ['mean', 'min', 'max'],
-        '2 noeuds': ['mean', 'min', 'max'],
-        'Épiaison': ['mean', 'min', 'max'],
-        '6/8 feuilles visibles': ['mean', 'min', 'max'],
-        'Floraison femelle': ['mean', 'min', 'max'],
-        'Début tallage': ['mean', 'min', 'max'],
-        'Humidité du grain 50%': ['mean', 'min', 'max'],
-        'Récolte': ['mean', 'min', 'max'],
-    }).reset_index()
-    aggregated_stats.columns = ['_'.join(col).strip() if col[1] else col[0] for col in aggregated_stats.columns.values]
-    aggregated_stats_cereales = aggregated_stats[(aggregated_stats['Culture'] == 'Blé tendre') | (aggregated_stats['Culture'] == 'Blé dur')]
-    start_date_cereales = np.where(
-        aggregated_stats_cereales['Week'] >= 36,
-        pd.to_datetime(f'{int_dates[0]}-01-01'),  # Use int_dates[0] if Week >= 36
-        pd.to_datetime(f'{int_dates[1]}-01-01')   # Use int_dates[1] if Week < 36
-    )
+    if request.method == "POST":
+        marketingYear = request.get_json()['Marketing_year']
+        developpement = dev(produits, stadeDevBle, stadeDevMais, statsStadeDevBle, statsStadeDevMais, marketingYear)
 
-    # Add timedelta to calculate the Date column
-    aggregated_stats_cereales['Date'] = start_date_cereales + pd.to_timedelta(aggregated_stats_cereales['Week'], unit="w")
-    aggregated_stats_cereales = pd.concat([aggregated_stats_cereales[aggregated_stats_cereales['Week'] >= 36], aggregated_stats_cereales[aggregated_stats_cereales['Week'] <= 35]]).reset_index(drop=True)
-
-
-    aggregated_stats_mais = aggregated_stats[aggregated_stats['Culture'] == 'Maïs grain']
-
-    # Add timedelta to calculate the Date column
-    aggregated_stats_mais['Date'] = pd.to_datetime(f'{int_dates[1]}-01-01') + pd.to_timedelta(aggregated_stats_mais['Week'], unit="w")
-    #merged = pd.merge(aggregated_stats, df, on=['Culture', 'Week'], how='left')
-
-    response = {
-        'Data': df.to_json(orient='values'),
-        'MeanCereales': aggregated_stats_cereales.to_json(orient='values'),
-        'MeanMais': aggregated_stats_mais.to_json(orient='values'),
-    }
-    return response
+    return [developpement['prodList'], developpement['statsProdList']]
 
 @app.route("/condition")
 def condition():
