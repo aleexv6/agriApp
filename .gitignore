@@ -1,4 +1,5 @@
 config.py
+wsgi.py
 *.csv
 *.xlsx
 *.png
