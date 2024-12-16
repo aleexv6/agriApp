@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
 import matplotlib as mpl
+import config
 
 warnings.filterwarnings("ignore")
 
@@ -677,7 +678,7 @@ def condition():
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():
-    df = pd.read_csv('static/files/SCR-GRC-hist_dep_surface_prod_cult_cer-A24.csv', encoding='ISO-8859-1', delimiter=';', decimal=',') #read surf,rend,prod file
+    df = pd.read_csv(config.SURFRENDPROD_URL, encoding='ISO-8859-1', delimiter=';', decimal=',') #read surf,rend,prod file
     years = sorted(df['ANNEE'].unique(), reverse=True) #get every years in descending order
     produits = ['Blé tendre', 'Maïs (grain et semence)', 'Colza'] #products to filter
     renderType = ['CULT_SURF', 'CULT_REND', 'CULT_PROD'] #type to filter
@@ -722,7 +723,7 @@ def produce_data(df, produit, year):
     df = pd.concat([df, newCorsica]).reset_index(drop=True) #concat new corsica data
     df = df[~df['DEP'].isin(['2A', '2B'])] #then remove the two corsican departements
     df['DEP'] = df['DEP'].astype(int) #set as int to merge
-    departments = gpd.read_file('static/files/geojsonfrance_corse_20.json')[['code', 'geometry']] #find geometry data for each departement
+    departments = gpd.read_file(config.GEOJSON_URL)[['code', 'geometry']] #find geometry data for each departement
     departments['code'] = departments['code'].astype(int) #set as int for merge
     final_df = departments.merge(df, how='left', left_on='code', right_on='DEP') #merge geometry and df
     final_df['DEP'] = final_df['DEP'].fillna(final_df['code']) #fill na with code if we dont have value for dep (can happen)
@@ -771,3 +772,7 @@ def download_cot(filename):
 @app.route("/arome-anomaly")
 def arome():
     return render_template('arome.html')
+
+@app.route("/404")
+def quatrecentquatre():
+    return render_template('404.html')
