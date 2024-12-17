@@ -1,53 +1,71 @@
 {% extends "nav.html" %}
 
 {% block content %} 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0">Physique</h1>
-</div>      
-{% for produit in produits %}
-    <!-- DataTales -->
-    <div class="card shadow mb-4">
-        <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold text-primary">{{ produit.upper() }}</h6>
-            <h6 class="m-0 font-italic text-primary" style="font-size: 0.7rem;">Mis à jour le : {{ tableData[0]['Date'] }}, data terre-net.fr</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>PLACE</th>
-                            <th>PRIX</th>
-                            <th>MOIS FUTURES</th>          
-                            <th>BASE</th>                  
-                            <th>DAILY CHANGE</th>                                                
-                            <th>GRAPHIQUE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in tableData %}
-                            {% if item['Produit'] == produit %}
-                                <tr>
-                                    <td>{{ item['Place'] }}</td>
-                                    <td>{{ item['Prix'] }}</td>
-                                    <td>{{ item['Expiration'] }}</td>
-                                    <td>{{ item['Base'] }}</td>            
-                                    <td class="percentChange">
-                                        <i class="fa-solid fa-caret-down show-carret-down mr-2" style="display: none;"></i>
-                                        <i class="fa-solid fa-caret-up show-carret-up mr-2" style="display: none;"></i>
-                                        <i class="fa-solid fa-equals show-equals mr-2" style="display: none;"></i>
-                                        {{ item['Change'] }}%
-                                    </td>   
-                                    <td><i class="fa-solid fa-chart-simple logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{produit}}/{{item['Place']}}"></i></td>                   
-                                </tr>
-                            {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="update-div">Dernière mise à jour {{ tableData[0]['Date'] }}</div>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0">Cash</h1>
+    </div>      
+    {% for produit in produits %}
+        <div class="bid-section">
+            <div class="header">
+                {{ produit }}
             </div>
+            <table>
+                <thead class="th-separator">
+                    <tr>
+                        <th class="text-align-left">LIVRAISON</th>
+                        <th>
+                            <div class="text-align-right">
+                                BID
+                            </div>
+                            <div class="text-align-right subheader">
+                                (EUR/T)
+                            </div>
+                        </th>
+                        <th>
+                            <div class="text-align-right">
+                                BASIS
+                            </div>
+                            <div class="text-align-right subheader">
+                                (EUR/T)
+                            </div>
+                        </th>
+                        <th>
+                            <div class="text-align-right">
+                                CHANGE
+                            </div>
+                            <div class="text-align-right subheader">
+                                (EUR/T)
+                            </div>
+                        </th>
+                        <th class="text-align-right">MOIS FUTURES</th>
+                        <th class="text-align-right">HISTORIQUE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in tableData %}
+                        {% if item['Produit'] == produit %}
+                            <tr>
+                                <td class="text-align-left"><b>{{ item['Place'] }}</b></td>
+                                <td class="text-align-right"><b>{{ item['Prix'] }}</b></td>
+                                <td class="text-align-right"><b>{{ item['Base'] }}</b></td>
+                                <td class="change text-align-right"><b>{{ item['Change'] }}</b></td>
+                                <td class="futures-month text-align-right"><b>{{ item['Expiration'] }}</b></td>
+                                <td class="text-align-right"><i class="fa-solid fa-chart-line logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{produit}}/{{item['Place']}}"></i></td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+    {% endfor %}
+    <div class="datasource mb-3">
+        Données journalières
+        <img class="datasource-img mr-1" src="{{ url_for('static', filename='img/terrenetLogo.png') }}"/>
+        <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
     </div>
-{% endfor %}
+</div>
 <div class="modal fade" id="graphModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -66,6 +84,22 @@
 {% block scripts %}
     {{ super() }}  
     <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const changeCells = document.querySelectorAll('.change');
+                changeCells.forEach(cell => {
+                    const value = parseFloat(cell.textContent);
+                    if (value > 0) {
+                        cell.classList.add('positive-change');
+                        cell.innerHTML = `<b>&#9650; ${value}%</b>`;
+                    } else if (value < 0) {
+                        cell.classList.add('negative-change');
+                        cell.innerHTML = `<b>&#9660; ${value}%</b>`;
+                    } else {
+                        cell.innerHTML = `<b>-</b>`;
+                    }
+
+                });
+            });
         var physique = {{ data | tojson | safe }};
         // Fonction qui sera appelée lorsqu'un icône est cliqué
         function handleIconClick(event) {
@@ -121,35 +155,4 @@
             icon.addEventListener('click', handleIconClick);
         });
     </script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var valueElements = document.querySelectorAll('.percentChange');
-
-        valueElements.forEach(function(element) {
-            var value = parseFloat(element.textContent);
-            var caretUp = element.querySelector('.fa-caret-up');
-            var caretDown = element.querySelector('.fa-caret-down');
-            var equals = element.querySelector('.fa-equals');
-
-            if (value < 0) {
-                element.style.color = '#E53E3E';
-                caretUp.style.display = 'none';
-                equals.style.display = 'none';
-                caretDown.style.display = 'inline';
-            } else if (value > 0) {
-                element.style.color = '#38A169';
-                caretUp.style.display = 'inline';
-                equals.style.display = 'none';
-                caretDown.style.display = 'none';
-            }
-            else{
-                element.style.color = '#2D3748';
-                caretUp.style.display = 'none';
-                equals.style.display = 'inline';
-                caretDown.style.display = 'none';
-            }
-        });
-    });
-</script>
 {% endblock %} 

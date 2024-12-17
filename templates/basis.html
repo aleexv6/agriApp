@@ -1,94 +1,44 @@
 {% extends "nav.html" %}
 
 {% block content %}
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Base</h1>
+<div class="update-div">Dernière mise à jour {{ lastDate }}</div>   
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0">Base</h1>
+    </div> 
+    <div class="bid-section">
+        <form class="form-inline mb-4 pt-4 pl-4">
+            <label class="xsmall mr-2"><b>CULTURE :</b></label>
+            <select name="produit" class="custom-select mr-4" id="basisProductSelector">
+                {% for item in baseSelector %}
+                    <option value="{{ item['Produit'] }}" >{{ item['Produit'] }}</option>
+                {% endfor %}
+            </select>
+            <label class="xsmall mr-2"><b>LIVRAISON :</b></label>
+            <select name="place" class="custom-select mr-4" id ="basisPlaceSelector">
+                {% for place in baseSelector[0]['Place'] %}
+                    <option value="{{ place }}">{{ place }}</option>
+                {% endfor %}
+            </select>
+            <label class="xsmall mr-2"><b>EXPIRATION :</b></label>
+            <select name="expiration" class="custom-select mr-4" id="basisContractSelector">
+                {% for expi in baseSelector[0]['Expi'] %}
+                    <option value="{{ expi }}">{{ expi }}</option>
+                {% endfor %}
+            </select>
+        </form>             
+        <div id="myChartBase"></div>
+    </div>
+    <div class="datasource mb-3">
+        Données journalières
+        <img class="datasource-img mr-1" src="{{ url_for('static', filename='img/terrenetLogo.png') }}"/>
+        <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
+    </div>
 </div>
-<form class="form-inline mb-4">
-    <label class="mr-2">Produit : </label>
-    <select name="produit" class="custom-select mr-4" id="basisProductSelector">
-        {% for item in baseSelector %}
-            <option value="{{ item['Produit'] }}" >{{ item['Produit'] }}</option>
-        {% endfor %}
-    </select>
-    <label class="mr-2">Place : </label>
-    <select name="place" class="custom-select mr-4" id ="basisPlaceSelector">
-        {% for place in baseSelector[0]['Place'] %}
-            <option value="{{ place }}">{{ place }}</option>
-        {% endfor %}
-    </select>
-    <label class="mr-2">Contrat : </label>
-    <select name="expiration" class="custom-select mr-4" id="basisContractSelector">
-        {% for expi in baseSelector[0]['Expi'] %}
-            <option value="{{ expi }}">{{ expi }}</option>
-        {% endfor %}
-    </select>
-    <!-- <label class="mr-2" for="checkbox">Show expired : </label>
-    <input type="checkbox" id="expiredCheckbox" name="checkbox"> -->
-</form>             
-
-<div id="myChartBase"></div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-    <script>
-        // Get the select element
-        var baseData = JSON.parse('{{ baseSelector | tojson }}');
-        var maisPlaces = baseData
-            .filter(item => item.Produit === 'Mais')
-            .map(item => item.Place)[0];
-        var blePlaces = baseData
-            .filter(item => item.Produit === 'Ble tendre')
-            .map(item => item.Place)[0];
-        var colzaPlaces = baseData
-            .filter(item => item.Produit === 'Colza')
-            .map(item => item.Place)[0];
-
-        var maisExpis = baseData
-            .filter(item => item.Produit === 'Mais')
-            .map(item => item.Expi)[0];
-        var bleExpis = baseData
-            .filter(item => item.Produit === 'Ble tendre')
-            .map(item => item.Expi)[0];
-        var colzaExpis = baseData
-            .filter(item => item.Produit === 'Colza')
-            .map(item => item.Expi)[0];
-
-        var selectElement = document.getElementById("basisProductSelector");
-        var outputPlace = document.getElementById("basisPlaceSelector");
-        var outputExpi = document.getElementById("basisContractSelector");
-        selectElement.addEventListener("change", function() {
-            var selectedValue = selectElement.value;
-            outputPlace.innerHTML = "";
-            outputExpi.innerHTML = "";
-            switch(selectedValue) {
-                case "Mais":
-                    addOptions(maisPlaces, outputPlace);
-                    addOptions(maisExpis, outputExpi);
-                    break;
-                case "Ble tendre":
-                    addOptions(blePlaces, outputPlace);
-                    addOptions(bleExpis, outputExpi);
-                    break;
-                case "Colza":
-                    addOptions(colzaPlaces, outputPlace);
-                    addOptions(colzaExpis, outputExpi);
-                    break;
-                default:
-                    outputPlace.innerHTML = "Default content";
-                    outputExpi.innerHTML = "Default content";
-            }
-        });
-
-        function addOptions(options, outputDoc) {
-            options.forEach(function(optionText) {
-                var option = new Option(optionText, optionText);
-                outputDoc.add(option);
-            });
-        }
-    </script>
-
     <script>
         var produit = document.getElementById("basisProductSelector");
         var place = document.getElementById("basisPlaceSelector");
@@ -171,5 +121,61 @@
                 }
             });
         }        
+    </script>
+    <script>
+        // Get the select element
+        var baseData = JSON.parse('{{ baseSelector | tojson }}');
+        var maisPlaces = baseData
+            .filter(item => item.Produit === 'Mais')
+            .map(item => item.Place)[0];
+        var blePlaces = baseData
+            .filter(item => item.Produit === 'Ble tendre')
+            .map(item => item.Place)[0];
+        var colzaPlaces = baseData
+            .filter(item => item.Produit === 'Colza')
+            .map(item => item.Place)[0];
+
+        var maisExpis = baseData
+            .filter(item => item.Produit === 'Mais')
+            .map(item => item.Expi)[0];
+        var bleExpis = baseData
+            .filter(item => item.Produit === 'Ble tendre')
+            .map(item => item.Expi)[0];
+        var colzaExpis = baseData
+            .filter(item => item.Produit === 'Colza')
+            .map(item => item.Expi)[0];
+
+        var selectElement = document.getElementById("basisProductSelector");
+        var outputPlace = document.getElementById("basisPlaceSelector");
+        var outputExpi = document.getElementById("basisContractSelector");
+        selectElement.addEventListener("change", function() {
+            var selectedValue = selectElement.value;
+            outputPlace.innerHTML = "";
+            outputExpi.innerHTML = "";
+            switch(selectedValue) {
+                case "Mais":
+                    addOptions(maisPlaces, outputPlace);
+                    addOptions(maisExpis, outputExpi);
+                    break;
+                case "Ble tendre":
+                    addOptions(blePlaces, outputPlace);
+                    addOptions(bleExpis, outputExpi);
+                    break;
+                case "Colza":
+                    addOptions(colzaPlaces, outputPlace);
+                    addOptions(colzaExpis, outputExpi);
+                    break;
+                default:
+                    outputPlace.innerHTML = "Default content";
+                    outputExpi.innerHTML = "Default content";
+            }
+        });
+
+        function addOptions(options, outputDoc) {
+            options.forEach(function(optionText) {
+                var option = new Option(optionText, optionText);
+                outputDoc.add(option);
+            });
+        }
     </script>
 {% endblock %}

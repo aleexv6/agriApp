@@ -1,71 +1,115 @@
 {% extends "nav.html" %}
 
 {% block content %} 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Spread</h1>
+<div class="update-div">Dernière mise à jour {{ lastDate }}</div>   
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0">Spread</h1>
+    </div> 
+    <div class="bid-section">
+        <form class="form-inline mb-4 pt-4 pl-4">
+            <label class="xsmall mr-2"><b>TYPE :</b></label>
+            <select name="spread" class="custom-select mr-4" id="spreadSelectorElement">
+                <option value='SP'>Calendar Spread</option>
+                <option value='BF'>Butterfly Spread</option>
+                <!--<option value='OT'>Other</option>-->
+            </select>
+            <!-- <input type="text" style="display: none;" class="form-control form-control-user mr-4" id="otherSpreadText" placeholder="Spread string"> -->
+            <label class="xsmall mr-2" id="productLabel"><b>TICKER :</b></label>
+            <select name="produit" class="custom-select mr-4" id="productSelector">
+                {% for item in spreadSelector %}
+                    <option value="{{ item['Ticker'] }}" >{{ item['Ticker'] }}</option>
+                {% endfor %}
+            </select>
+            <label class="xsmall mr-2" id="leg1Label"><b>LEG 1 :</b></label>
+            <select name="expiration" class="custom-select mr-4" id="spreadLeg1Selector">                            
+                {% for expi in spreadSelector[0]['Expi'] %}
+                    <option value="{{ spreadSelector[0]['Ticker'] }}_{{ expi }}">{{ spreadSelector[0]['Ticker'] }} {{ expi }}</option>
+                {% endfor %}
+            </select>
+            <label class="xsmall mr-2" id="leg2Label"><b>LEG 2 :</b></label>
+            <select name="expiration" class="custom-select mr-4" id="spreadLeg2Selector">                   
+                {% for expi in spreadSelector[0]['Expi'] %}
+                    {% if loop.index0 != 1 %}
+                        <option value="{{ spreadSelector[0]['Ticker'] }}_{{ expi }}">{{ spreadSelector[0]['Ticker'] }} {{ expi }}</option>
+                    {% else %}
+                        <option value="{{ spreadSelector[0]['Ticker'] }}_{{ expi }}" selected>{{ spreadSelector[0]['Ticker'] }} {{ expi }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <label style="display: none;" class="xsmall mr-2" id="leg3Label"><b>LEG 3 :</b></label>
+            <select style="display: none;" name="expiration" class="custom-select mr-4 legDisplay" id="spreadLeg3Selector">                            
+                {% for expi in spreadSelector[0]['Expi'] %}
+                    <option value="{{ spreadSelector[0]['Ticker'] }}_{{ expi }}">{{ spreadSelector[0]['Ticker'] }} {{ expi }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-sm btn-success shadow-sm mr-4" type="button" onclick="Spread()"><b>CALCULER</b></button>
+
+            <!-- <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Pour les autres spreads, la chaine de charactère doit être du type : NBCONTRATS_PRODUIT_EXPIRATION. Par exemple : 1_EBM_MAY24 - 1_EMA_MAY25. Pour connaitre les produits et expiration disponibles, rendez-vous sur le Calendar Spread."></i> -->
+
+        </form> 
+        <div id="myChartSpread" style="height: 60vh;"></div>
+    </div>
+    <div class="datasource mb-3">
+        Données journalières
+        <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
+    </div>
 </div>
-
-<form class="form-inline mb-4">
-    <label class="mr-2">Type : </label>
-    <select name="spread" class="custom-select mr-4" id="spreadSelectorElement">
-        <option value='SP'>Calendar Spread</option>
-        <option value='BF'>Butterfly Spread</option>
-        <!--<option value='OT'>Other</option>-->
-    </select>
-    <input type="text" style="display: none;" class="form-control form-control-user mr-4" id="otherSpreadText" placeholder="Spread string">
-    <label class="mr-2" id="productLabel">Ticker : </label>
-    <select name="produit" class="custom-select mr-4" id="productSelector">
-        {% for item in spreadSelector %}
-            <option value="{{ item['Ticker'] }}" >{{ item['Ticker'] }}</option>
-        {% endfor %}
-    </select>
-    <label class="mr-2" id="leg1Label">Leg 1 : </label>
-    <select name="expiration" class="custom-select mr-4" id="spreadLeg1Selector">                            
-        {% for expi in spreadSelector[0]['Expi'] %}
-            <option value="{{ spreadSelector[0]['Ticker'] }}_{{ expi }}">{{ spreadSelector[0]['Ticker'] }} {{ expi }}</option>
-        {% endfor %}
-    </select>
-    <label class="mr-2" id="leg2Label">Leg 2 : </label>
-    <select name="expiration" class="custom-select mr-4" id="spreadLeg2Selector">                            
-        {% for expi in spreadSelector[0]['Expi'] %}
-            <option value="{{ spreadSelector[0]['Ticker'] }}_{{ expi }}">{{ spreadSelector[0]['Ticker'] }} {{ expi }}</option>
-        {% endfor %}
-    </select>
-    <label style="display: none;" class="mr-2" id="leg3Label">Leg 3 : </label>
-    <select style="display: none;" name="expiration" class="custom-select mr-4 legDisplay" id="spreadLeg3Selector">                            
-        {% for expi in spreadSelector[0]['Expi'] %}
-            <option value="{{ spreadSelector[0]['Ticker'] }}_{{ expi }}">{{ spreadSelector[0]['Ticker'] }} {{ expi }}</option>
-        {% endfor %}
-    </select>
-    <button class="btn btn-sm btn-success shadow-sm mr-4" type="button" onclick="Spread()">Show</button>
-
-    <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Pour les autres spreads, la chaine de charactère doit être du type : NBCONTRATS_PRODUIT_EXPIRATION. Par exemple : 1_EBM_MAY24 - 1_EMA_MAY25. Pour connaitre les produits et expiration disponibles, rendez-vous sur le Calendar Spread."></i>
-
-</form> 
-<div id="myChartSpread" style="height: 60vh;"></div>
 {% endblock %} 
 
 {% block scripts %}
     {{ super() }} 
     <script>
-        $('[data-toggle="tooltip"]').tooltip();
+        const firstData = JSON.parse({{ data | tojson | safe }})
+        var title = 'Spread ' + spreadLeg1Selector.value.replace('_', ' ') + ' - ' + spreadLeg2Selector.value.split('_')[1];
+        document.addEventListener("DOMContentLoaded", function() {
+            Highcharts.stockChart('myChartSpread', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: title
+                },
+                xAxis: {
+                    title: {
+                        text: 'Day'
+                    },
+                    type: 'datetime'
+                },
+                yAxis: {
+                    title: {
+                        text: 'Spread'
+                    }
+                },
+                series: [{
+                    name: 'Spread',
+                    data: firstData
+                }],
+                credits: {
+                    enabled: false
+                }
+            });
+        });
 
+        $('[data-toggle="tooltip"]').tooltip();
+    </script>
+    <script>
         function Spread() {
             var spreadLeg1 = document.getElementById('spreadLeg1Selector')
             var spreadLeg2 = document.getElementById('spreadLeg2Selector')
             var spreadLeg3 = document.getElementById('spreadLeg3Selector')
             var spreadType = document.getElementById('spreadSelectorElement')
-            var otherString = document.getElementById("otherSpreadText");
-            if (spreadType.value == "OT"){
-                var title = 'Spread ' + otherString.value.replace(/_/g, ' ');
-            }
-            else{
-                var title = 'Spread '
+            // var otherString = document.getElementById("otherSpreadText");
+            if (spreadType.value == "SP"){
+                var title = 'Spread ' + spreadLeg1Selector.value.replace('_', ' ') + ' - ' + spreadLeg2Selector.value.split('_')[1];
+            } 
+            else if (spreadType.value == "BF"){
+                var title = 'Spread ' + spreadLeg1Selector.value.replace('_', ' ') + ' - ' + spreadLeg2Selector.value.split('_')[1] + ' - ' + spreadLeg3Selector.value.split('_')[1];
             }
             $.ajax({
                 type: "POST",
                 url: "/process_spread",
-                data: JSON.stringify({"Type" : spreadType.value, "Leg1": spreadLeg1.value, "Leg2": spreadLeg2.value, "Leg3": spreadLeg3.value, 'OtherSpread': otherString.value}),
+                data: JSON.stringify({"Type" : spreadType.value, "Leg1": spreadLeg1.value, "Leg2": spreadLeg2.value, "Leg3": spreadLeg3.value}),//, 'OtherSpread': otherString.value}),
                 contentType: "application/json",
                 dataType: 'json',
                 success: function(result) {
@@ -75,31 +119,31 @@
                     }
                     else{
                         Highcharts.stockChart('myChartSpread', {
-                        chart: {
-                            type: 'line'
-                        },
-                        title: {
-                            text: title
-                        },
-                        xAxis: {
-                            title: {
-                                text: 'Day'
+                            chart: {
+                                type: 'line'
                             },
-                            type: 'datetime'
-                        },
-                        yAxis: {
                             title: {
-                                text: 'Spread'
+                                text: title
+                            },
+                            xAxis: {
+                                title: {
+                                    text: 'Day'
+                                },
+                                type: 'datetime'
+                            },
+                            yAxis: {
+                                title: {
+                                    text: 'Spread'
+                                }
+                            },
+                            series: [{
+                                name: 'Spread',
+                                data: result,
+                                
+                            }],
+                            credits: {
+                                enabled: false
                             }
-                        },
-                        series: [{
-                            name: 'Spread',
-                            data: result,
-                            
-                        }],
-                        credits: {
-                            enabled: false
-                        }
                         });
                     }
                 }
@@ -175,7 +219,7 @@
                 case "SP":
                     document.getElementById("spreadLeg3Selector").style.display = 'none';
                     document.getElementById("leg3Label").style.display = 'none';
-                    document.getElementById("otherSpreadText").style.display = 'none';
+                    //document.getElementById("otherSpreadText").style.display = 'none';
                     document.getElementById("productLabel").style.display = 'block';
                     document.getElementById("productSelector").style.display = 'block';
                     document.getElementById("spreadLeg1Selector").style.display = 'block';
@@ -193,7 +237,7 @@
                     document.getElementById("leg2Label").style.display = 'block';
                     document.getElementById("spreadLeg3Selector").style.display = 'block';
                     document.getElementById("leg3Label").style.display = 'block';
-                    document.getElementById("otherSpreadText").style.display = 'none';
+                    //document.getElementById("otherSpreadText").style.display = 'none';
                     break;
                 
                 case "CF":
@@ -204,21 +248,21 @@
                     document.getElementById("leg2Label").style.display = 'block';
                     document.getElementById("spreadLeg3Selector").style.display = 'block';
                     document.getElementById("leg3Label").style.display = 'block';
-                    document.getElementById("otherSpreadText").style.display = 'none';
+                    //document.getElementById("otherSpreadText").style.display = 'none';
                     document.getElementById("productLabel").style.display = 'block';
                     break;
                 
-                case "OT":
-                    document.getElementById("spreadLeg1Selector").style.display = 'none';
-                    document.getElementById("leg1Label").style.display = 'none';
-                    document.getElementById("spreadLeg2Selector").style.display = 'none';
-                    document.getElementById("leg2Label").style.display = 'none';
-                    document.getElementById("spreadLeg3Selector").style.display = 'none';
-                    document.getElementById("leg3Label").style.display = 'none';
-                    document.getElementById("productSelector").style.display = 'none';
-                    document.getElementById("otherSpreadText").style.display = 'block';
-                    document.getElementById("productLabel").style.display = 'none';
-                    break;
+                // case "OT":
+                //     document.getElementById("spreadLeg1Selector").style.display = 'none';
+                //     document.getElementById("leg1Label").style.display = 'none';
+                //     document.getElementById("spreadLeg2Selector").style.display = 'none';
+                //     document.getElementById("leg2Label").style.display = 'none';
+                //     document.getElementById("spreadLeg3Selector").style.display = 'none';
+                //     document.getElementById("leg3Label").style.display = 'none';
+                //     document.getElementById("productSelector").style.display = 'none';
+                //     document.getElementById("otherSpreadText").style.display = 'block';
+                //     document.getElementById("productLabel").style.display = 'none';
+                //     break;
 
             }
         });

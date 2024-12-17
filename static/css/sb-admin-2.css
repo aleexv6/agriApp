@@ -215,6 +215,7 @@ svg {
 }
 
 table {
+  width: 100%;
   border-collapse: collapse;
 }
 
@@ -226,9 +227,35 @@ caption {
   caption-side: bottom;
 }
 
+.th-separator {
+  box-shadow: 0px 1.5rem 3px -24px #CBD5E0;
+  border-bottom: 0;
+}
+
+.tr-separator {
+  box-shadow: 0px 2.5rem 3px -24px #CBD5E0;
+  border-bottom: 0;
+}
+
+th, td {
+  padding: 10px;
+  padding-right: 1.5rem;
+  
+}
+
 th {
-  text-align: inherit;
-  text-align: -webkit-match-parent;
+  color: #4A5568;
+  font-size: 0.9rem;
+  padding-left: 1.5rem;
+}
+
+td {
+  font-size: 0.95rem;
+  padding-left: 2.5rem;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa;
 }
 
 label {
@@ -436,6 +463,11 @@ hr {
 small,
 .small {
   font-size: 80%;
+  font-weight: 400;
+}
+
+.xsmall {
+  font-size: 11px;
   font-weight: 400;
 }
 
@@ -1491,10 +1523,7 @@ pre code {
 
 .table {
   width: 100%;
-  margin-bottom: 1rem;
-  font-weight: 700;
-  color: #2D3748;
-  font-size: 15px;
+  border-collapse: collapse;
 }
 
 .table th,
@@ -3717,9 +3746,9 @@ input[type="button"].btn-block {
   height: calc(1.5em + 0.75rem + 2px);
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.5;
-  color: #6e707e;
+  color: #818181;
   vertical-align: middle;
   background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%235a5c69' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") right 0.75rem center/8px 10px no-repeat;
   border: 1px solid #d1d3e2;
@@ -7938,6 +7967,11 @@ button.bg-dark:focus {
   padding-bottom: 3rem !important;
 }
 
+.pl-4-demie,
+.px-4-demie {
+  padding-left: 2.5rem !important;
+}
+
 .pl-5,
 .px-5 {
   padding-left: 3rem !important;
@@ -11289,4 +11323,61 @@ footer.sticky-footer .copyright {
 
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
+}
+
+.positive-change {
+  color: #48BB78;
+}
+.negative-change {
+  color: #F56565;
+}
+.header {
+  font-size: 1.2rem;
+  padding-top: 15px;
+  padding-left: 15px;
+  font-weight: bold;
+}
+.bid-section {
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border-radius: 8px;
+  padding-bottom: 1.5rem;
+}
+.subheader {
+  font-size: 0.7rem;
+  color: #A0AEC0;
+}
+
+.text-align-right {
+  text-align: right;
+}
+
+.text-align-left {
+  text-align: left;
+}
+
+.update-div {
+  padding: 4px 0;
+  text-align: center;
+  background-color: #EDF2F7;
+  color: #69788A;
+  font-size: 0.75rem;
+  height: 26px;
+  margin-bottom: 15px;
+}
+
+.navbar #sidebarToggle {
+  font-size: 1.2rem;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.datasource {
+  font-size: 0.7rem;
+  color: #2D3748;
+}
+
+.datasource-img {
+  width: 7%;
 }

@@ -1,58 +1,90 @@
 {% extends "nav.html" %}
 
 {% block content %} 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Futures</h1>
-</div>      
-{% for ticker in tickers %}
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-primary">{{ ticker }}</h6>
-        <h6 class="m-0 font-italic text-primary" style="font-size: 0.7rem;">Mis à jour le : {{tableData[0]['Date']}}, data Euronext</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                <thead>
+<div class="update-div">Dernière mise à jour {{ tableData[0]['Date'] }}</div>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0">Futures</h1>
+    </div>  
+    {% for ticker in tickers %}
+        <div class="bid-section">
+            <div class="header">
+                {{ ticker }}
+            </div>
+            <table>
+                <thead class="th-separator">
                     <tr>
-                        <th>Mois</th>
-                        <th>Open</th>
-                        <th>High</th>
-                        <th>Low</th>
-                        <th>Close</th>
-                        <th>Daily Change</th>
-                        <th>Volume</th>
-                        <th>Open Interest</th>
-                        <th>Graphique</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in tableData %}
-                        {% if item['Ticker'] == ticker %}
-                            <tr>
-                                <td>{{ item['Expiration'] }}</td>
-                                <td>{{ item['Open'] }}</td>
-                                <td>{{ item['High'] }}</td>
-                                <td>{{ item['Low'] }}</td>
-                                <td>{{ item['Close'] }}</td>
-                                <td class="percentChange">
-                                    <i class="fa-solid fa-caret-down show-carret-down mr-2" style="display: none;"></i>
-                                    <i class="fa-solid fa-caret-up show-carret-up mr-2" style="display: none;"></i>
-                                    <i class="fa-solid fa-equals show-equals mr-2" style="display: none;"></i>
-                                    {{ item['Change'] }}%
-                                </td>
-                                <td>{{ item['Volume'] }}</td>
-                                <td>{{ item['Open Interest'] }}</td>
-                                <td><i class="fa-solid fa-chart-simple logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{item['Ticker']}}/{{item['Expiration']}}"></i></td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                            <th class="text-align-left">EXPIRATION</th>
+                            <th>
+                                <div class="text-align-right">
+                                    OPEN
+                                </div>
+                                <div class="text-align-right subheader">
+                                    (EUR/T)
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-align-right">
+                                    HIGH
+                                </div>
+                                <div class="text-align-right subheader">
+                                    (EUR/T)
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-align-right">
+                                    LOW
+                                </div>
+                                <div class="text-align-right subheader">
+                                    (EUR/T)
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-align-right">
+                                    CLOSE
+                                </div>
+                                <div class="text-align-right subheader">
+                                    (EUR/T)
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-align-right">
+                                    CHANGE
+                                </div>
+                                <div class="text-align-right subheader">
+                                    (EUR/T)
+                                </div>
+                            </th>
+                            <th class="text-align-right">VOLUME</th>
+                            <th class="text-align-right">OPEN INTEREST</th>
+                            <th class="text-align-right">HISTORIQUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in tableData %}
+                            {% if item['Ticker'] == ticker %}
+                                <tr>
+                                    <td class="text-align-left"><b>{{ item['Expiration'] }}</b></td>
+                                    <td class="text-align-right"><b>{{ item['Open'] }}</b></td>
+                                    <td class="text-align-right"><b>{{ item['High'] }}</b></td>
+                                    <td class="text-align-right"><b>{{ item['Low'] }}</b></td>
+                                    <td class="text-align-right"><b>{{ item['Close'] }}</b></td>
+                                    <td class="change text-align-right"><b>{{ item['Change'] }}</b></td>
+                                    <td class="text-align-right"><b>{{ item['Volume'] }}</b></td>
+                                    <td class="text-align-right"><b>{{ item['Open Interest'] }}</b></td>
+                                    <td class="text-align-right"><i class="fa-solid fa-chart-line logoGraph" data-toggle="modal" data-target="#graphModal" style="cursor: pointer;" id="{{item['Ticker']}}/{{item['Expiration']}}"></i></td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    {% endfor %}
+    <div class="datasource mb-3">
+        Données journalières
+        <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
     </div>
 </div>
-{% endfor %}
 <div class="modal fade" id="graphModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -72,6 +104,23 @@
 {% block scripts %}
     {{ super() }}    
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const changeCells = document.querySelectorAll('.change');
+            changeCells.forEach(cell => {
+                const value = parseFloat(cell.textContent);
+                if (value > 0) {
+                    cell.classList.add('positive-change');
+                    cell.innerHTML = `<b>&#9650; ${value}%</b>`;
+                } else if (value < 0) {
+                    cell.classList.add('negative-change');
+                    cell.innerHTML = `<b>&#9660; ${value}%</b>`;
+                } else {
+                    cell.innerHTML = `<b>-</b>`;
+                }
+
+            });
+        });
+
         var futures = JSON.parse('{{ data | tojson }}');
         // Fonction qui sera appelée lorsqu'un icône est cliqué
         function handleIconClick(event) {
@@ -125,36 +174,6 @@
         // Ajoute un gestionnaire d'événements de clic à chaque élément
         icons.forEach(function(icon) {
             icon.addEventListener('click', handleIconClick);
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var valueElements = document.querySelectorAll('.percentChange');
-
-            valueElements.forEach(function(element) {
-                var value = parseFloat(element.textContent);
-                var caretUp = element.querySelector('.fa-caret-up');
-                var caretDown = element.querySelector('.fa-caret-down');
-                var equals = element.querySelector('.fa-equals');
-
-                if (value < 0) {
-                    element.style.color = '#E53E3E';
-                    caretUp.style.display = 'none';
-                    equals.style.display = 'none';
-                    caretDown.style.display = 'inline';
-                } else if (value > 0) {
-                    element.style.color = '#38A169';
-                    caretUp.style.display = 'inline';
-                    equals.style.display = 'none';
-                    caretDown.style.display = 'none';
-                }
-                else{
-                    element.style.color = '#2D3748';
-                    caretUp.style.display = 'none';
-                    equals.style.display = 'inline';
-                    caretDown.style.display = 'none';
-                }
-            });
         });
     </script>
 {% endblock %}

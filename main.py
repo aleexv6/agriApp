@@ -274,7 +274,7 @@ dfPhysique = pd.DataFrame(list(cursorPhysique)).sort_values(by='Date', ascending
 cursorFutures = db.get_database_new_euronext().find({}, {'_id': 0})#get data from db removing id column
 dfFutures = pd.DataFrame(list(cursorFutures)).sort_values(by='Date', ascending=True).reset_index(drop=True)#put data in df for sorting on date and reindexing
 dfFutures['Expiration Full Date'] = dfFutures[['Ticker', 'Expiration']].apply(full_expiration_date, axis=1)
-sampleFutures = dfFutures.tail(100).sort_values(by='Expiration Full Date') #sample 100 last values (to avoid sorting full df) to sort expiration date by date
+sampleFutures = dfFutures.tail(100).sort_values(by='Expiration Full Date').reset_index(drop=True) #sample 100 last values (to avoid sorting full df) to sort expiration date by date
 
 jours_feries = [
     (1, 1),  # Nouvel An
@@ -352,6 +352,7 @@ def futures(dfFutures=dfFutures):
 
 @app.route("/basis", methods=['GET', 'POST'])
 def base(dfPhysique=dfPhysique, dfFutures=dfFutures, sampleFutures=sampleFutures):    
+    lastDate = dfFutures.iloc[-1]['Date']
     baseSelector = []
     for produit in sorted(dfPhysique['Produit'].unique()): #sort product to have always same order
         if produit != 'Ble dur': #remove ble dur we do not have futures
@@ -360,7 +361,7 @@ def base(dfPhysique=dfPhysique, dfFutures=dfFutures, sampleFutures=sampleFutures
             expi = list(sampleFutures[(sampleFutures['Ticker'] == ticker) & (sampleFutures['Expiration Full Date'] > date.today())]['Expiration'].unique()) #get expiration for the productn sorted by expiration date
             baseSelector.append({'Produit': produit, 'Place':place, 'Expi':expi})
 
-    return render_template('basis.html', dfFutures=dfFutures, baseSelector=baseSelector)
+    return render_template('basis.html', lastDate=lastDate, baseSelector=baseSelector)
 
 @app.route('/process_basis', methods=['POST', 'GET'])
 def process_basis():
@@ -379,11 +380,19 @@ def process_basis():
   
 @app.route("/spread", methods=['GET', 'POST'])
 def spread(dfFutures=dfFutures, sampleFutures=sampleFutures):
+    lastDate = dfFutures.iloc[-1]['Date']
     spreadSelector = []
     for ticker in sorted(dfFutures['Ticker'].unique()): #loop throught unique tickers in df sorted alphabeticaly
         expi = list(sampleFutures[(sampleFutures['Ticker'] == ticker) & (sampleFutures['Expiration Full Date'] > date.today())]['Expiration'].unique()) #get expiration for the product sorted by expiration date
         spreadSelector.append({'Ticker': ticker, 'Expi': expi})
-    return render_template('spread.html', dfFutures=dfFutures, spreadSelector=spreadSelector)
+    first2ebmExpi = [item['Expi'] for item in spreadSelector if item['Ticker'] == 'EBM'][0][:2]
+    firstLeg = dfFutures[(dfFutures['Ticker'] == 'EBM') & (dfFutures['Expiration'] == first2ebmExpi[0])][['Date', 'Ticker', 'Expiration', 'Close']]
+    secondLeg = dfFutures[(dfFutures['Ticker'] == 'EBM') & (dfFutures['Expiration'] == first2ebmExpi[1])][['Date', 'Ticker', 'Expiration', 'Close']]
+    spreadDf = pd.merge(firstLeg, secondLeg, on=['Date', 'Ticker'], how='inner') #x is firstleg, y is second leg
+    spreadDf['Spread'] = spreadDf['Close_x'] - spreadDf['Close_y'] #spread calculation
+    spreadDf = spreadDf[['Date', 'Spread']] #keep interesting values
+    json_string = spreadDf.to_json(orient='values') #return json string
+    return render_template('spread.html', lastDate=lastDate, dfFutures=dfFutures, spreadSelector=spreadSelector, data=json_string)
     
 @app.route('/process_spread', methods=['POST', 'GET'])
 def process_spread(dfFutures=dfFutures):
@@ -410,36 +419,6 @@ def process_spread(dfFutures=dfFutures):
 
         # TODO : Make the spread string allow a lot of calculation (stops at 3 with the merge) and secure the string against injections
         # elif response['Type'] == 'OT':
-        #         data = request.get_json()['OtherSpread']
-        #         if data is not None:
-        #             data = data.upper()
-        #             data = data.replace(' ', '')
-        #             operators = re.findall(r'[-+*/]', data)
-        #             data = re.split(r'[-+*/]', data)
-        #             data = [item.split('_') for item in data]
-        #             result = pd.DataFrame()
-
-        #             for i, (nb_contracts, ticker, expiration) in enumerate(data):
-        #                 nb_contracts = int(nb_contracts)
-        #                 df_temp = dfFutures[(dfFutures['Ticker'] == ticker) & (dfFutures['Expiration'] == expiration)]
-        #                 df_temp = df_temp.rename(columns={'Close': f'Close {i}'})
-        #                 df_temp[f'Close {i}'] = df_temp[f'Close {i}'] * nb_contracts
-        #                 if i == 0:
-        #                     result = df_temp
-        #                 else:
-        #                     result = pd.merge(result, df_temp, on='Date', how='inner')
-        #                 print(result.columns)
-
-        #             for i in range(1, len(data)):
-        #                 if operators[i - 1] == '+':
-        #                     result[f'Close 0'] += result[f'Close {i}']
-        #                 elif operators[i - 1] == '-':
-        #                     result[f'Close 0'] -= result[f'Close {i}'] 
-        #                 else:
-        #                     json_string = {'result': 'Wrong operand used, please use only + and - operands'}
-        #             results = result[['Date', 'Close 0']]
-        #             json_string = results.to_json(orient='values')
-        #             return json_string
 
     return json_string
 
