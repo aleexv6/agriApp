@@ -1,18 +1,27 @@
 {% extends "nav.html" %}
-
 {% block content %} 
-{% for item in data %}
-    <div class="card shadow mb-4">
-        <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold text-success">{{ item['Produit'] }}</h6>
-        </div>
-        <div class="card-body">
-                <div>
-                    <div id="cond{{ item['Produit'].replace(' ', '_') }}" class="mb-4" style="height: 60vh;"></div>
-                </div>
-        </div>                            
+<div class="update-div">Dernière mise à jour {{ lastDate }}</div>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0 mr-4">Condition cultures</h1>
     </div>
-{% endfor %}
+    {% for item in data %}
+        <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between py-3">
+                <h6 class="m-0 font-weight-bold">{{ item['Produit'] }}</h6>
+            </div>
+            <div class="card-body">
+                    <div>
+                        <div id="cond{{ item['Produit'].replace(' ', '_') }}" class="mb-4" style="height: 60vh;"></div>
+                    </div>
+            </div>                            
+        </div>
+    {% endfor %}
+    <div class="datasource mb-3">
+        Données hebdomadaires
+        <img class="datasource-img ml-3" src="{{ url_for('static', filename='img/franceagrimerLogo.png') }}"/>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

@@ -1,76 +1,86 @@
 {% extends "nav.html" %}
 
 {% block content %} 
-<form class="form-inline mb-4">
-    <label class="mr-2">Marketing Year : </label>
-    <select name="market_year" class="custom-select mr-4" id="market_year_selector">
-        {% for my in marketYear: %}        
-        <option value='{{ my }}' >{{ my }}</option>
-        {% endfor %}
-    </select>
-</form>
-{% for item in data: %}
-    <div class="card shadow mb-4">
-        <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold text-success">{{ item['Produit'] }}</h6>
-        </div>
-        <div class="card-body">
-            {% if item['Produit'] in ['Blé tendre', 'Blé dur']: %}
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[0] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[1] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[2] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[3] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[4] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[5] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[6] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                </div>  
-            {% else: %}
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[0] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[1] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[2] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[3] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[4] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[5] }}" class="mb-4" style="height: 60vh;"></div>
-                    </div>
-                </div>
-            {% endif %}
-                          
+<div class="update-div">Dernière mise à jour {{ lastDate }}</div>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0 mr-4">Développement cultures</h1>
+        <div>
+            <label class="xsmall mr-2"><b>MARKETING YEAR :</b></label>
+            <select name="market_year" class="custom-select mr-4" id="market_year_selector" style="width: auto;">
+                {% for my in marketYear: %}        
+                <option value='{{ my }}' >{{ my }}</option>
+                {% endfor %}
+            </select>
         </div>
     </div>
-{% endfor %}
+    {% for item in data: %}
+        <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between py-3">
+                <h6 class="m-0 font-weight-bold">{{ item['Produit'] }}</h6>
+            </div>
+            <div class="card-body">
+                {% if item['Produit'] in ['Blé tendre', 'Blé dur']: %}
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[0] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[1] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[2] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[3] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[4] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[5] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevBle[6] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>  
+                {% else: %}
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[0] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[1] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[2] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[3] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[4] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="dev{{ item['Produit'].replace(' ', '') }}{{ stadeDevMais[5] }}" class="mb-4" style="height: 60vh;"></div>
+                        </div>
+                    </div>
+                {% endif %}
+                            
+            </div>
+        </div>
+    {% endfor %}
+    <div class="datasource mb-3">
+        Données hebdomadaires
+        <img class="datasource-img ml-3" src="{{ url_for('static', filename='img/franceagrimerLogo.png') }}"/>
+    </div>
+</div>
 {% endblock %}     
 
 {% block scripts %}

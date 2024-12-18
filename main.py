@@ -185,6 +185,7 @@ def dev(produits, stadeDevBle, stadeDevMais, statsStadeDevBle, statsStadeDevMais
             "Région": "Moyenne France"
         }, {'_id': 0})
     df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True)
+    lastDate = df.iloc[-1]['Date'].date()
     df['MarketYear'] = df.apply(get_market_year, axis=1) #apply function to get marketyear
     uniqueMY = df['MarketYear'].unique()[1:]
     if marketYear:
@@ -264,7 +265,7 @@ def dev(produits, stadeDevBle, stadeDevMais, statsStadeDevBle, statsStadeDevMais
             statsDevList.append({'Dev': dev, 'Parent': dev.split("_")[0], 'Data': [[timestamp, value] for timestamp, value in zip(dfProduit['epoch'].to_list(), dfProduit[dev].to_list())]})
         statsProdList.append({'Produit': produit, 'Stade': statsDevList})
 
-    return {'prodList': prodList, 'statsProdList': statsProdList, 'MarketYear': reversedUniqueMY.tolist()}
+    return {'prodList': prodList, 'statsProdList': statsProdList, 'MarketYear': reversedUniqueMY.tolist(), 'lastDate': lastDate}
 
 listProductFutures = {'Ble tendre':'EBM', 'Mais':'EMA', 'Colza':'ECO', 'Ble dur':'EDW'} #set a futures ticker for every product name
 
@@ -443,6 +444,7 @@ def cot():
     net_euronext_eco = net_euronext_eco[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
     net_euronext_ema = net_euronext_ema[['Date', 'Ticker', 'Produit', 'CommerceNetPos', 'FondNetPos', 'InvestAndCredit', 'OtherFinancial']]
 
+    lastDate = net_euronext_ebm.iloc[-1]['Date'].date()
 
     data_seasonality_euronext_ebm = seasonality_euronext(dfEuronextEBM)
     list = [df.to_dict(orient='records') for df in data_seasonality_euronext_ebm]
@@ -493,7 +495,7 @@ def cot():
     df_variation_eco = variation_euronext(dfEuronextECO)
     df_variation_fonds_eco = df_variation_eco[df_variation_eco['Type'] == "Fonds d'investissement"]
 
-    return render_template('cot.html', net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_fonds_euronext_ebm=seasonality_fonds_euronext_ebm, seasonality_comm_euronext_ebm=seasonality_comm_euronext_ebm, seasonality_fonds_euronext_ema=seasonality_fonds_euronext_ema, seasonality_comm_euronext_ema=seasonality_comm_euronext_ema, seasonality_fonds_euronext_eco=seasonality_fonds_euronext_eco, seasonality_comm_euronext_eco=seasonality_comm_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'), df_variation_fonds_eco=df_variation_fonds_eco.to_dict(orient='records'), df_variation_fonds_ema=df_variation_fonds_ema.to_dict(orient='records'))
+    return render_template('cot.html', lastDate=lastDate, net_euronext_ebm=net_euronext_ebm.to_dict(orient='records'), net_euronext_ema=net_euronext_ema.to_dict(orient='records'), net_euronext_eco=net_euronext_eco.to_dict(orient='records'), seasonality_fonds_euronext_ebm=seasonality_fonds_euronext_ebm, seasonality_comm_euronext_ebm=seasonality_comm_euronext_ebm, seasonality_fonds_euronext_ema=seasonality_fonds_euronext_ema, seasonality_comm_euronext_ema=seasonality_comm_euronext_ema, seasonality_fonds_euronext_eco=seasonality_fonds_euronext_eco, seasonality_comm_euronext_eco=seasonality_comm_euronext_eco, df_variation_fonds_ebm=df_variation_fonds_ebm.to_dict(orient='records'), df_variation_fonds_eco=df_variation_fonds_eco.to_dict(orient='records'), df_variation_fonds_ema=df_variation_fonds_ema.to_dict(orient='records'))
 
 @app.route("/futures-curve")
 def curve(dfFutures=dfFutures):
@@ -505,11 +507,12 @@ def curve(dfFutures=dfFutures):
     for ticker in sorted(lastFutures['Ticker'].unique()): #loop through unique tickers 
         data = {'Ticker': ticker, 'Expirations': list(lastFutures[lastFutures['Ticker'] == ticker]['Expiration']), 'Prix': list(lastFutures[lastFutures['Ticker'] == ticker]['Close'])} #create data for ticker, expis and prices
         curveData.append(data)    
-    return render_template('curve.html', curveData=curveData)
+    return render_template('curve.html', lastDate=lastFuturesDate, curveData=curveData)
 
 @app.route("/saisonnalite")
 def saisonnalite(dfFutures=dfFutures):
     todayofyear = pd.to_datetime(date.today().strftime('%Y-%m-%d')).dayofyear # get day of year to print on chart
+    today = date.today().strftime('%Y-%m-%d')
     lst = []
     for _, ticker in listProductFutures.items(): #loop through futures tickers
         if ticker != 'EDW': #we remove EDW we do not have data
@@ -542,7 +545,7 @@ def saisonnalite(dfFutures=dfFutures):
 
             lst.append({'Ticker': ticker, 'Cumulative': median_cumulative_percentage_change.to_dict()}) #append to list to send to front
 
-    return render_template('saisonnalite.html', data=lst, dayofyear=todayofyear)
+    return render_template('saisonnalite.html', data=lst, dayofyear=todayofyear, lastDate=today)
 
 @app.route("/production")
 def production():
@@ -585,7 +588,7 @@ def developpement():
     else:
         developpement = dev(produits, stadeDevBle, stadeDevMais, statsStadeDevBle, statsStadeDevMais)
 
-    return render_template('developpement.html', marketYear=developpement['MarketYear'], data=developpement['prodList'], statsData=developpement['statsProdList'], stadeDevBle=stadeDevBle, stadeDevMais=stadeDevMais)
+    return render_template('developpement.html', marketYear=developpement['MarketYear'], data=developpement['prodList'], statsData=developpement['statsProdList'], stadeDevBle=stadeDevBle, stadeDevMais=stadeDevMais, lastDate=developpement['lastDate'])
 
 @app.route("/process_dev", methods=['POST', 'GET'])
 def process_dev():
@@ -610,6 +613,7 @@ def condition():
     }
     }, {'_id': 0})
     df = pd.DataFrame(list(cursorDev)).sort_values(by='Date', ascending=True) #make it a df ordered by date 
+    lastDate = df.iloc[-1]['Date'].date()
     df = df[df['Région'] == 'Moyenne France'] #filter on Moyenne France only
     df = df[['Culture', 'Date', 'Semaine', 'Week', 'Year', 'Très mauvaises', 'Mauvaises', 'Assez bonnes', 'Bonnes', 'Très bonnes']] #filter on wanted columns
     dfMoy = df[df['Year'] < datetime.now().year - 1] #select a portion of the df and make it another df for stats
@@ -653,7 +657,7 @@ def condition():
         dfProduitAgg = dfProduitAgg.replace({np.nan: None})
         aggregateLst.append({'Produit': produit, 'stats': dfProduitAgg.to_dict()}) #make the list of dict
 
-    return render_template('condition.html', data=productLst, stats=aggregateLst)
+    return render_template('condition.html', data=productLst, stats=aggregateLst, lastDate=lastDate)
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():

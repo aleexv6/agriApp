@@ -1,67 +1,68 @@
 {% extends "nav.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-12 text-center">
-        <a href="{{ url_for('download_cot', filename='COT_Report_Agri.pdf') }}" class="btn btn-sm btn-success shadow-sm mb-4">Download latest COT Report as PDF</a>
+<div class="update-div">Dernière mise à jour {{ lastDate }}</div>   
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0">COT Report</h1>
+        <a href="{{ url_for('download_cot', filename='COT_Report_Agri.pdf') }}" class="btn btn-sm btn-success shadow-sm"><b>COT Report PDF</b></a>
     </div>
-</div>
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">EBM</h6>
-    </div>
-    <div class="card-body">
-        <div id="net_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
-        <div class="row">
-            <div class="col-lg-6">
-                <div id="seasonality_fonds_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
-            </div>
-            <div class="col-lg-6">
-                <div id="seasonality_comm_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
-            </div>
-        </div>                            
-        <div id="variation_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
-    </div>
-</div>
-
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">EMA</h6>
-    </div>
-    <div class="card-body">
-        <div id="net_euronext_ema" class="mb-4" style="height: 60vh;"></div>
-        <div class="row">
-            <div class="col-lg-6">
-                <div id="seasonality_fonds_euronext_ema" class="mb-4" style="height: 60vh;"></div>
-            </div>
-            <div class="col-lg-6">
-                <div id="seasonality_comm_euronext_ema" class="mb-4" style="height: 60vh;"></div>
-            </div>
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between py-3">
+            <h6 class="m-0 font-weight-bold">EBM Milling Wheat / Ble</h6>
         </div>
-        <div id="variation_euronext_ema" class="mb-4" style="height: 60vh;"></div>
-    </div>
-</div>
-
-<div class="card shadow mb-4">
-    <div class="card-header d-flex justify-content-between py-3">
-        <h6 class="m-0 font-weight-bold text-success">ECO</h6>
-    </div>
-    <div class="card-body">
-        <div id="net_euronext_eco" class="mb-4" style="height: 60vh;"></div>
-        <div class="row">
-            <div class="col-lg-6">
-                <div id="seasonality_fonds_euronext_eco" class="mb-4" style="height: 60vh;"></div>
-            </div>
-            <div class="col-lg-6">
-                <div id="seasonality_comm_euronext_eco" class="mb-4" style="height: 60vh;"></div>
-            </div>
+        <div class="card-body">
+            <div id="net_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div id="seasonality_fonds_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                </div>
+                <div class="col-lg-6">
+                    <div id="seasonality_comm_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                </div>
+            </div>                            
+            <div id="variation_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
         </div>
-        <div id="variation_euronext_eco" class="mb-4" style="height: 60vh;"></div>
     </div>
-</div>    
-<div class="row">
-    <div class="col-lg-12 text-center">
-        <a href="{{ url_for('download_cot', filename='COT_Report_Agri.pdf') }}" class="btn btn-sm btn-success shadow-sm mb-4">Download latest COT Report as PDF</a>
+
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between py-3">
+            <h6 class="m-0 font-weight-bold">EMA Corn / Maïs</h6>
+        </div>
+        <div class="card-body">
+            <div id="net_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div id="seasonality_fonds_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                </div>
+                <div class="col-lg-6">
+                    <div id="seasonality_comm_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                </div>
+            </div>
+            <div id="variation_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between py-3">
+            <h6 class="m-0 font-weight-bold">ECO Rapeseed / Colza</h6>
+        </div>
+        <div class="card-body">
+            <div id="net_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div id="seasonality_fonds_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                </div>
+                <div class="col-lg-6">
+                    <div id="seasonality_comm_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                </div>
+            </div>
+            <div id="variation_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+        </div>
+    </div>
+    <div class="datasource mb-3">
+        Données hebdomadaires
+        <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
     </div>
 </div>
 {% endblock %}
