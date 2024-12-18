@@ -4,7 +4,7 @@
 <div class="update-div">Dernière mise à jour {{ tableData[0]['Date'] }}</div>
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h2 mb-0">Futures</h1>
+        <h1 class="h2 text-theme-responsive mb-0">Futures</h1>
     </div>  
     {% for ticker in tickers %}
         <div class="bid-section">
@@ -80,7 +80,7 @@
                 </table>
             </div>
     {% endfor %}
-    <div class="datasource mb-3">
+    <div class="datasource mb-3 text-theme-responsive">
         Données journalières
         <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
     </div>

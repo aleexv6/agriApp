@@ -759,3 +759,7 @@ def arome():
 @app.route("/404")
 def quatrecentquatre():
     return render_template('404.html')
+
+@app.context_processor
+def inject_current_year():
+    return dict(current_year=date.today().year)

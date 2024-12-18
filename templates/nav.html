@@ -22,13 +22,13 @@
 
 </head>
 
-<body id="page-top">
+<body class="sidebar-toggled" id="page-top">
 
     <!-- Page Wrapper -->
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-success sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+        <ul class="navbar-nav sidebar sidebar accordion toggled" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
@@ -142,14 +142,19 @@
             <div id="content">
 
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow">
+                <nav class="navbar navbar topbar static-top shadow">
                     <!-- Sidebar Toggler (Sidebar) -->
-                    <div class="text-center d-none d-md-inline">
-                        <button class="rounded-circle border-0" id="sidebarToggle">
+                    <div class="text-center no-show-burger">
+                        <button class="border-0" id="sidebarToggle">
                             <i class="fa-solid fa-bars"></i>
                         </button>
                     </div>
-
+                    <div class="ml-auto">
+                        <button class="nav-btn border-0" id="themeToggle">
+                            <i class="fa-solid fa-moon" id="darkLogo" style="display: none;"></i>
+                            <i class="fa-solid fa-lightbulb" id="lightLogo" style="display: none;"></i>
+                        </button>
+                    </div>
                 </nav>
                 <!-- End of Topbar -->                    
                 {% block content %}
@@ -159,10 +164,10 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
+            <footer class="sticky-footer">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; AleexV6 Corporation 2024</span>
+                        <span class="text-theme-responsive">Copyright &copy; AleexV6 Corporation {{ current_year }}</span>
                     </div>
                 </div>
             </footer>
@@ -196,6 +201,28 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.documentElement.classList.contains('dark-theme')) {
+                document.getElementById('lightLogo').style.display = 'block';
+            } 
+            else {
+                document.getElementById('darkLogo').style.display = 'block';
+            }
+        });
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark-theme');
+            if (document.documentElement.classList.contains('dark-theme')) {
+                document.getElementById('darkLogo').style.display = 'none';
+                document.getElementById('lightLogo').style.display = 'block';
+            }
+            else {
+                document.getElementById('darkLogo').style.display = 'block';
+                document.getElementById('lightLogo').style.display = 'none';
+            }
+        });
+    </script>
 
     {% block scripts %}
     <!-- Additional scripts will be inserted here -->

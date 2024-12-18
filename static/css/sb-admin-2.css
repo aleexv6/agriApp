@@ -45,6 +45,43 @@
   --breakpoint-xl: 1200px;
   --font-family-sans-serif: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --nav-background-color: #fff;
+  --sidebar-heading-color: color: #b7b9cc;
+  --sidebar-items-color: #2D3748;
+  --sidebar-border-color: #dbdbdb;
+  --navbar-btn-color: #000;
+  --navbar-btn-background-color: #fff;
+  --wrapper-background-color: #F7FAFC;
+  --header-color: #2D3748;
+  --text-theme-responsive: #2D3748;
+  --footer-background-color: #fff;
+  --update-div-background-color: #EDF2F7;
+  --update-div-color: #69788A;
+  --tr-interrow-background-color: #fafafa;
+  --bid-section-background-color: #fff;
+  --table-background-color: #fff;
+  --table-color: #2D3748;
+  --table-thead-color: #4A5568;
+}
+
+:root.dark-theme {
+  --nav-background-color: #181818;
+  --sidebar-heading-color: rgba(255, 255, 255, 0.4);
+  --sidebar-items-color: rgba(255, 255, 255, 0.7);
+  --sidebar-border-color: #000;
+  --navbar-btn-color: #fff;
+  --navbar-btn-background-color: #181818;
+  --wrapper-background-color: #2d2d2d;
+  --header-color: #fff;
+  --text-theme-responsive: #fff;
+  --footer-background-color: #181818;
+  --update-div-background-color: #4b4b4b;
+  --update-div-color: #fff;
+  --tr-interrow-background-color: #252525;
+  --bid-section-background-color: #181818;
+  --table-background-color: #181818;
+  --table-color: #fff;
+  --table-thead-color: #fff;
 }
 
 *,
@@ -217,6 +254,8 @@ svg {
 table {
   width: 100%;
   border-collapse: collapse;
+  background-color: var(--table-background-color);
+  color: var(--table-color)
 }
 
 caption {
@@ -244,7 +283,7 @@ th, td {
 }
 
 th {
-  color: #4A5568;
+  color: var(--table-thead-color);
   font-size: 0.9rem;
   padding-left: 1.5rem;
 }
@@ -255,7 +294,7 @@ td {
 }
 
 tr:nth-child(even) {
-  background-color: #fafafa;
+  background-color: var(--tr-interrow-background-color);
 }
 
 label {
@@ -1783,12 +1822,13 @@ pre code {
 
 .table-dark {
   color: #fff;
-  background-color: #5a5c69;
+  background-color: #181818;
 }
 
 .table-dark th,
 .table-dark td,
 .table-dark thead th {
+  color: #fff;
   border-color: #6c6e7e;
 }
 
@@ -2657,6 +2697,10 @@ fieldset:disabled a.btn {
   color: #fff;
   background-color: #5a5c69;
   border-color: #5a5c69;
+}
+.nav-btn-dark {
+  color: #fff;
+  background-color: #181818;
 }
 
 .btn-dark:hover {
@@ -4147,6 +4191,7 @@ input[type="button"].btn-block {
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 1rem;
+  background-color: var(--nav-background-color);
 }
 
 .navbar .container,
@@ -6520,7 +6565,7 @@ button.bg-light:focus {
 }
 
 .bg-dark {
-  background-color: #5a5c69 !important;
+  background-color: #181818 !important;
 }
 
 a.bg-dark:hover, a.bg-dark:focus,
@@ -9632,7 +9677,7 @@ button.bg-dark:focus {
 }
 
 .text-white {
-  color: #fff !important;
+  color: var(--blue) !important;
 }
 
 .text-primary {
@@ -9841,7 +9886,7 @@ a:focus {
 }
 
 #wrapper #content-wrapper {
-  background-color: #f8f9fc;
+  background-color: var(--wrapper-background-color);
   width: 100%;
   overflow-x: hidden;
 }
@@ -10366,6 +10411,8 @@ a:focus {
 .sidebar {
   width: 6.5rem;
   min-height: 100vh;
+  background-color: var(--nav-background-color);
+  border-right: 1px solid var(--sidebar-border-color);
 }
 
 .sidebar .nav-item {
@@ -10380,6 +10427,7 @@ a:focus {
   text-align: center;
   padding: 0.75rem 1rem;
   width: 6.5rem;
+  color: var(--sidebar-items-color)
 }
 
 .sidebar .nav-item .nav-link span {
@@ -10503,6 +10551,7 @@ a:focus {
   text-transform: uppercase;
   letter-spacing: 0.05rem;
   z-index: 1;
+  color: var(--sidebar-items-color)
 }
 
 .sidebar .sidebar-brand .sidebar-brand-icon i {
@@ -10522,6 +10571,7 @@ a:focus {
   padding: 0 1rem;
   font-weight: 800;
   font-size: 0.65rem;
+  color: var(--sidebar-heading-color)
 }
 
 .sidebar .sidebar-card {
@@ -10650,7 +10700,7 @@ a:focus {
     width: 6.5rem;
   }
   .sidebar.toggled .nav-item .nav-link span {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     display: block;
   }
   .sidebar.toggled .nav-item .nav-link i {
@@ -10683,11 +10733,11 @@ a:focus {
 }
 
 .sidebar-light .nav-item .nav-link {
-  color: #858796;
+  color: #2D3748;
 }
 
 .sidebar-light .nav-item .nav-link i {
-  color: #d1d3e2;
+  color: #2D3748;
 }
 
 .sidebar-light .nav-item .nav-link:active, .sidebar-light .nav-item .nav-link:focus, .sidebar-light .nav-item .nav-link:hover {
@@ -11314,6 +11364,7 @@ form.user .btn-user {
 footer.sticky-footer {
   padding: 2rem 0;
   flex-shrink: 0;
+  background-color: var(--footer-background-color);
 }
 
 footer.sticky-footer .copyright {
@@ -11326,24 +11377,27 @@ body.sidebar-toggled footer.sticky-footer {
 }
 
 .positive-change {
-  color: #48BB78;
+  color: #48BB78!important;
 }
 .negative-change {
-  color: #F56565;
+  color: #F56565!important;
 }
 .header {
   font-size: 1.2rem;
   padding-top: 15px;
   padding-left: 15px;
   font-weight: bold;
+  color: var(--header-color)
 }
+
 .bid-section {
-  background-color: #fff;
+  background-color: var(--bid-section-background-color);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   border-radius: 8px;
   padding-bottom: 1.5rem;
 }
+
 .subheader {
   font-size: 0.7rem;
   color: #A0AEC0;
@@ -11360,8 +11414,8 @@ body.sidebar-toggled footer.sticky-footer {
 .update-div {
   padding: 4px 0;
   text-align: center;
-  background-color: #EDF2F7;
-  color: #69788A;
+  background-color: var(--update-div-background-color);
+  color: var(--update-div-color);
   font-size: 0.75rem;
   height: 26px;
   margin-bottom: 15px;
@@ -11380,4 +11434,24 @@ body.sidebar-toggled footer.sticky-footer {
 
 .datasource-img {
   width: 7%;
+}
+
+@media (min-width: 768px) {
+  .no-show-burger {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .no-show-burger {
+    display: inline;
+  }
+}
+
+.nav-btn {
+  color: var(--navbar-btn-color);
+  background-color: var(--navbar-btn-background-color);
+}
+
+.text-theme-responsive {
+  color: var(--text-theme-responsive)
 }
