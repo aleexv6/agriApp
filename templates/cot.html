@@ -4,63 +4,63 @@
 <div class="update-div">Dernière mise à jour {{ lastDate }}</div>   
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h2 mb-0">COT Report</h1>
+        <h1 class="h2 text-theme-responsive mb-0">COT Report</h1>
         <a href="{{ url_for('download_cot', filename='COT_Report_Agri.pdf') }}" class="btn btn-sm btn-success shadow-sm"><b>COT Report PDF</b></a>
     </div>
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold">EBM Milling Wheat / Ble</h6>
+            <h6 class="m-0 text-theme-responsive font-weight-bold">EBM Milling Wheat / Ble</h6>
         </div>
         <div class="card-body">
-            <div id="net_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+            <div id="net_euronext_ebm" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
             <div class="row">
                 <div class="col-lg-6">
-                    <div id="seasonality_fonds_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                    <div id="seasonality_fonds_euronext_ebm" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
                 </div>
                 <div class="col-lg-6">
-                    <div id="seasonality_comm_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+                    <div id="seasonality_comm_euronext_ebm" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
                 </div>
             </div>                            
-            <div id="variation_euronext_ebm" class="mb-4" style="height: 60vh;"></div>
+            <div id="variation_euronext_ebm" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
         </div>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold">EMA Corn / Maïs</h6>
+            <h6 class="m-0 text-theme-responsive font-weight-bold">EMA Corn / Maïs</h6>
         </div>
         <div class="card-body">
-            <div id="net_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+            <div id="net_euronext_ema" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
             <div class="row">
                 <div class="col-lg-6">
-                    <div id="seasonality_fonds_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                    <div id="seasonality_fonds_euronext_ema" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
                 </div>
                 <div class="col-lg-6">
-                    <div id="seasonality_comm_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+                    <div id="seasonality_comm_euronext_ema" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
                 </div>
             </div>
-            <div id="variation_euronext_ema" class="mb-4" style="height: 60vh;"></div>
+            <div id="variation_euronext_ema" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
         </div>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold">ECO Rapeseed / Colza</h6>
+            <h6 class="m-0 text-theme-responsive font-weight-bold">ECO Rapeseed / Colza</h6>
         </div>
         <div class="card-body">
-            <div id="net_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+            <div id="net_euronext_eco" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
             <div class="row">
                 <div class="col-lg-6">
-                    <div id="seasonality_fonds_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                    <div id="seasonality_fonds_euronext_eco" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
                 </div>
                 <div class="col-lg-6">
-                    <div id="seasonality_comm_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+                    <div id="seasonality_comm_euronext_eco" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
                 </div>
             </div>
-            <div id="variation_euronext_eco" class="mb-4" style="height: 60vh;"></div>
+            <div id="variation_euronext_eco" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
         </div>
     </div>
-    <div class="datasource mb-3">
+    <div class="datasource text-theme-responsive mb-3">
         Données hebdomadaires
         <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
     </div>
@@ -193,6 +193,7 @@
 
         Highcharts.chart('net_euronext_ebm', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -231,6 +232,7 @@
 
         Highcharts.chart('net_euronext_ema', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -269,6 +271,7 @@
 
         Highcharts.chart('net_euronext_eco', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -306,6 +309,7 @@
 
         Highcharts.chart('seasonality_fonds_euronext_ebm', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -336,6 +340,7 @@
 
         Highcharts.chart('seasonality_comm_euronext_ebm', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -366,6 +371,7 @@
 
         Highcharts.chart('seasonality_fonds_euronext_ema', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -396,6 +402,7 @@
 
         Highcharts.chart('seasonality_comm_euronext_ema', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -426,6 +433,7 @@
 
         Highcharts.chart('seasonality_fonds_euronext_eco', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -456,6 +464,7 @@
 
         Highcharts.chart('seasonality_comm_euronext_eco', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -486,6 +495,7 @@
 
         Highcharts.chart('variation_euronext_ebm', {
         chart: {
+            styledMode: true,
             type: 'histogram'
         },        
         title: {
@@ -519,6 +529,7 @@
 
         Highcharts.chart('variation_euronext_ema', {
         chart: {
+            styledMode: true,
             type: 'histogram'
         },
         title: {
@@ -552,6 +563,7 @@
 
         Highcharts.chart('variation_euronext_eco', {
         chart: {
+            styledMode: true,
             type: 'histogram'
         },
         title: {

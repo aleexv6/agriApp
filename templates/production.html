@@ -4,35 +4,35 @@
 <div class="update-div">Dernière mise à jour </div>
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h2 mb-0">Collecte, Stocks</h1>
+        <h1 class="h2 text-theme-responsive mb-0">Collecte, Stocks</h1>
     </div>   
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold">EBM</h6>
+            <h6 class="m-0 text-theme-responsive font-weight-bold">EBM</h6>
         </div>
         <div class="card-body">
-            <div id="production_ebm" class="mb-4" style="height: 60vh;"></div>
+            <div id="production_ebm" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
         </div>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold">EMA</h6>
+            <h6 class="m-0 text-theme-responsive font-weight-bold">EMA</h6>
         </div>
         <div class="card-body">
-            <div id="production_ema" class="mb-4" style="height: 60vh;"></div>
+            <div id="production_ema" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
         </div>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between py-3">
-            <h6 class="m-0 font-weight-bold">ECO</h6>
+            <h6 class="m-0 text-theme-responsive font-weight-bold">ECO</h6>
         </div>
         <div class="card-body">
-            <div id="production_eco" class="mb-4" style="height: 60vh;"></div>
+            <div id="production_eco" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
         </div>
     </div>    
-    <div class="datasource mb-3">
+    <div class="datasource text-theme-responsive mb-3">
         Données journalières
         <img class="datasource-img ml-3" src="{{ url_for('static', filename='img/franceagrimerLogo.png') }}"/>
     </div>
@@ -69,6 +69,7 @@
 
         Highcharts.chart('production_ebm', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -107,6 +108,7 @@
 
         Highcharts.chart('production_ema', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {
@@ -145,6 +147,7 @@
 
         Highcharts.chart('production_eco', {
         chart: {
+            styledMode: true,
             type: 'line'
         },
         title: {

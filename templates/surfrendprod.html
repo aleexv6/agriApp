@@ -4,7 +4,7 @@
 <div class="update-div">Dernière mise à jour</div>
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h2 mb-0 mr-4">Surface, Rendement, Production</h1>
+        <h1 class="h2 mb-0 text-theme-responsive mr-4">Surface, Rendement, Production</h1>
         <div>
             <label class="xsmall mr-2"><b>ANNEE :</b></label>
             <select name="year" class="custom-select" id="year" style="width: auto;">
@@ -18,7 +18,7 @@
         {% for item in img %}
             <div class="card shadow mb-4">
                 <div class="card-header d-flex justify-content-between py-3">
-                    <h6 class="m-0 font-weight-bold">{{ item['Produit'] }}</h6>
+                    <h6 class="m-0 text-theme-responsive font-weight-bold">{{ item['Produit'] }}</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -31,7 +31,7 @@
         {% endfor %}
     </div>
     
-    <div class="datasource mb-3">
+    <div class="datasource text-theme-responsive mb-3">
         Données
         <img class="datasource-img ml-3" src="{{ url_for('static', filename='img/franceagrimerLogo.png') }}"/>
     </div>

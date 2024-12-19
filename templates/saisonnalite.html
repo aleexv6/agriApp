@@ -3,19 +3,19 @@
 <div class="update-div">Dernière mise à jour {{ lastDate }}</div>   
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h2 mb-0">Saisonnalité</h1>
+        <h1 class="h2 text-theme-responsive mb-0">Saisonnalité</h1>
     </div> 
     {% for item in data %}
         <div class="card shadow mb-4">
             <div class="card-header d-flex justify-content-between py-3">
-                <h6 class="m-0 font-weight-bold">{{ item['Ticker'] }}</h6>
+                <h6 class="m-0 text-theme-responsive font-weight-bold">{{ item['Ticker'] }}</h6>
             </div>
             <div class="card-body">
-                <div id="saisonnalite_{{ item['Ticker'] }}" class="mb-4" style="height: 60vh;"></div>
+                <div id="saisonnalite_{{ item['Ticker'] }}" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
             </div>
         </div>
     {% endfor %}
-    <div class="datasource mb-3">
+    <div class="datasource text-theme-responsive mb-3">
         Données journalières
         <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
     </div>
@@ -34,6 +34,7 @@
 
             Highcharts.chart(`saisonnalite_${item.Ticker}`, {
             chart: {
+                styledMode: true,
                 type: 'line'
             },
             title: {

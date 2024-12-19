@@ -11,10 +11,12 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
 
- @font-face {
+@import url("https://code.highcharts.com/css/highcharts.css");
+
+@font-face {
   font-family: 'RobotoCustom';
   src: url('../font/Roboto-Bold.ttf') format('ttf')
- }
+}
 
 :root {
   --blue: #4e73df;
@@ -62,6 +64,15 @@
   --table-background-color: #fff;
   --table-color: #2D3748;
   --table-thead-color: #4A5568;
+  --xsmall-color: #2D3748; 
+  --custom-select-background-color: #fff;
+  --custom-select-color: #818181;
+  --custom-select-border-color: #d1d3e2;
+  --hr-border-color: rgba(0, 0, 0, 0.1);
+  --card-background-color: #fff;
+  --card-border-color: #e3e6f0;
+  --card-header-background-color: #f8f9fc;
+  --card-header-border-color: #e3e6f0;
 }
 
 :root.dark-theme {
@@ -82,6 +93,25 @@
   --table-background-color: #181818;
   --table-color: #fff;
   --table-thead-color: #fff;
+  --xsmall-color: #fff; 
+  --custom-select-background-color: #2d2d2d;
+  --custom-select-color: #fff;
+  --custom-select-border-color: #000;
+  --hr-border-color: #494949;
+  --card-background-color: #181818;
+  --card-border-color: #212121;
+  --card-header-background-color: #252525;
+  --card-header-border-color: #252525;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+      --highcharts-background-color: #181818;
+  }
+}
+
+.highcharts-dark {
+  --highcharts-background-color: #181818;
 }
 
 *,
@@ -496,7 +526,7 @@ hr {
   margin-top: 1rem;
   margin-bottom: 1rem;
   border: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--hr-border-color);
 }
 
 small,
@@ -508,6 +538,7 @@ small,
 .xsmall {
   font-size: 11px;
   font-weight: 400;
+  color: var(--xsmall-color)
 }
 
 mark,
@@ -3792,10 +3823,10 @@ input[type="button"].btn-block {
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
-  color: #818181;
+  color: var(--custom-select-color);
   vertical-align: middle;
-  background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%235a5c69' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") right 0.75rem center/8px 10px no-repeat;
-  border: 1px solid #d1d3e2;
+  background: var(--custom-select-background-color) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%235a5c69' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") right 0.75rem center/8px 10px no-repeat;
+  border: 1px solid var(--custom-select-border-color);
   border-radius: 0.35rem;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -4573,9 +4604,9 @@ input[type="button"].btn-block {
   flex-direction: column;
   min-width: 0;
   word-wrap: break-word;
-  background-color: #fff;
+  background-color: var(--card-background-color);
   background-clip: border-box;
-  border: 1px solid #e3e6f0;
+  border: 1px solid var(--card-border-color);
   border-radius: 0.35rem;
 }
 
@@ -4636,8 +4667,8 @@ input[type="button"].btn-block {
 .card-header {
   padding: 0.75rem 1.25rem;
   margin-bottom: 0;
-  background-color: #f8f9fc;
-  border-bottom: 1px solid #e3e6f0;
+  background-color: var(--card-header-background-color);
+  border-bottom: 1px solid var(--card-header-border-color);
 }
 
 .card-header:first-child {
@@ -11454,4 +11485,8 @@ body.sidebar-toggled footer.sticky-footer {
 
 .text-theme-responsive {
   color: var(--text-theme-responsive)
+}
+
+#myChartBase, #myChartSpread {
+  padding: 10px;
 }

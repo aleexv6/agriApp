@@ -4,7 +4,7 @@
 <div class="update-div">Dernière mise à jour {{ lastDate }}</div>   
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h2 mb-0">Spread</h1>
+        <h1 class="h2 text-theme-responsive mb-0">Spread</h1>
     </div> 
     <div class="bid-section">
         <form class="form-inline mb-4 pt-4 pl-4">
@@ -48,9 +48,9 @@
             <!-- <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Pour les autres spreads, la chaine de charactère doit être du type : NBCONTRATS_PRODUIT_EXPIRATION. Par exemple : 1_EBM_MAY24 - 1_EMA_MAY25. Pour connaitre les produits et expiration disponibles, rendez-vous sur le Calendar Spread."></i> -->
 
         </form> 
-        <div id="myChartSpread" style="height: 60vh;"></div>
+        <div id="myChartSpread" class="highcharts-chart-theme-responsive" style="height: 60vh;"></div>
     </div>
-    <div class="datasource mb-3">
+    <div class="datasource text-theme-responsive mb-3">
         Données journalières
         <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
     </div>
@@ -65,6 +65,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             Highcharts.stockChart('myChartSpread', {
                 chart: {
+                    styledMode: true,
                     type: 'line'
                 },
                 title: {
@@ -91,7 +92,7 @@
             });
         });
 
-        $('[data-toggle="tooltip"]').tooltip();
+        // $('[data-toggle="tooltip"]').tooltip();
     </script>
     <script>
         function Spread() {
