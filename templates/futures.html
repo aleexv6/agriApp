@@ -94,7 +94,7 @@
             </button>
         </div>
         <div class="modal-body">
-            <div id="graphFuture" class="mb-4" style="height: 60vh;"></div>
+            <div id="graphFuture" class="highcharts-chart-theme-responsive mb-4" style="height: 60vh;"></div>
         </div>
         </div>
     </div>
@@ -134,6 +134,7 @@
             });
             Highcharts.stockChart('graphFuture', {
                     chart: {
+                        styledMode: true,
                         type: 'line'
                     },
                     title: {

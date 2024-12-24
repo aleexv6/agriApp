@@ -73,6 +73,9 @@
   --card-border-color: #e3e6f0;
   --card-header-background-color: #f8f9fc;
   --card-header-border-color: #e3e6f0;
+  --modal-content-background-color: #fff;
+  --modal-close-icon-color: #000;
+  --modal-colse-icon-hover: #000;
 }
 
 :root.dark-theme {
@@ -102,6 +105,9 @@
   --card-border-color: #212121;
   --card-header-background-color: #252525;
   --card-header-border-color: #252525;
+  --modal-content-background-color: #181818;
+  --modal-close-icon-color: #fff;
+  --modal-colse-icon-hover: #fff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -5683,13 +5689,13 @@ a.badge-dark:focus, a.badge-dark.focus {
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1;
-  color: #000;
+  color: var(--modal-close-icon-color);
   text-shadow: 0 1px 0 #fff;
   opacity: .5;
 }
 
 .close:hover {
-  color: #000;
+  color: var(--modal-colse-icon-hover);
   text-decoration: none;
 }
 
@@ -5853,7 +5859,7 @@ a.close.disabled {
   flex-direction: column;
   width: 100%;
   pointer-events: auto;
-  background-color: #fff;
+  background-color: var(--modal-content-background-color);
   background-clip: padding-box;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 0.3rem;
