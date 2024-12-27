@@ -76,6 +76,8 @@
   --modal-content-background-color: #fff;
   --modal-close-icon-color: #000;
   --modal-colse-icon-hover: #000;
+  --burger-menu-color: #000;
+  --burger-menu-background-color: rgba(255, 255, 255, 0.2);
 }
 
 :root.dark-theme {
@@ -108,6 +110,8 @@
   --modal-content-background-color: #181818;
   --modal-close-icon-color: #fff;
   --modal-colse-icon-hover: #fff;
+  --burger-menu-color: #fff;
+  --burger-menu-background-color: #181818;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -11433,6 +11437,8 @@ body.sidebar-toggled footer.sticky-footer {
   margin-bottom: 20px;
   border-radius: 8px;
   padding-bottom: 1.5rem;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .subheader {
@@ -11461,7 +11467,8 @@ body.sidebar-toggled footer.sticky-footer {
 .navbar #sidebarToggle {
   font-size: 1.2rem;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--burger-menu-background-color);
+  color: var(--burger-menu-color);
 }
 
 .datasource {
@@ -11470,7 +11477,7 @@ body.sidebar-toggled footer.sticky-footer {
 }
 
 .datasource-img {
-  width: 7%;
+  max-width: 80px;
 }
 
 @media (min-width: 768px) {
@@ -11496,3 +11503,26 @@ body.sidebar-toggled footer.sticky-footer {
 #myChartBase, #myChartSpread {
   padding: 10px;
 }
+
+.select-form-inline-responsive {
+  display: flex;
+}
+
+@media (max-width: 906px) {
+  .select-form-inline-responsive {
+    display: block !important;
+  }
+}
+
+@media (max-width: 580px) {
+  .select-form-inline-responsive {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .select-year-responsive {
+    margin-top: 1.5rem;
+  }
+}
+

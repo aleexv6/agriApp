@@ -8,24 +8,30 @@
     </div> 
     <div class="bid-section">
         <form class="form-inline mb-4 pt-4 pl-4">
-            <label class="xsmall mr-2"><b>CULTURE :</b></label>
-            <select name="produit" class="custom-select mr-4" id="basisProductSelector">
-                {% for item in baseSelector %}
-                    <option value="{{ item['Produit'] }}" >{{ item['Produit'] }}</option>
-                {% endfor %}
-            </select>
-            <label class="xsmall mr-2"><b>LIVRAISON :</b></label>
-            <select name="place" class="custom-select mr-4" id ="basisPlaceSelector">
-                {% for place in baseSelector[0]['Place'] %}
-                    <option value="{{ place }}">{{ place }}</option>
-                {% endfor %}
-            </select>
-            <label class="xsmall mr-2"><b>EXPIRATION :</b></label>
-            <select name="expiration" class="custom-select mr-4" id="basisContractSelector">
-                {% for expi in baseSelector[0]['Expi'] %}
-                    <option value="{{ expi }}">{{ expi }}</option>
-                {% endfor %}
-            </select>
+            <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>CULTURE :</b></label>
+                <select name="produit" class="custom-select mr-4" id="basisProductSelector">
+                    {% for item in baseSelector %}
+                        <option value="{{ item['Produit'] }}" >{{ item['Produit'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>LIVRAISON :</b></label>
+                <select name="place" class="custom-select mr-4" id ="basisPlaceSelector">
+                    {% for place in baseSelector[0]['Place'] %}
+                        <option value="{{ place }}">{{ place }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>EXPIRATION :</b></label>
+                <select name="expiration" class="custom-select mr-4" id="basisContractSelector">
+                    {% for expi in baseSelector[0]['Expi'] %}
+                        <option value="{{ expi }}">{{ expi }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </form>             
         <div id="myChartBase" class="highcharts-chart-theme-responsive"></div>
     </div>

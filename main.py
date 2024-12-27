@@ -314,16 +314,14 @@ def physique(dfPhysique=dfPhysique):
     dfFutures['Date'] = pd.to_datetime(dfFutures['Date']) #set as pd datetime
 
     tableData = pd.merge(currenData, dfFutures, on=['Date', 'Ticker', 'Expiration'], how='inner') #merge physical data and futures data with inner join for basis calculation
-
     tableData['Base'] = round(tableData['Prix'] - tableData['Close'], 2) #basis calculation
-
     calculateChange = pd.merge(currenData, previousData, on=['Produit', 'Place'], how='outer') #merge current and prev physical data with outer join for % change | x is current, y is previous
-
     calculateChange['Change'] = round(((calculateChange['Prix_x'] - calculateChange['Prix_y']) / calculateChange['Prix_y']) * 100, 2).fillna('-') #make % change calculation
-
     tableData = tableData.merge(calculateChange[['Produit', 'Place', 'Change']], on=['Produit', 'Place'], how='inner') #merge data to put each change with valid product and place
 
-    return render_template('physique.html', data=dfPhysique.to_dict('records'), produits=uniqueProduct, tableData=tableData.to_dict('records'))
+    lastDate = tableData.iloc[0]['Date'].date()
+
+    return render_template('physique.html', data=dfPhysique.to_dict('records'), produits=uniqueProduct, tableData=tableData.to_dict('records'), lastDate=lastDate)
 
 @app.route("/futures")
 def futures(dfFutures=dfFutures):
@@ -348,12 +346,14 @@ def futures(dfFutures=dfFutures):
     tableData = tableData.replace(0, '-')
 
     tableData = tableData.sort_values(by='Expiration Full Date') #sort by date
+
+    lastDate = tableData.iloc[0]['Date'].date()
     
-    return render_template('futures.html', data=dfFutures.to_dict('records'), tickers=uniqueTicker, tableData=tableData.to_dict('records'))
+    return render_template('futures.html', data=dfFutures.to_dict('records'), tickers=uniqueTicker, tableData=tableData.to_dict('records'), lastDate=lastDate)
 
 @app.route("/basis", methods=['GET', 'POST'])
 def base(dfPhysique=dfPhysique, dfFutures=dfFutures, sampleFutures=sampleFutures):    
-    lastDate = dfFutures.iloc[-1]['Date']
+    lastDate = pd.to_datetime(dfFutures.iloc[-1]['Date']).date()
     baseSelector = []
     for produit in sorted(dfPhysique['Produit'].unique()): #sort product to have always same order
         if produit != 'Ble dur': #remove ble dur we do not have futures
@@ -381,7 +381,7 @@ def process_basis():
   
 @app.route("/spread", methods=['GET', 'POST'])
 def spread(dfFutures=dfFutures, sampleFutures=sampleFutures):
-    lastDate = dfFutures.iloc[-1]['Date']
+    lastDate = pd.to_datetime(dfFutures.iloc[-1]['Date']).date()
     spreadSelector = []
     for ticker in sorted(dfFutures['Ticker'].unique()): #loop throught unique tickers in df sorted alphabeticaly
         expi = list(sampleFutures[(sampleFutures['Ticker'] == ticker) & (sampleFutures['Expiration Full Date'] > date.today())]['Expiration'].unique()) #get expiration for the product sorted by expiration date
@@ -507,7 +507,7 @@ def curve(dfFutures=dfFutures):
     for ticker in sorted(lastFutures['Ticker'].unique()): #loop through unique tickers 
         data = {'Ticker': ticker, 'Expirations': list(lastFutures[lastFutures['Ticker'] == ticker]['Expiration']), 'Prix': list(lastFutures[lastFutures['Ticker'] == ticker]['Close'])} #create data for ticker, expis and prices
         curveData.append(data)    
-    return render_template('curve.html', lastDate=lastFuturesDate, curveData=curveData)
+    return render_template('curve.html', lastDate=pd.to_datetime(lastFuturesDate).date(), curveData=curveData)
 
 @app.route("/saisonnalite")
 def saisonnalite(dfFutures=dfFutures):
