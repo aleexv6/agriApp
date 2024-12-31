@@ -2,7 +2,6 @@
 <html lang="fr">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -10,15 +9,12 @@
     <meta name="author" content="">
 
     <title>{% block title %}AleexV6 Market Dashboard{% endblock %}</title>
-    <!-- <title>AleexV6 Market Dashboard</title> -->
 
-    <!-- Custom fonts for this template-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}"/>
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <!-- Custom styles for this template-->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sb-admin-2.css') }}"/>
-
 </head>
 
 <body class="sidebar-toggled" id="page-top">
@@ -150,8 +146,8 @@
                     </div>
                     <div class="ml-auto">
                         <button class="nav-btn border-0" id="themeToggle">
-                            <i class="fa-solid fa-moon" id="darkLogo" style="display: none;"></i>
-                            <i class="fa-solid fa-lightbulb" id="lightLogo" style="display: none;"></i>
+                            <i class="fa-solid fa-moon" id="darkLogo"></i>  
+                            <i class="fa-solid fa-lightbulb" id="lightLogo"></i>
                         </button>
                     </div>
                 </nav>
@@ -184,7 +180,7 @@
     </a>
 
     <!-- Bootstrap core JavaScript-->
-    
+    <script type="text/javascript" src="{{ url_for('static', filename='js/darkmode.js') }}"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
@@ -196,54 +192,11 @@
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     
-
     <!-- Core plugin JavaScript-->
     <script src="../static/vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.js') }}"></script>
-
-    <script>
-        const elements = document.getElementsByClassName('highcharts-chart-theme-responsive');
-        document.addEventListener('DOMContentLoaded', function() {
-            if (document.documentElement.classList.contains('dark-theme')) {
-                document.getElementById('lightLogo').style.display = 'block';
-                Array.from(elements).forEach(element => {
-                    element.classList.add('highcharts-dark');
-                });
-            } 
-            else {
-                document.getElementById('darkLogo').style.display = 'block';
-                Array.from(elements).forEach(element => {
-                    element.classList.add('highcharts-light');
-                });
-                
-            }
-        });
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.documentElement.classList.toggle('dark-theme');
-            if (document.documentElement.classList.contains('dark-theme')) {
-                document.getElementById('darkLogo').style.display = 'none';
-                document.getElementById('lightLogo').style.display = 'block';
-                Array.from(elements).forEach(element => {
-                    element.classList.remove('highcharts-light');
-                });
-                Array.from(elements).forEach(element => {
-                    element.classList.add('highcharts-dark');
-                });
-            }
-            else {
-                document.getElementById('darkLogo').style.display = 'block';
-                document.getElementById('lightLogo').style.display = 'none';
-                Array.from(elements).forEach(element => {
-                    element.classList.remove('highcharts-dark');
-                });
-                Array.from(elements).forEach(element => {
-                    element.classList.add('highcharts-light');
-                });
-            }
-        });
-    </script>
 
     {% block scripts %}
     <!-- Additional scripts will be inserted here -->

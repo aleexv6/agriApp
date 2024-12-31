@@ -80,7 +80,7 @@
   --burger-menu-background-color: rgba(255, 255, 255, 0.2);
 }
 
-:root.dark-theme {
+.dark-theme {
   --nav-background-color: #181818;
   --sidebar-heading-color: rgba(255, 255, 255, 0.4);
   --sidebar-items-color: rgba(255, 255, 255, 0.7);
@@ -2738,10 +2738,6 @@ fieldset:disabled a.btn {
   color: #fff;
   background-color: #5a5c69;
   border-color: #5a5c69;
-}
-.nav-btn-dark {
-  color: #fff;
-  background-color: #181818;
 }
 
 .btn-dark:hover {
@@ -11494,6 +11490,18 @@ body.sidebar-toggled footer.sticky-footer {
 .nav-btn {
   color: var(--navbar-btn-color);
   background-color: var(--navbar-btn-background-color);
+}
+
+.nav-btn i:last-child {
+  display: none;
+}
+
+.dark-theme .nav-btn i:first-child {
+  display: none;
+}
+
+.dark-theme .nav-btn i:last-child {
+  display: block;
 }
 
 .text-theme-responsive {
