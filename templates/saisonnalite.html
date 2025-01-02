@@ -27,6 +27,7 @@
     <script>
         var data = JSON.parse('{{ data | tojson }}');
         var dayofyear = JSON.parse('{{ dayofyear | tojson }}');
+        var lastYear = JSON.parse('{{ lastYear | tojson }}');
         
         data.forEach((item) => {
             var categories = Object.keys(item.Cumulative);
@@ -38,7 +39,7 @@
                 type: 'line'
             },
             title: {
-                text: `Saisonnalité ${item.Ticker} Continuous (2004-2023)`
+                text: `Saisonnalité ${item.Ticker} Continuous (2004-${lastYear})`
             },
             xAxis: {
                 categories: categories,

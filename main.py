@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for
 import database as db
 import pandas as pd
 from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
@@ -290,7 +290,7 @@ jours_feries = [
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return redirect(url_for('physique'))
 
 @app.route("/physique")
 def physique(dfPhysique=dfPhysique):
@@ -522,6 +522,7 @@ def saisonnalite(dfFutures=dfFutures):
             dfFuturesProduct = dfFuturesProduct[~((dfFuturesProduct['Date'].dt.month == 2) & (dfFuturesProduct['Date'].dt.day == 29))] #remove 02/29 for leap year
             dfFuturesProduct = dfFuturesProduct.reset_index(drop=True)
             dfFuturesProduct = dfFuturesProduct.set_index(['Date', 'Expiration'])
+            lastYear, _ = dfFuturesProduct.index[-1]
 
             rollingContractsPctChange = dfFuturesProduct.groupby('Expiration')['Close'].pct_change() * 100 #groupby expi and percent change for each contracts
             rollingContractsPctChange.name = 'Percent Change'
@@ -545,7 +546,7 @@ def saisonnalite(dfFutures=dfFutures):
 
             lst.append({'Ticker': ticker, 'Cumulative': median_cumulative_percentage_change.to_dict()}) #append to list to send to front
 
-    return render_template('saisonnalite.html', data=lst, dayofyear=todayofyear, lastDate=today)
+    return render_template('saisonnalite.html', data=lst, dayofyear=todayofyear, lastDate=today, lastYear=lastYear.year)
 
 @app.route("/production")
 def production():
