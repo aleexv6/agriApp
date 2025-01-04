@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for
 import database as db
 import pandas as pd
-from cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
+from models.cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
 import warnings
 import requests
 from datetime import datetime, date, timedelta
@@ -15,6 +15,7 @@ import base64
 from io import BytesIO
 import matplotlib as mpl
 import config
+from models.spreads import getSpread
 
 warnings.filterwarnings("ignore")
 
@@ -393,7 +394,11 @@ def spread(dfFutures=dfFutures, sampleFutures=sampleFutures):
     spreadDf['Spread'] = spreadDf['Close_x'] - spreadDf['Close_y'] #spread calculation
     spreadDf = spreadDf[['Date', 'Spread']] #keep interesting values
     json_string = spreadDf.to_json(orient='values') #return json string
-    return render_template('spread.html', lastDate=lastDate, dfFutures=dfFutures, spreadSelector=spreadSelector, data=json_string)
+
+    dfKU = getSpread(dfFutures, 'EBM', 'MAY', 'SEP', [2013, date.today().year], 25)
+    dfUZ = getSpread(dfFutures, 'EBM', 'SEP', 'DEC', [2013, date.today().year], 25)
+
+    return render_template('spread.html', lastDate=lastDate, dfFutures=dfFutures, spreadSelector=spreadSelector, data=json_string, spreadKU=dfKU, spreadUZ=dfUZ)
     
 @app.route('/process_spread', methods=['POST', 'GET'])
 def process_spread(dfFutures=dfFutures):

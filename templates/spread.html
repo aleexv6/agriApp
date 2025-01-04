@@ -61,6 +61,21 @@
         </form> 
         <div id="myChartSpread" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
     </div>
+
+    <div class="bid-section mt-04">
+        <div class="header">
+            EBM / Milling Wheat
+        </div>
+        <div class="row">
+            <div class="col-lg-6">  
+                <div id="spreadKU" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+            <div class="col-lg-6">  
+                <div id="spreadUZ" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="datasource text-theme-responsive mb-3">
         Données journalières
         <img class="datasource-img" src="{{ url_for('static', filename='img/euronextLogo.png') }}"/>
@@ -72,6 +87,83 @@
     {{ super() }} 
     <script>
         const firstData = JSON.parse({{ data | tojson | safe }})
+        const KUdata = JSON.parse('{{ spreadKU | tojson }}');
+        const UZdata = JSON.parse('{{ spreadUZ | tojson }}');
+        const fullSeriesKU = []
+        const fullSeriesUZ = []
+
+        KUdata.forEach((item) => {
+            const seriesKU = {
+                name: item.spreadYear,
+                data: Object.keys(item.spreadData.Date).map(key => [item.spreadData.Date[key], item.spreadData.Spread[key]])
+            };
+            fullSeriesKU.push(seriesKU)
+            
+        });
+        UZdata.forEach((item) => {
+            const seriesUZ = {
+                name: item.spreadYear,
+                data: Object.keys(item.spreadData.Date).map(key => [item.spreadData.Date[key], item.spreadData.Spread[key]])
+            };
+            fullSeriesUZ.push(seriesUZ)
+            
+        });
+        Highcharts.stockChart('spreadKU', {
+            chart: {
+                styledMode: true,
+                type: 'line'
+            },
+            title: {
+                text: 'KU Spread'
+            },
+            xAxis: {
+                title: {
+                    text: 'Day'
+                },
+                type: 'datetime'
+            },
+            yAxis: {
+                title: {
+                    text: 'Spread'
+                }
+            },
+            series: fullSeriesKU,
+            credits: {
+                enabled: false
+            },
+            legend: {
+                enabled: true
+            }
+        });
+
+        Highcharts.stockChart('spreadUZ', {
+            chart: {
+                styledMode: true,
+                type: 'line'
+            },
+            title: {
+                text: 'UZ Spread'
+            },
+            xAxis: {
+                title: {
+                    text: 'Day'
+                },
+                type: 'datetime'
+            },
+            yAxis: {
+                title: {
+                    text: 'Spread'
+                }
+            },
+            series: fullSeriesUZ,
+            credits: {
+                enabled: false
+            },
+            legend: {
+                enabled: true
+            }
+        });
+
         var title = 'Spread ' + spreadLeg1Selector.value.replace('_', ' ') + ' - ' + spreadLeg2Selector.value.split('_')[1];
         document.addEventListener("DOMContentLoaded", function() {
             Highcharts.stockChart('myChartSpread', {
