@@ -397,8 +397,10 @@ def spread(dfFutures=dfFutures, sampleFutures=sampleFutures):
 
     dfKU = getSpread(dfFutures, 'EBM', 'MAY', 'SEP', [2013, date.today().year], 25)
     dfUZ = getSpread(dfFutures, 'EBM', 'SEP', 'DEC', [2013, date.today().year], 25)
+    dfZH = getSpread(dfFutures, 'EBM', 'DEC', 'MAR', [2013, date.today().year], 26)
+    dfHK = getSpread(dfFutures, 'EBM', 'MAR', 'MAY', [2013, date.today().year], 26)
 
-    return render_template('spread.html', lastDate=lastDate, dfFutures=dfFutures, spreadSelector=spreadSelector, data=json_string, spreadKU=dfKU, spreadUZ=dfUZ)
+    return render_template('spread.html', lastDate=lastDate, dfFutures=dfFutures, spreadSelector=spreadSelector, data=json_string, spreadKU=dfKU, spreadUZ=dfUZ, spreadZH=dfZH, spreadHK=dfHK)
     
 @app.route('/process_spread', methods=['POST', 'GET'])
 def process_spread(dfFutures=dfFutures):

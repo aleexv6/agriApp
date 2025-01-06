@@ -74,6 +74,14 @@
                 <div id="spreadUZ" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-6">  
+                <div id="spreadZH" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+            <div class="col-lg-6">  
+                <div id="spreadHK" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+        </div>
     </div>
 
     <div class="datasource text-theme-responsive mb-3">
@@ -86,82 +94,54 @@
 {% block scripts %}
     {{ super() }} 
     <script>
-        const firstData = JSON.parse({{ data | tojson | safe }})
-        const KUdata = JSON.parse('{{ spreadKU | tojson }}');
-        const UZdata = JSON.parse('{{ spreadUZ | tojson }}');
-        const fullSeriesKU = []
-        const fullSeriesUZ = []
+        const firstData = JSON.parse({{ data | tojson | safe }});
+        const KUdata = JSON.parse('{{ spreadKU | tojson | safe }}');
+        const UZdata = JSON.parse('{{ spreadUZ | tojson | safe }}');
+        const ZHdata = JSON.parse('{{ spreadZH | tojson | safe }}');
+        const HKdata = JSON.parse('{{ spreadHK | tojson | safe }}'); //set data
 
-        KUdata.forEach((item) => {
-            const seriesKU = {
-                name: item.spreadYear,
-                data: Object.keys(item.spreadData.Date).map(key => [item.spreadData.Date[key], item.spreadData.Spread[key]])
-            };
-            fullSeriesKU.push(seriesKU)
-            
-        });
-        UZdata.forEach((item) => {
-            const seriesUZ = {
-                name: item.spreadYear,
-                data: Object.keys(item.spreadData.Date).map(key => [item.spreadData.Date[key], item.spreadData.Spread[key]])
-            };
-            fullSeriesUZ.push(seriesUZ)
-            
-        });
-        Highcharts.stockChart('spreadKU', {
-            chart: {
-                styledMode: true,
-                type: 'line'
-            },
-            title: {
-                text: 'KU Spread'
-            },
-            xAxis: {
-                title: {
-                    text: 'Day'
-                },
-                type: 'datetime'
-            },
-            yAxis: {
-                title: {
-                    text: 'Spread'
-                }
-            },
-            series: fullSeriesKU,
-            credits: {
-                enabled: false
-            },
-            legend: {
-                enabled: true
-            }
-        });
+        const regions = ['KU', 'UZ', 'ZH', 'HK'];
+        const allSeries = {}; // set regions and empty dict
 
-        Highcharts.stockChart('spreadUZ', {
-            chart: {
-                styledMode: true,
-                type: 'line'
-            },
-            title: {
-                text: 'UZ Spread'
-            },
-            xAxis: {
-                title: {
-                    text: 'Day'
+        regions.forEach(region => {
+            const data = eval(region + 'data');
+            allSeries[region] = [];
+            
+            data.forEach(item => {
+                const series = {
+                    name: item.spreadYear,
+                    data: Object.keys(item.spreadData.Date).map(key => [
+                        item.spreadData.Date[key], 
+                        item.spreadData.Spread[key]
+                    ])
+                };
+                allSeries[region].push(series);
+            });
+
+            Highcharts.stockChart('spread' + region, {
+                chart: {
+                    styledMode: true,
+                    type: 'line'
                 },
-                type: 'datetime'
-            },
-            yAxis: {
                 title: {
-                    text: 'Spread'
-                }
-            },
-            series: fullSeriesUZ,
-            credits: {
-                enabled: false
-            },
-            legend: {
-                enabled: true
-            }
+                    text: region + ' Spread'
+                },
+                xAxis: {
+                    title: { text: 'Day' },
+                    type: 'datetime',
+                    labels: {
+                        formatter: function() {
+                            return  Highcharts.dateFormat('%b-%d', this.value)
+                        }
+                    }
+                },
+                yAxis: {
+                    title: { text: 'Spread' }
+                },
+                series: allSeries[region],
+                credits: { enabled: false },
+                legend: { enabled: true }
+            });
         });
 
         var title = 'Spread ' + spreadLeg1Selector.value.replace('_', ' ') + ' - ' + spreadLeg2Selector.value.split('_')[1];
