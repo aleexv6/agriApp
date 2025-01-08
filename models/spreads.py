@@ -26,10 +26,10 @@ def getSpread(dfFutures, ticker, firstLegMonth, secondLegMonth, dataYears, expiY
     df = select_futures(dfFutures, ticker, dataYears)
     df = df[df['Expiration Year'] <= expiYearMax]
 
-    dfMay = df[df['Expiration Month'] == firstLegMonth]
-    dfSep = df[df['Expiration Month'] == secondLegMonth]
+    dfFirstLeg = df[df['Expiration Month'] == firstLegMonth]
+    dfSecondLeg = df[df['Expiration Month'] == secondLegMonth]
 
-    merged = pd.merge(dfMay, dfSep, on=['Date'], how='inner').reset_index(drop=True)
+    merged = pd.merge(dfFirstLeg, dfSecondLeg, on=['Date'], how='inner').reset_index(drop=True)
     merged['Spread'] = merged['Close_x'] - merged['Close_y']
     merged = merged[['Date', 'Spread', 'Expiration_x', 'Expiration_y', 'Expiration Full Date_x', 'Expiration Year_x', 'Expiration Year_y']]
 

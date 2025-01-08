@@ -64,22 +64,64 @@
 
     <div class="bid-section mt-04">
         <div class="header">
-            EBM / Milling Wheat
+            EBM / Milling Wheat (Blé tendre)
         </div>
         <div class="row">
             <div class="col-lg-6">  
-                <div id="spreadKU" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                <div id="EBM_HK" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
             </div>
             <div class="col-lg-6">  
-                <div id="spreadUZ" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                <div id="EBM_KU" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-6">  
-                <div id="spreadZH" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                <div id="EBM_UZ" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
             </div>
             <div class="col-lg-6">  
-                <div id="spreadHK" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                <div id="EBM_ZH" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="bid-section mt-04">
+        <div class="header">
+            ECO / Rapeseed (Colza)
+        </div>
+        <div class="row">
+            <div class="col-lg-6">  
+                <div id="ECO_GK" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+            <div class="col-lg-6">  
+                <div id="ECO_KQ" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">  
+                <div id="ECO_QG" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+            <div class="col-lg-6">  
+                <div id="ECO_QX" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="bid-section mt-04">
+        <div class="header">
+            EMA / Corn (Maïs)
+        </div>
+        <div class="row">
+            <div class="col-lg-6">  
+                <div id="EMA_HM" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+            <div class="col-lg-6">  
+                <div id="EMA_MQ" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">  
+                <div id="EMA_QX" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+            </div>
+            <div class="col-lg-6">  
+                <div id="EMA_XH" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
             </div>
         </div>
     </div>
@@ -95,36 +137,31 @@
     {{ super() }} 
     <script>
         const firstData = JSON.parse({{ data | tojson | safe }});
-        const KUdata = JSON.parse('{{ spreadKU | tojson | safe }}');
-        const UZdata = JSON.parse('{{ spreadUZ | tojson | safe }}');
-        const ZHdata = JSON.parse('{{ spreadZH | tojson | safe }}');
-        const HKdata = JSON.parse('{{ spreadHK | tojson | safe }}'); //set data
+        const spreads = JSON.parse('{{ spreads | tojson | safe }}'); 
 
-        const regions = ['KU', 'UZ', 'ZH', 'HK'];
-        const allSeries = {}; // set regions and empty dict
+        const allSeries = {}; // set empty dict
 
-        regions.forEach(region => {
-            const data = eval(region + 'data');
-            allSeries[region] = [];
-            
-            data.forEach(item => {
+        spreads.forEach(item => {
+            allSeries[item.product] = [];
+            item.data.forEach(value => {
                 const series = {
-                    name: item.spreadYear,
-                    data: Object.keys(item.spreadData.Date).map(key => [
-                        item.spreadData.Date[key], 
-                        item.spreadData.Spread[key]
+                    name: value.spreadYear,
+                    data: Object.keys(value.spreadData.Date).map(key => [
+                    value.spreadData.Date[key], 
+                    value.spreadData.Spread[key]
                     ])
                 };
-                allSeries[region].push(series);
+                allSeries[item.product].push(series);
+
             });
 
-            Highcharts.stockChart('spread' + region, {
+            Highcharts.stockChart(item.product, {
                 chart: {
                     styledMode: true,
                     type: 'line'
                 },
                 title: {
-                    text: region + ' Spread'
+                    text: item.product.split("_")[1] + ' Spread'
                 },
                 xAxis: {
                     title: { text: 'Day' },
@@ -138,10 +175,11 @@
                 yAxis: {
                     title: { text: 'Spread' }
                 },
-                series: allSeries[region],
+                series: allSeries[item.product],
                 credits: { enabled: false },
                 legend: { enabled: true }
             });
+
         });
 
         var title = 'Spread ' + spreadLeg1Selector.value.replace('_', ' ') + ' - ' + spreadLeg2Selector.value.split('_')[1];

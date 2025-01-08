@@ -395,12 +395,91 @@ def spread(dfFutures=dfFutures, sampleFutures=sampleFutures):
     spreadDf = spreadDf[['Date', 'Spread']] #keep interesting values
     json_string = spreadDf.to_json(orient='values') #return json string
 
-    dfKU = getSpread(dfFutures, 'EBM', 'MAY', 'SEP', [2013, date.today().year], 25)
-    dfUZ = getSpread(dfFutures, 'EBM', 'SEP', 'DEC', [2013, date.today().year], 25)
-    dfZH = getSpread(dfFutures, 'EBM', 'DEC', 'MAR', [2013, date.today().year], 26)
-    dfHK = getSpread(dfFutures, 'EBM', 'MAR', 'MAY', [2013, date.today().year], 26)
+    spreads = {
+        'EBM' : 
+        [{
+            'firstMonth' : 'MAR',
+            'secondMonth' : 'MAY',
+            'dataExpi' : date.today().year % 100, #gives last two digits of current year
+            'title': 'HK'
+        },
+        {
+            'firstMonth' : 'MAY',
+            'secondMonth' : 'SEP',
+            'dataExpi' : date.today().year % 100,
+            'title': 'KU'
+        }, 
+        {
+            'firstMonth' : 'SEP',
+            'secondMonth' : 'DEC',
+            'dataExpi' : date.today().year % 100,
+            'title': 'UZ'
+        },
+        {
+            'firstMonth' : 'DEC',
+            'secondMonth' : 'MAR',
+            'dataExpi' : (date.today().year % 100) + 1, #gives last two digits of current year + 1
+            'title': 'ZH'
+        }],
+        'EMA' : 
+        [{
+            'firstMonth' : 'MAR',
+            'secondMonth' : 'JUN',
+            'dataExpi' : date.today().year % 100, #gives last two digits of current year
+            'title': 'HM'
+        },
+        {
+            'firstMonth' : 'JUN',
+            'secondMonth' : 'AUG',
+            'dataExpi' : date.today().year % 100,
+            'title': 'MQ'
+        }, 
+        {
+            'firstMonth' : 'AUG',
+            'secondMonth' : 'NOV',
+            'dataExpi' : date.today().year % 100,
+            'title': 'QX'
+        },
+        {
+            'firstMonth' : 'NOV',
+            'secondMonth' : 'MAR',
+            'dataExpi' : (date.today().year % 100) + 1, #gives last two digits of current year + 1
+            'title': 'XH'
+        }],
+        'ECO' : 
+        [{
+            'firstMonth' : 'FEB',
+            'secondMonth' : 'MAY',
+            'dataExpi' : date.today().year % 100, #gives last two digits of current year
+            'title': 'GK'
+        },
+        {
+            'firstMonth' : 'MAY',
+            'secondMonth' : 'AUG',
+            'dataExpi' : date.today().year % 100,
+            'title': 'KQ'
+        }, 
+        {
+            'firstMonth' : 'AUG',
+            'secondMonth' : 'NOV',
+            'dataExpi' : date.today().year % 100,
+            'title': 'QX'
+        },
+        {
+            'firstMonth' : 'NOV',
+            'secondMonth' : 'FEB',
+            'dataExpi' : (date.today().year % 100) + 1, #gives last two digits of current year + 1
+            'title': 'QG'
+        }]
+    }
 
-    return render_template('spread.html', lastDate=lastDate, dfFutures=dfFutures, spreadSelector=spreadSelector, data=json_string, spreadKU=dfKU, spreadUZ=dfUZ, spreadZH=dfZH, spreadHK=dfHK)
+    spreadsDict = []
+    for product, spread_list in spreads.items():
+        for spread in spread_list:
+            df = getSpread(dfFutures, product, spread['firstMonth'], spread['secondMonth'], [2013, date.today().year], spread['dataExpi'])
+            spreadsDict.append({'product' : f"{product}_{spread['title']}", 'data' : df})
+
+    return render_template('spread.html', lastDate=lastDate, dfFutures=dfFutures, spreadSelector=spreadSelector, data=json_string, spreads=spreadsDict)
     
 @app.route('/process_spread', methods=['POST', 'GET'])
 def process_spread(dfFutures=dfFutures):
