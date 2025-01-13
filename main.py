@@ -16,6 +16,7 @@ from io import BytesIO
 import matplotlib as mpl
 import config
 from models.spreads import getSpread
+from models.contract_seasonality import getContractSeasonality
 
 warnings.filterwarnings("ignore")
 
@@ -597,6 +598,7 @@ def curve(dfFutures=dfFutures):
 
 @app.route("/saisonnalite")
 def saisonnalite(dfFutures=dfFutures):
+    #continuous seasonality
     todayofyear = pd.to_datetime(date.today().strftime('%Y-%m-%d')).dayofyear # get day of year to print on chart
     today = date.today().strftime('%Y-%m-%d')
     lst = []
@@ -632,7 +634,68 @@ def saisonnalite(dfFutures=dfFutures):
 
             lst.append({'Ticker': ticker, 'Cumulative': median_cumulative_percentage_change.to_dict()}) #append to list to send to front
 
-    return render_template('saisonnalite.html', data=lst, dayofyear=todayofyear, lastDate=today, lastYear=lastYear.year)
+    #single contract seasonality
+    contracts = {
+        'EBM' : 
+        [{
+            'month' : 'MAR',
+            'title': 'Mars'
+        },
+        {
+            'month' : 'MAY',
+            'title': 'Mai'
+        }, 
+        {
+            'month' : 'SEP',
+            'title': 'Septembre'
+        },
+        {
+            'month' : 'DEC',
+            'title': 'Décembre'
+        }],
+        'EMA' : 
+        [{
+            'month' : 'MAR',
+            'title': 'Mars'
+        },
+        {
+            'month' : 'JUN',
+            'title': 'Juin'
+        }, 
+        {
+            'month' : 'AUG',
+            'title': 'Aout'
+        },
+        {
+            'month' : 'NOV',
+            'title': 'Novembre'
+        }],
+        'ECO' : 
+        [{
+            'month' : 'FEB',
+            'title': 'Février'
+        },
+        {
+            'month' : 'MAY',
+            'title': 'Mai'
+        }, 
+        {
+            'month' : 'AUG',
+            'title': 'Aout'
+        },
+        {
+            'month' : 'NOV',
+            'title': 'Novembre'
+        }]
+    }
+
+    seasonDict = []
+    for product, contract_list in contracts.items():
+        for contract in contract_list:
+            data = getContractSeasonality(dfFutures, product, contract['month'], 15)
+            seasonDict.append({'product' : f"{product}_{contract['month']}", 'dataList' : data, 'title': contract['title']})
+
+    return render_template('saisonnalite.html', data=lst, dayofyear=todayofyear, lastDate=today, lastYear=lastYear.year, contractSeasonality=seasonDict)
 
 @app.route("/production")
 def production():

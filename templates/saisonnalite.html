@@ -13,6 +13,58 @@
             <div class="card-body">
                 <div id="saisonnalite_{{ item['Ticker'] }}" class="highcharts-chart-theme-responsive highcharts-light mb-4" style="height: 60vh;"></div>
             </div>
+            {% if item['Ticker'] == 'EBM' %}
+                <div class="row">
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_MAR" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_MAY" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_SEP" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_DEC" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                </div>
+            {% elif item['Ticker'] == 'EMA' %}
+                <div class="row">
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_MAR" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_JUN" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_AUG" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_NOV" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="row">
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_FEB" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_MAY" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_AUG" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                    <div class="col-lg-6">  
+                        <div id="{{ item['Ticker'] }}_NOV" class="highcharts-chart-theme-responsive highcharts-light" style="height: 60vh;"></div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     {% endfor %}
     <div class="datasource text-theme-responsive mb-3">
@@ -28,7 +80,49 @@
         var data = JSON.parse('{{ data | tojson }}');
         var dayofyear = JSON.parse('{{ dayofyear | tojson }}');
         var lastYear = JSON.parse('{{ lastYear | tojson }}');
-        
+        var contractSeasonality = JSON.parse('{{ contractSeasonality | tojson }}')
+
+        const allSeries = {}; // set empty dict
+
+        contractSeasonality.forEach(item => {
+            allSeries[item.product] = [];
+            item.dataList.forEach(value => {
+                const series = {
+                    name: value.Expiration,
+                    data: Object.keys(value.data.Date).map(key => [
+                    value.data.Date[key], 
+                    value.data.CumulativePercentChange[key]
+                    ])
+                };
+                allSeries[item.product].push(series);
+            });
+
+            Highcharts.stockChart(item.product, {
+                chart: {
+                    styledMode: true,
+                    type: 'line'
+                },
+                title: {
+                    text: item.title + ' contracts'
+                },
+                xAxis: {
+                    title: { text: 'Date' },
+                    type: 'datetime',
+                    labels: {
+                        formatter: function() {
+                            return  Highcharts.dateFormat('%b-%d', this.value)
+                        }
+                    }
+                },
+                yAxis: {
+                    title: { text: 'Cumulative % Change' }
+                },
+                series: allSeries[item.product],
+                credits: { enabled: false },
+                legend: { enabled: true }
+            });
+        });
+
         data.forEach((item) => {
             var categories = Object.keys(item.Cumulative);
             var values = Object.values(item.Cumulative);
