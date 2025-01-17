@@ -1,9 +1,9 @@
 import pandas as pd
-import database as db
+import db.database as db
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
-import database as db
+import db.database as db
 import yfinance as yf
 import locale
 name_cftc = {

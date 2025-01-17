@@ -1,0 +1,111 @@
+{% extends "nav.html" %}
+
+{% block content %} 
+<div class="update-div">Dernière mise à jour {{ lastDate }}</div>   
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 text-theme-responsive mb-0">USDA WASDE</h1>
+    </div> 
+    <div class="bid-section">
+        <form class="form-inline mb-4 pt-4 pl-4">
+            <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>PRODUIT :</b></label>
+                <select name="produit" class="custom-select mr-4" id="productSelector">
+                    {% for item in attributes %}
+                        <option value="{{ item['Produit'] }}">{{ item['Produit'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>ATTRIBUT :</b></label>
+                <select name="place" class="custom-select mr-4" id ="attributeSelector">
+                    {% for item in attributes %}
+                        {% if item['Produit'] == 'Corn' %}
+                            {% for attr in item['Attributes']['US'] %}
+                                {% if attr == 'Ending Stocks' %}
+                                    <option value="{{ attr }}" selected>{{ attr }}</option>
+                                {% else %}
+                                    <option value="{{ attr }}">{{ attr }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>REGION :</b></label>
+                <select name="expiration" class="custom-select mr-4" id="regionSelector">
+                        <option value="US" selected>US</option>
+                        <option value="World">World</option>
+                </select>
+            </div>
+        </form>             
+        <div id="myChartWasde" class="highcharts-chart-theme-responsive highcharts-light"></div>
+    </div>
+    <div class="datasource text-theme-responsive mb-3">
+        Données mensuelles
+        <img class="datasource-img mr-1" src="{{ url_for('static', filename='img/usdaLogo.png') }}"/>
+    </div>
+</div>
+{% endblock %} 
+{% block scripts %}
+    {{ super() }} 
+    <script>
+        const firstData = JSON.parse('{{ data | tojson | safe }}');
+        const allSeries = []; // set empty dict
+        let minValue = Infinity; // find min value for unflatten the rendered chart
+
+        firstData.forEach(value => {
+
+            const currentMin = Math.min(...value.Value);
+            minValue = Math.min(minValue, currentMin);
+
+            const series = {
+                    name: value.MarketYear,
+                    data: value.Date.map((item, index) => [item, value.Value[index]])
+            };
+            allSeries.push(series);
+        });
+
+        Highcharts.chart('myChartWasde', {
+                chart: {
+                    styledMode: true,
+                    type: 'line'
+                },
+                title: {
+                    text: 'Corn Ending Stocks'
+                },
+                xAxis: {
+                    title: { text: 'Month' },
+                    type: 'datetime',
+                    labels: {
+                        formatter: function() {
+                            return  Highcharts.dateFormat('%B', this.value)
+                        }
+                    }
+                },
+                yAxis: {
+                    min: minValue - 50,
+                    title: { text: 'Million Bushels' }
+                },
+                plotOptions: {
+                    series: {
+                        marker: {
+                            enabled: false,
+                        }
+                    }
+                },
+                series: allSeries,
+                tooltip: {
+                    formatter: function(d){
+                        var date = new Date(this.x) //convert x which is epoch to date
+                        var rV = date.toLocaleString('default', { month: 'long' }) + "<br/>";
+                        rV += '<span>\u25CF</span> ' + this.series.name + ': <b> ' + this.y + '</b><br/>';
+                        return rV;
+                    }
+                },
+                credits: { enabled: false },
+                legend: { enabled: true }
+            });
+    </script>
+{% endblock %} 

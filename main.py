@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for
-import database as db
+import db.database as db
 import pandas as pd
 from models.cot import format_data_euronext, net_position_euronext, get_cot_from_db_euronext, seasonality_euronext, variation_euronext
 import warnings
@@ -17,6 +17,7 @@ import matplotlib as mpl
 import config
 from models.spreads import getSpread
 from models.contract_seasonality import getContractSeasonality
+from models.wasde import find_wasde, get_commodity_attributes
 
 warnings.filterwarnings("ignore")
 
@@ -909,6 +910,18 @@ def arome():
 @app.route("/404")
 def quatrecentquatre():
     return render_template('404.html')
+
+@app.route("/wasde")
+def wasde():
+    commodityAttr = get_commodity_attributes()
+    df = find_wasde('Ending Stocks', 'Corn')
+    lastDate = df['ReleaseDate'].iloc[-1].date()
+    dataList = []
+    for my in df['MarketYear'].unique():
+        tmp = df[df['MarketYear'] == my]
+        dataList.append({'MarketYear': my, 'Value': tmp['Value'].to_list(), 'Date': tmp['FakeDate'].to_list()})
+
+    return render_template('wasde.html', data=dataList, attributes=commodityAttr, lastDate=lastDate)
 
 @app.context_processor
 def inject_current_year():
