@@ -923,6 +923,26 @@ def wasde():
 
     return render_template('wasde.html', data=dataList, attributes=commodityAttr, lastDate=lastDate)
 
+@app.route("/process_wasde", methods=['POST', 'GET'])
+def process_wasde():
+    if request.method == "POST":
+        response = request.get_json()
+        dataList = []
+        if response['Region'] == "US":
+            df = find_wasde(response['Attribute'], response['Product'])        
+            for my in df['MarketYear'].unique():
+                tmp = df[df['MarketYear'] == my]
+                dataList.append({'MarketYear': my, 'Value': tmp['Value'].to_list(), 'Date': tmp['FakeDate'].to_list(), 'Unit': tmp['Unit'].to_list(), 'Commodity': tmp['Commodity'].to_list(), 'Attr': tmp['Attribute'].to_list()})
+        else:
+            df = find_wasde(response['Attribute'], response['Product'], response['Region'])
+            df = df[df['Region'] == 'World']
+            for my in df['MarketYear'].unique():
+                tmp = df[df['MarketYear'] == my]
+                dataList.append({'MarketYear': my, 'Value': tmp['Value'].to_list(), 'Date': tmp['FakeDate'].to_list(), 'Unit': tmp['Unit'].to_list(), 'Commodity': tmp['Commodity'].to_list(), 'Attr': tmp['Attribute'].to_list()})
+        return dataList
+    else:
+        return "0"
+    
 @app.context_processor
 def inject_current_year():
     return dict(current_year=date.today().year)
