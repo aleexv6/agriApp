@@ -45,3 +45,9 @@ def get_database_wasde():
     CONNECTION_STRING = "mongodb://"+config.USER+":"+config.PASS+"@"+config.DB_IP_ADRESS+":27017/"+config.DB_USER
     client = MongoClient(CONNECTION_STRING)
     return client['agri_data']['wasde']
+
+def get_database_polymarket():
+    CONNECTION_STRING = "mongodb://localhost:27017/"
+    client = MongoClient(CONNECTION_STRING)
+    return client['polymarket']
+    

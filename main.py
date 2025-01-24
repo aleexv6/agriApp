@@ -942,7 +942,24 @@ def process_wasde():
         return dataList
     else:
         return "0"
-    
+
+@app.route("/polymarket")
+def polymarket():
+
+
+
+    return render_template("polymarket.html")
+
+@app.route("/polymarket/search")
+def search_autocomplete():
+    query = request.args["find"].lower()
+    cursor = db.get_database_polymarket()['marketData'].find(
+        {'$text': {'$search': query}}
+    )
+    res = list(cursor)
+
+    return [[item['question'], item['tokens'][0]['token_id']] for item in res]
+
 @app.context_processor
 def inject_current_year():
     return dict(current_year=date.today().year)

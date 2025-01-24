@@ -78,6 +78,15 @@
   --modal-colse-icon-hover: #000;
   --burger-menu-color: #000;
   --burger-menu-background-color: rgba(255, 255, 255, 0.2);
+  --custom-input-background-color: #fff;
+  --custom-input-color: #818181;
+  --custom-input-border-color: #d1d3e2;
+  --autocomplete-items-border: #d4d4d4;
+  --autocomplete-items-background-color: #fff;
+  --autocomplete-items-border-bottom: #818181;
+  --autocomplete-items-color: #818181;
+  --autocomplete-items-hover: #818181;
+
 }
 
 .dark-theme {
@@ -112,6 +121,15 @@
   --modal-colse-icon-hover: #fff;
   --burger-menu-color: #fff;
   --burger-menu-background-color: #181818;
+  --custom-input-background-color: #2d2d2d;
+  --custom-input-color: #fff;
+  --custom-input-border-color: #000;
+  --autocomplete-items-border: #252525;
+  --autocomplete-items-background-color: #292929;
+  --autocomplete-items-border-bottom: #252525;
+  --autocomplete-items-color: #fff;
+  --autocomplete-items-hover: #303030;
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -11514,6 +11532,42 @@ body.sidebar-toggled footer.sticky-footer {
 
 .select-form-inline-responsive {
   display: flex;
+}
+
+.custom-input {
+  background-color: var(--custom-input-background-color);
+  color: var(--custom-input-color);
+  border: 1px solid var(--custom-input-border-color);
+}
+
+.custom-input:focus {
+  background-color: var(--custom-input-background-color);
+  color: var(--custom-input-color);
+  border: 1px solid var(--custom-input-border-color);
+}
+
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+.autocomplete-items {
+  border: 1px solid var(--autocomplete-items-border)#d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: var(--autocomplete-items-background-color);
+  border-bottom: 1px solid var(--autocomplete-items-border-bottom);
+  color: var(--autocomplete-items-color)
+}
+.autocomplete-items div:hover {
+  background-color: var(--autocomplete-items-hover);
 }
 
 @media (max-width: 906px) {
