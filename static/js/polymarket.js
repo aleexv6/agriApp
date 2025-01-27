@@ -1,4 +1,6 @@
 let chart;
+let tokensDiv;
+let fidelity = document.getElementById('timeframeSelector').value;
 $(document).ready(function() {
     let debounce;
     $('.form-control').on('keydown', function (e) { 
@@ -15,6 +17,16 @@ $(document).ready(function() {
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);
     });
+    document.getElementById('timeframeSelector').addEventListener('change', function() {
+        if (typeof tokensDiv !== "undefined" && tokensDiv[0].id !== ""){
+            fidelity = document.getElementById('timeframeSelector').value
+            fetchTokenPrices(tokensDiv, fidelity)
+            .then(result => {
+                chart = showHighcharts(result);
+            })
+        }
+    });
+    
 })
 
 function closeAllLists(elmnt) {
@@ -28,10 +40,9 @@ function closeAllLists(elmnt) {
     }
 }
 
-async function getSelectedTokenPrice(token_id) {
+async function getSelectedTokenPrice(token_id, fidelity) {
     try {
         const endTime = Date.now();
-        const fidelity = 1;
         const response = await fetch(`https://clob.polymarket.com/prices-history?market=${token_id}&startTs=""&endTs=${endTime}&fidelity=${fidelity}`);
         const data = await response.json();
         return data['history'];
@@ -40,14 +51,14 @@ async function getSelectedTokenPrice(token_id) {
     }
 }
 
-async function fetchTokenPrices(tokensDiv) {
+async function fetchTokenPrices(tokensDiv, fidelity) {
     let priceList = [];
     document.getElementById("noTokenId").innerHTML = "";
 
     for (let g = 0; g < tokensDiv.length; g++) {
         try {
             let tokenId = tokensDiv[g].id;
-            let history = await getSelectedTokenPrice(tokenId);
+            let history = await getSelectedTokenPrice(tokenId, fidelity);
             priceList.push({"outcome": tokensDiv[g].value, "data": history});
         } catch (error) {
             console.error(`Error fetching price for token ID ${tokenId}:`, error);
@@ -61,7 +72,7 @@ function showHighcharts(priceData){
     const allSeries = []
     priceData.forEach(item => {
         var date = item.data.map(d => d.t * 1000)
-        var price = item.data.map(d => d.p)
+        var price = item.data.map(d => d.p * 100)
         const series = {
             name: item.outcome,
             data: date.map((_, i) => [date[i], price[i]])
@@ -88,6 +99,13 @@ function showHighcharts(priceData){
                 text: '% Chance'
             }
         },
+        plotOptions: {
+            series: {
+                marker: {
+                    enabled: false,
+                }
+            }
+        },
         series: allSeries,
         credits: {
             enabled: false
@@ -102,7 +120,7 @@ function showHighcharts(priceData){
 
 function getAutoComplete() {
     const query = $('.form-control').val();
-    fetch(`http://127.0.0.1:5000/polymarket/search?find=${encodeURIComponent(query.trim())}`)
+    fetch(`https://alexandrelargeau.fr/polymarket/search?find=${encodeURIComponent(query.trim())}`)
     .then((resp) => resp.json())
     .then((data) => {
             a = document.createElement("DIV");
@@ -129,7 +147,7 @@ function getAutoComplete() {
                         document.getElementById("marketInput").value = this.textContent; //insert the value for the autocomplete text field
                         tokensDiv = this.getElementsByTagName("input")
                         if (tokensDiv[0].id !== "") {
-                            fetchTokenPrices(tokensDiv)
+                            fetchTokenPrices(tokensDiv, fidelity)
                             .then(result => {
                                 chart = showHighcharts(result);
                             })

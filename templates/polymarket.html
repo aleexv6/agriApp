@@ -8,9 +8,20 @@
     </div> 
     <div class="bid-section">
         <form autocomplete="off" class="form-inline mb-4 pt-4 pl-4">
+            <label class="xsmall mr-2"><b>MARKET :</b></label>
             <div class="select-form-inline-responsive autocomplete">
-                <label class="xsmall mr-2"><b>MARKET :</b></label>
-                <input type="text" class="form-control custom-input" id="marketInput" placeholder="Type market...">
+                <input type="text" class="form-control custom-input mr-4" id="marketInput" placeholder="Type market...">
+            </div>            
+        </form>
+        <form class="form-inline mb-4 pt-4 pl-4">
+            <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>TIMEFRAME :</b></label>
+                <select name="timeframe" class="custom-select mr-4" id="timeframeSelector">
+                    <option value="1">1m</option>
+                    <option value="15">15m</option>
+                    <option value="60">1h</option>
+                    <option value="1440" selected>1d</option>
+                </select>
             </div>
         </form>
         <div id="noTokenId" class="text-theme-responsive pl-4"></div>

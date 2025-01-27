@@ -11548,7 +11548,7 @@ body.sidebar-toggled footer.sticky-footer {
 
 .autocomplete {
   position: relative;
-  display: inline-block;
+  display: inline;
 }
 .autocomplete-items {
   border: 1px solid var(--autocomplete-items-border)#d4d4d4;
