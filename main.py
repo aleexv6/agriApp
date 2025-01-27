@@ -954,11 +954,11 @@ def polymarket():
 def search_autocomplete():
     query = request.args["find"].lower()
     cursor = db.get_database_polymarket()['marketData'].find(
-        {'$text': {'$search': query}}
+        {'$text': {'$search': query}}, 
+        {'_id': 0}
     )
     res = list(cursor)
-
-    return [[item['question'], item['tokens'][0]['token_id']] for item in res]
+    return res
 
 @app.context_processor
 def inject_current_year():
