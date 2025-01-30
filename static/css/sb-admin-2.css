@@ -10304,10 +10304,6 @@ a:focus {
   width: 2.5rem;
 }
 
-.topbar #sidebarToggleTop:active {
-  background-color: #dddfeb;
-}
-
 .topbar .navbar-search {
   width: 25rem;
 }
