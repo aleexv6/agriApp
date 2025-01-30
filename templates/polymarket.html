@@ -6,15 +6,11 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h2 text-theme-responsive mb-0">Polymarket</h1>
     </div> 
-    <div class="bid-section">
-        <form autocomplete="off" class="form-inline mb-4 pt-4 pl-4">
-            <label class="xsmall mr-2"><b>MARKET :</b></label>
-            <div class="select-form-inline-responsive autocomplete">
-                <input type="text" class="form-control custom-input mr-4" id="marketInput" placeholder="Type market...">
-            </div>            
-        </form>
-        <form class="form-inline mb-4 pt-4 pl-4">
+    <div class="bid-section" style="position: relative; height: 505px;">
+        <form class="form-inline mb-2 pt-4 pl-4">
             <div class="select-form-inline-responsive">
+                <label class="xsmall mr-2"><b>MARKET :</b></label>
+                <input type="text" class="custom-input mr-4" id="marketInput" placeholder="Type market...">        
                 <label class="xsmall mr-2"><b>TIMEFRAME :</b></label>
                 <select name="timeframe" class="custom-select mr-4" id="timeframeSelector">
                     <option value="1">1m</option>
@@ -24,6 +20,9 @@
                 </select>
             </div>
         </form>
+        <div class="autocomplete">
+            <div id="autocompleteResult"></div>
+        </div>
         <div id="noTokenId" class="text-theme-responsive pl-4"></div>
         <div id="myChartPolymarket" class="highcharts-chart-theme-responsive highcharts-light"></div>
     </div>

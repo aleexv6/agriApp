@@ -3,7 +3,7 @@ let tokensDiv;
 let fidelity = document.getElementById('timeframeSelector').value;
 $(document).ready(function() {
     let debounce;
-    $('.form-control').on('keydown', function (e) { 
+    $('#marketInput').on('keydown', function (e) { 
         clearTimeout(debounce)
         debounce = setTimeout(() => {
                 closeAllLists();
@@ -119,7 +119,7 @@ function showHighcharts(priceData){
 }
 
 function getAutoComplete() {
-    const query = $('.form-control').val();
+    const query = $('#marketInput').val();
     fetch(`https://alexandrelargeau.fr/polymarket/search?find=${encodeURIComponent(query.trim())}`)
     .then((resp) => resp.json())
     .then((data) => {
@@ -127,7 +127,7 @@ function getAutoComplete() {
             a.setAttribute("id", "autocompleteId");
             a.setAttribute("class", "autocomplete-items");
             /*append the DIV element as a child of the autocomplete container:*/
-            document.getElementById("marketInput").parentNode.appendChild(a);
+            document.getElementById("autocompleteResult").parentNode.appendChild(a);
             if (data.length === 0) {
                 b = document.createElement("DIV");
                 b.innerHTML += 'No data found';
