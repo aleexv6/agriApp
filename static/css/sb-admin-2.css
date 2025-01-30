@@ -2471,13 +2471,11 @@ textarea.form-control {
 }
 
 .btn:hover {
-  color: #858796;
   text-decoration: none;
 }
 
 .btn:focus, .btn.focus {
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
 }
 
 .btn.disabled, .btn:disabled {
@@ -3047,22 +3045,8 @@ fieldset:disabled a.btn {
 
 .btn-link {
   font-weight: 400;
-  color: #4e73df;
+  color: var(--burger-menu-color);
   text-decoration: none;
-}
-
-.btn-link:hover {
-  color: #224abe;
-  text-decoration: underline;
-}
-
-.btn-link:focus, .btn-link.focus {
-  text-decoration: underline;
-}
-
-.btn-link:disabled, .btn-link.disabled {
-  color: #858796;
-  pointer-events: none;
 }
 
 .btn-lg, .btn-group-lg > .btn {
@@ -10318,10 +10302,6 @@ a:focus {
 .topbar #sidebarToggleTop {
   height: 2.5rem;
   width: 2.5rem;
-}
-
-.topbar #sidebarToggleTop:hover {
-  background-color: #eaecf4;
 }
 
 .topbar #sidebarToggleTop:active {
