@@ -952,11 +952,14 @@ def polymarket():
 
 @app.route("/polymarket/search")
 def search_autocomplete():
-    query = request.args["find"].lower()
+    req = request.args["find"].lower()
+    words = req.split()
+    escaped_words = [f'\"{word}\"' for word in words]
+    query = ''.join(escaped_words)
     cursor = db.get_database_polymarket()['marketData'].find(
         {'$text': {'$search': query}}, 
         {'_id': 0}
-    )
+    ).sort([('score', {'$meta': 'textScore'})])
     res = list(cursor)
     return res
 
