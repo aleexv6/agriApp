@@ -777,9 +777,24 @@ def condition():
         dfProduit = dfProduit.reset_index(drop=True)
         MYLst = []
         for year in dfProduit['MarketYear'].unique(): #now loop through each marketyear
-            dfMY = dfProduit[dfProduit['MarketYear'] == year] #filter on MY
-            dfMY[['Bonnes', 'Très bonnes']] = dfMY[['Bonnes', 'Très bonnes']].fillna(0) #set NaN to 0 for calculation
-            dfMY['BonneEtTresBonnes'] = dfMY['Bonnes'] + dfMY['Très bonnes'] #add bonnes and très bonnes values 
+            if produit != "Maïs grain":
+                dfMY = dfProduit[dfProduit['MarketYear'] == year] #filter on MY
+                dfMY[['Bonnes', 'Très bonnes']] = dfMY[['Bonnes', 'Très bonnes']].fillna(0) #set NaN to 0 for calculation
+                dfMY['BonneEtTresBonnes'] = dfMY['Bonnes'] + dfMY['Très bonnes'] #add bonnes and très bonnes values 
+                baseWeekDf = pd.DataFrame({"Week": [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]})
+                dfMY = pd.merge(baseWeekDf, dfMY, how='outer', on="Week")
+                dfMY['sort_key'] = dfMY['Week'].apply(lambda x: x - 50 if x >= 36 else x) #Filter to sort week from 36 to 49 then come back to 2 to 35
+                df_sorted = dfMY.sort_values('sort_key')
+                df_sorted = df_sorted.drop('sort_key', axis=1)
+                df_sorted = df_sorted.reset_index(drop=True)
+                dfMY = df_sorted
+            else:
+                dfMY = dfProduit[dfProduit['MarketYear'] == year] #filter on MY
+                dfMY[['Bonnes', 'Très bonnes']] = dfMY[['Bonnes', 'Très bonnes']].fillna(0) #set NaN to 0 for calculation
+                dfMY['BonneEtTresBonnes'] = dfMY['Bonnes'] + dfMY['Très bonnes'] #add bonnes and très bonnes values 
+                baseWeekDf = pd.DataFrame({"Week": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]})
+                dfMY = pd.merge(baseWeekDf, dfMY, how='outer', on="Week")
+            
             dfMY = dfMY.replace({np.nan: None}) #if some nan left we replace for JSON compatibility
             dfMY = dfMY.replace({0: None}) #Replace 0 with None for JSON compatibility
             MYLst.append({'Year': year, 'Data': dfMY.to_dict()}) #append the dict to the list of dict
