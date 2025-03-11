@@ -967,14 +967,24 @@ def polymarket():
 
 @app.route("/polymarket/search")
 def search_autocomplete():
+
+    str_to_bool = {"true": True, "false": False}
+
     req = request.args["find"].lower()
+    closed = str_to_bool.get(request.args["showClosed"])
     words = req.split()
     escaped_words = [f'\"{word}\"' for word in words]
     query = ''.join(escaped_words)
-    cursor = db.get_database_polymarket()['marketData'].find(
-        {'$text': {'$search': query}}, 
-        {'_id': 0}
-    ).sort([('score', {'$meta': 'textScore'})])
+    if closed: #if closed true (if showClosed checked) we show everything
+        cursor = db.get_database_polymarket()['marketData'].find(
+            {'$text': {'$search': query}}, 
+            {'_id': 0}
+        ).sort([('score', {'$meta': 'textScore'})])
+    else: #else we show only non closed data -> filter where closed = false
+        cursor = db.get_database_polymarket()['marketData'].find(
+            {'$text': {'$search': query}, 'closed': False}, 
+            {'_id': 0}
+        ).sort([('score', {'$meta': 'textScore'})])
     res = list(cursor)
     return res
 

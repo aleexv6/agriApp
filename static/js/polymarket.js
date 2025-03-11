@@ -120,7 +120,8 @@ function showHighcharts(priceData){
 
 function getAutoComplete() {
     const query = $('#marketInput').val();
-    fetch(`https://alexandrelargeau.fr/polymarket/search?find=${encodeURIComponent(query.trim())}`)
+    const showClosed = $('#showClosed').is(':checked');
+    fetch(`https://alexandrelargeau.fr/polymarket/search?find=${encodeURIComponent(query.trim())}&showClosed=${encodeURIComponent(showClosed)}`)
     .then((resp) => resp.json())
     .then((data) => {
             a = document.createElement("DIV");
@@ -140,11 +141,21 @@ function getAutoComplete() {
                 for (let i = 0; i < data.length; i++) {
                     b = document.createElement("DIV");
                     b.innerHTML += data[i]['question'];
+                    
+                    openClosedDiv = document.createElement("DIV")
+                    openClosedDiv.setAttribute("class", "open-closed-span");
+                    if (data[i]["closed"]){
+                        openClosedDiv.innerHTML = ("<span class='badge badge-danger'>Closed</span>")
+                    }
+                    else{
+                        openClosedDiv.innerHTML = ("<span class='badge badge-success'>Open</span>")
+                    }
+                    b.appendChild(openClosedDiv)
                     for (let j = 0; j < data[i]['tokens'].length; j++){
                         b.innerHTML += "<input type='hidden' id='" + data[i]['tokens'][j]['token_id'] + "' value='" + data[i]['tokens'][j]['outcome'] + "'>";
                     }
                     b.addEventListener("click", function(e) {
-                        document.getElementById("marketInput").value = this.textContent; //insert the value for the autocomplete text field
+                        document.getElementById("marketInput").value = this.childNodes[0].textContent; //insert the value for the autocomplete text field
                         tokensDiv = this.getElementsByTagName("input")
                         if (tokensDiv[0].id !== "") {
                             fetchTokenPrices(tokensDiv, fidelity)

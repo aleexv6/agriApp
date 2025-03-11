@@ -11567,6 +11567,10 @@ input[type=text] {
 .autocomplete-items div:hover {
   background-color: var(--autocomplete-items-hover);
 }
+.open-closed-span {
+  display: inline;
+  font-size: 13px;
+}
 
 @media (max-width: 906px) {
   .select-form-inline-responsive {
