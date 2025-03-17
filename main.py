@@ -827,7 +827,9 @@ def condition():
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():
-    df = pd.read_csv(config.SURFRENDPROD_URL, encoding='ISO-8859-1', delimiter=';', decimal=',') #read surf,rend,prod file
+    df = pd.read_csv(config.SURFRENDPROD_URL, encoding='utf-8') #read surf,rend,prod file
+    print(df["ESPECES"].unique())
+    print(df[(df['ANNEE'] == 2025) & (df["ESPECES"] == "Blé tendre")])
     years = sorted(df['ANNEE'].unique(), reverse=True) #get every years in descending order
     produits = ['Blé tendre', 'Maïs (grain et semence)', 'Colza'] #products to filter
     renderType = ['CULT_SURF', 'CULT_REND', 'CULT_PROD'] #type to filter
