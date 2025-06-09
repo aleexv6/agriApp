@@ -43,7 +43,7 @@ function closeAllLists(elmnt) {
 async function getSelectedTokenPrice(token_id, fidelity) {
     try {
         const endTime = Date.now();
-        const response = await fetch(`https://clob.polymarket.com/prices-history?market=${token_id}&startTs=""&endTs=${endTime}&fidelity=${fidelity}`);
+        const response = await fetch(`https://clob.polymarket.com/prices-history?market=${token_id}&interval=max&fidelity=${fidelity}`);
         const data = await response.json();
         return data['history'];
     } catch (error) {
@@ -64,7 +64,7 @@ async function fetchTokenPrices(tokensDiv, fidelity) {
             console.error(`Error fetching price for token ID ${tokenId}:`, error);
         }
     }
-
+    
     return priceList
 }
 
@@ -121,7 +121,7 @@ function showHighcharts(priceData){
 function getAutoComplete() {
     const query = $('#marketInput').val();
     const showClosed = $('#showClosed').is(':checked');
-    fetch(`https://alexandrelargeau.fr/polymarket/search?find=${encodeURIComponent(query.trim())}&showClosed=${encodeURIComponent(showClosed)}`)
+    fetch(`https://alexandrelargeau.fr/polymarket/search?find=${encodeURIComponent(query.trim())}&showClosed=${encodeURIComponent(showClosed)}`) //
     .then((resp) => resp.json())
     .then((data) => {
             a = document.createElement("DIV");
