@@ -827,9 +827,7 @@ def condition():
 
 @app.route("/surfrendprod", methods=['GET', 'POST'])
 def surfrendprod():
-    df = pd.read_csv(config.SURFRENDPROD_URL, encoding='utf-8') #read surf,rend,prod file
-    print(df["ESPECES"].unique())
-    print(df[(df['ANNEE'] == 2025) & (df["ESPECES"] == "Blé tendre")])
+    df = pd.read_csv(config.SURFRENDPROD_URL, encoding='latin1', sep=";", decimal=",") #read surf,rend,prod file
     years = sorted(df['ANNEE'].unique(), reverse=True) #get every years in descending order
     produits = ['Blé tendre', 'Maïs (grain et semence)', 'Colza'] #products to filter
     renderType = ['CULT_SURF', 'CULT_REND', 'CULT_PROD'] #type to filter
@@ -837,7 +835,7 @@ def surfrendprod():
     imgProduct = []
     for produit in produits: #loop through products
         imgStringList = []
-        if request.method == "POST": #if we sent a poste (meaning we changed the date)
+        if request.method == "POST": #if we sent a post (meaning we changed the date)
             postResponse = request.get_json()['Date'] #get the wanted date from response
             data = produce_data(df, produit, int(postResponse)) #make data for this date
             for rType in renderType: #loop through each type
