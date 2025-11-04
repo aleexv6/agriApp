@@ -918,6 +918,12 @@ def produce_map(produced_data, typeCult, produit, year):
 def download_cot(filename):
     return send_from_directory(os.path.join(app.root_path, 'static/files'), filename, as_attachment=True)
 
+@app.route('/wheatprodpaper')
+def wheatprodpaper():
+    pdf_url = url_for('static', filename='files/Wheat_Prod_Model.pdf')
+    viewer_url = url_for('static', filename='pdfjs/web/viewer.html')
+    return render_template('wheatprodpaper.html', pdf_url=pdf_url, viewer_url=viewer_url)
+
 @app.route("/arome-anomaly")
 def arome():
     return render_template('arome.html')
